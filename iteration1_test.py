@@ -41,5 +41,3 @@ def test_3(): #this tests the email if statement (vaild)
     assert result.password == '54351222'
     pass 
 
-
-xx
