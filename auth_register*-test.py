@@ -56,9 +56,20 @@ def test_auth_register3():
 def test_auth_register4():
     result = auth_register('correctemail@gmail.com', '123', 'ShortN', 'Sweet')
     with.pytest.raises(ValueError):
-        print ("Password entered is not a valid")  
+        print ("Password entered is not a valid password")  
     
     pass 
 
 def test_auth_register5(): 
-    result = auth_register('randomemail@hotmail.com', '324sf223', 'sdfsvsdbgsdvsvbnsdvnsdovosdnvodsnvosdnvodsvnsdvnsdv3wj', '
+    result = auth_register('doyourfingershurt@hotmail.com', '324sf223', 'sdfsvsdbgsdvsvbnsdvnsdovosdnvodsnvosdnvodsvnsdvnsdvfwj', 'LongAssFirstName') 
+    with.pytest.raises(ValueError):
+        print ("name_first is more than 50 characters")  
+    
+    pass
+
+def test_auth_register6(): 
+    result = auth_register('donthateme@gmail.com', 'ihavegivenup232e', 'Joe', 'tehrhdbfsmohteojfblkdnfgojdvfjgbfgodbdljhpobfhfdjhpdrsdsvr')
+    with.pytest.raises(ValueError):
+        print ("name_last is more than 50 characters")  
+        
+    pass
