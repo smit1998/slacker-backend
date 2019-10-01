@@ -37,23 +37,20 @@ def test_auth_login1():
 # when the email is valid and password is invalid, print error message
 def test_auth_login2(): 
     token = 'really funny_123'
-    result = auth_login('ankitrai326@gmail.com', '2242')
     with.pytest.raises(ValueError):
-        print ("Invalid user")   
+        result = auth_login('ankitrai326@gmail.com', '2242')
         
 # when the password is valid and email is invalid, print error message
 def test_auth_login3(): 
     token = 'what should i do ?'
-    result = auth_login('1337memesgmail.com', '123243223') 
     with.pytest.raises(ValueError):
-        print ("Invalid user")   
+        result = auth_login('1337memesgmail.com', '123243223') 
     
 # when both of email and password are invalid, print error message
 def test_auth_login4(): 
     token = 'code1234code'
-    result = auth_login('tisisatest.comgamil', '66666')
     with.pytest.raises(ValueError):
-        print ("Invalid user")   
+        result = auth_login('tisisatest.comgamil', '66666') 
 
 # when both of email and password are valid, return the valid token
 def test_auth_login5():
@@ -93,9 +90,8 @@ def test_auth_logout5():
 
 # register failed because the email have already being used by others
 def test_auth_register1():
-    result = auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei')
     with.pytest.raises(ValueError):
-        print('Email address is already being used by others') 
+        result = auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei')
 
 # register for a new user and return a new token
 def test_auth_register2():
@@ -117,18 +113,16 @@ def test_channel_details2():
     token = 'right user'
     name = 'a new channel' 
     channel_id = channels_create(token, name, True)
-    result = channel_details(token, channel_id)
     with.pytest.raises(ValueError):
-        print('Authorised user is not a member of this channel')
+        result = channel_details(token, channel_id)
 
 # when channel doesn't exist, print error message
 def test_channel_details3():
     token = 'right user'
     name = 'unknown group'
     channel_id = 66
-    result = channel_details(token, channel_id)
     with.pytest.raises(AccessError):
-        print('Channel_id is invalid')
+       result = channel_details(token, channel_id)
 
 # add one user into the channel, and print the detail of this channel
 def test_channel_details4():
@@ -146,10 +140,9 @@ def test_channels_create1():
     token = 'right user'
     name = 'a new channel fanstic right right right right'
     is_public = False
-    channel_id = channel_create(token, name, False)
     with.pytest.raises(ValueError):
-        print('Name is invalid')
- 
+        channel_id = channel_create(token, name, False)
+        
 # return up to 50 messages between start and end under the authorized user
 def test_channel_messages1():
     token = 'easy easy easy'
@@ -169,10 +162,9 @@ def test_channel_messages2():
     start = 10000 
     query_str = 'dummychoice'
     messages = seach(token, query_str)
-    result = channel_messages(token, channel_id, start)
     if(start > messages):
         with.pytest.raises(ValueError):
-            print('start is greater than the total number of messages')
+            result = channel_messages(token, channel_id, start)    
        
 # valueError because of the channel doesn't exist
 def test_channel_messages3():
@@ -181,20 +173,36 @@ def test_channel_messages3():
     channel_id = 4
     query_str = 'dummychoice'
     messages = seach(token, query_str)
-    result = channel_messages(token, channel_id, start)
     with.pytest.raises(ValueError):
-        print('channel does not exist')
+        result = channel_messages(token, channel_id, start)
  
 # valueError because of the authorized user is not a number of this current channel
 def test_channel_messages4():
     token = 'right user'
     name = 'a new channel'
     start = 5
-    channel_id = channels_create(token, name, True)
     with.pytest.raises(AccessError):
-        print('this authorised user is not a memeber of this current channel')
+       channel_id = channels_create(token, name, True)
     
-# 
+# test message_send(......) function
+def test_message_send1():
+    token = 'easy easy easy'
+    name = 'a new channel'
+    channel_id = channels_create(token, name, True)
+    qury_str = 'dummychoice'
+    messages = search(token, query_str)
+    message_send(token, channel_id, message)
+    # i want to use function channel_messages(.....) to check the messages updated, but how ?
+
+# test user_profile(....) function and return the valid user's information 
+def test_user_profile1():
+    token = 'easy easy easy' 
+    u_id = 1
+    information = user_profile(token, u_id)
+    assert information == {'email': 'ankitrai326@gmail.com', 'name_first': 'Andy', 'name_last': 'Wei', 'handle_str': 'change'}
+    
+#
+    
     
     
     

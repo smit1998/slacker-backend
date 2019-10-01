@@ -184,7 +184,30 @@ def test_channel_messages4():
     with.pytest.raises(AccessError):
        channel_id = channels_create(token, name, True)
     
-# 
+# test message_send(......) function
+def test_message_send1():
+    token = 'easy easy easy'
+    name = 'a new channel'
+    channel_id = channels_create(token, name, True)
+    qury_str = 'dummychoice'
+    messages = search(token, query_str)
+    message_send(token, channel_id, message)
+    # i want to use function channel_messages(.....) to check the messages updated, but how ?
+
+# test user_profile(....) function and return the valid user's information 
+def test_user_profile1():
+    token = 'easy easy easy' 
+    u_id = 1
+    information = user_profile(token, u_id)
+    assert information == {'email': 'ankitrai326@gmail.com', 'name_first': 'Andy', 'name_last': 'Wei', 'handle_str': 'change'}
+    
+# when user is invalid, valueError would happen
+def test_user_profile2():
+    with.pytest.raises(ValueError):
+        information = user_profile('easy easy easy', 34)
+        
+    
+    
     
     
     
