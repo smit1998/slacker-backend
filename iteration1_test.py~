@@ -89,20 +89,21 @@ def test_auth_logout5():
     auth_logout(result)
     assert result == {}
 
-def auth_register_test1():
+def test_auth_register1():
     result = auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei'}
-    assert result == {'token': 'easy easy easy'}
-    
+    with.pytest.raises(ValueError):
+        print('Email address is already being used by others') 
     
 # the test of channel_details
-def test_channels_details1():
+def test_channel_details1():
     token = 'easy easy easy'
     name = "a new channel"
     channel_id = channels_create(token, name, True)
     result = channel_details(token, channel_id)
-    assert result == {'name': 'a new channel', 'owner_members': 'Andy Wei', 'all_members': 'Andy Wei'}
+    assert result == {'name': 'a new channel', 'owner_members': {['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei']}, 
+    'all_members': {['u_id': 1, 'name_first': 'Andy', 'name_last': 'Wei']}}
 
-def test_channels_details2():
+def test_channel_details2():
     token = 'right user'
     name = 'a new channel' 
     channel_id = channels_create(token, name, True)
@@ -110,7 +111,7 @@ def test_channels_details2():
     with.pytest.raises(ValueError):
         print('Authorised user is not a member of this channel')
         
-def test_channels_details3():
+def test_channel_details3():
     token = 'right user'
     name = 'unknown group'
     channel_id = 66
@@ -118,9 +119,15 @@ def test_channels_details3():
     with.pytest.raises(ValueError):
         print('Channel_id is invalid')
         
- 
-
-        
+def test_channel_invite1():
+    token = 'easy easy easy'
+    name = "a new channel"
+    channel_id = channels_create(token, name, True) 
+    u_id = 2
+    channel_invite(token, channel_id, u_id)
+    result = channel_details(token, channel_id)
+    assert result == {'name': 'a new channel', 'owner_members': {['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei']}, 
+    'all_members':{['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei'], ['u_id': 2, 'name_first':'Bill', 'name_last': 'Wei']} }
  
         
     
