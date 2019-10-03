@@ -34,6 +34,7 @@ def auth_login(email, password):
 def test_auth_login1():
     result = auth_login('ankitrai326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
+    assert result['u_id'] = 23
 
 # when the email is valid and password is invalid, print error message
 def test_auth_login2():
@@ -91,8 +92,7 @@ def test_auth_register1():
 def test_auth_register2():
     result = auth_register('ededed12@gmail.com', '3453257B', 'Andy', 'Wei')
     with.pytest.raises(ValueError):
-        result = auth_register('bad_mail', '224232r4', 'Andy', 'Wei')
-        # how to manipulate this result
+        auth_register('bad_mail', '224232r4', 'Andy', 'Wei')
     assert result['token'] == 'secret'
     
 # show the details of current channel under the authorised user
@@ -105,61 +105,51 @@ def test_channel_details1():
 
 # when authorised user is not a member of this channel, print error message
 def test_channel_details2():
- 
     channel_id = channels_create('right user', 'a new channel', True)
     result = channel_id['channel_id']
     with.pytest.raises(ValueError):
-        stuff = channel_details('hahaha', result)
+        channel_details('hahaha', result)
 
 # when channel doesn't exist, print error message
 def test_channel_details3():
-    token = 'right user'
-    name = 'unknown group'
-    channel_id = 66
+    channel_id = channels_create('right user', 'unknown group', True)
+    result = channel_id['channel_id']
     with.pytest.raises(AccessError):
-       result = channel_details(token, channel_id)
+        channel_details('right user', result)
 
 # add one user into the channel, and print the detail of this channel
 def test_channel_details4():
-    token = 'easy easy easy'
-    name = "a new channel"
-    channel_id = channels_create(token, name, True) 
-    u_id = 2
-    channel_invite(token, channel_id, u_id)
-    result = channel_details(token, channel_id)
+    channel_id = channels_create('easy easy easy', 'a new channel', True) 
+    u_id = channel_id['u_id']
+    chann_id = channel_id['channel_id']
+    channel_invite('easy easy easy', chann_id, u_id)
+    result = channel_details('easy easy easy', chann_id)
     assert result == {'name': 'a new channel', 'owner_members': {['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei']}, 
-    'all_members':{['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei'], ['u_id': 2, 'name_first':'Bill', 'name_last': 'Wei']} }
+    'all_members': {['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei'], ['u_id': 2, 'name_first':'Bill', 'name_last': 'Wei']} }
  
 # failed to create a new private channel, because name is more than 20 characters long
 def test_channels_create1():
-    token = 'right user'
-    name = 'a new channel fanstic right right right right'
     is_public = False
     with.pytest.raises(ValueError):
-        channel_id = channel_create(token, name, False)
+        channel_id = channel_create('right user', 'a new channel fanstic right right right right', False)
         
 # return up to 50 messages between start and end under the authorized user
 def test_channel_messages1():
-    token = 'easy easy easy'
-    name = 'a new channel'
-    channel_id = channels_create(token, name, True)
-    start = 1 
-    query_str = 'dummychoice'
-    messages = seach(token, query_str)
-    result = channel_messages(token, channel_id, start)
+    channel_id = channels_create('easy easy easy', 'a new channel', True)
+    chann_id = channel_id['channel_id']
+    messages = seach('easy easy easy', 'dummychoice')
+    result = channel_messages('easy easy easy', chann_id, 1)
     assert result == {messages, 'start': 1, 'end': 50}
   
 # valueError because of the start is greater than the total number of messages in the channel
 def test_channel_messages2():
-    token = 'easy easy easy'
-    name = 'a new channel'
-    channel_id = channels_create(token, name, True)
+    channel_id = channels_create('easy easy easy', 'a new channel', True)
+    chann_id = channel_id['channel_id']
     start = 10000 
-    query_str = 'dummychoice'
-    messages = seach(token, query_str)
-    if(start > messages):
+    messages = seach('easy easy easy', 'dummychoice')
+    if(start > len(message['messages']):
         with.pytest.raises(ValueError):
-            result = channel_messages(token, channel_id, start)    
+            channel_messages('easy easy easy', chann_id, start)    
        
 # valueError because of the channel doesn't exist
 def test_channel_messages3():
