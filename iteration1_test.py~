@@ -1,4 +1,3 @@
-
 import pytest 
 import time
 '''
@@ -181,7 +180,7 @@ def test_channel_messages1():
   
 # valueError because of the start is greater than the total number of messages in the channel
 def test_channel_messages2():
-     result = auth_login('andyWei326@gmail.com', '224232r4')
+    result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
     chann_id = channel_id['channel_id']
@@ -234,13 +233,22 @@ def test_message_sendlater1():
     assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
     chann_id = channel_id['channel_id']
-    today = data.today()
+    today = datetime.datatime(2019,10,1,18,54,36,280121)
     messages = search('easy easy easy', 'dummychoice')
     message = messages['message']
     with pytest.raises(ValueError):
         message_sendlater('easy easy easy','wrong channel', message, today)
 
-# 
+# if the message is more than 1000 characters, then just ValueError
+def test_message_sendlater2():
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    channel_id = channels_create('easy easy easy', 'a new channel', True)
+    chann_id = channel_id['channel_id']
+    today = datetime.datatime(2020,3,1,18,54,36,280121)
+    messages = search('easy easy easy', 'dummychoice')
+    message = messages['message']
+    if(len(message
 
 
 # test user_profile(....) function and return the valid user's information 
