@@ -26,7 +26,7 @@ def auth_register(email,password,name_first,name_last):
         
         
 '''        
-        
+from Error import AccessError       
 import pytest 
 import re 
 
@@ -125,6 +125,7 @@ def test_channel_leave_channel_not_exist():
     channelID = channels_create_dict['channel_id']
     
     channel_leave(token, channelID)
+    channel_join(token, channelID)
     
     with pytest.raises(ValueError): 
         channel_leave(token, unexisiting_channel)
@@ -139,6 +140,7 @@ def test_channel_join_channel_not_exisit():
     channelID = channels_create_dict['channel_id']
     
     channel_join(token, channelID)
+    channel_leave(token, channelID) 
     
     with pytest.raises(ValueError): 
         channel_join(token, unexisiting_channel)
@@ -177,6 +179,59 @@ def test_channel_join_private_channel_two():
         channel_join(token, channelID)
 
 def test_channel_addowner_id_not_exist(): 
+    register_details = auth_register('niceemail@gmail.com', '12345678', 'nice', 'person')
+    token = register_details['token'] 
+    user_id = register_details['u_id']
+    name = 'god channel' 
+    unexisiting_channel = 'does not exist' 
+    channels_create_dict = channels_create(token, name, False)
     
-        
+    channelID = channels_create_dict['channel_id']
     
+    channel_addowner(token, channelID, user_id)
+    channel_removeowner(token, channelID, user_id) 
+    
+    with pytest.raises(ValueError): 
+        channel_addowner(token, unexisiting_channel, user_id)
+
+def test_channel_addowner_user_already_owner(): 
+    u_id1, token1 = auth_register('nicenicenice@gmail.com', '12323452', 'good', 'smart')
+    u_id2, token2 = auth_register('niceandcorrect@gmail.com', '12345454', 'hi', 'man') 
+    channels_create_dict = channels_create(token1, 'My channel', False)
+    channelID = channels_create_dict['channel_id'] 
+    
+    channel_addowner(token1, channelID, u_id2) 
+    
+    with pytest.raises(ValueError): 
+        channel_addowner(token1, channelID, u_id1)
+
+def test_channel_addowner_non_owners(): 
+    u_id1, token1 = auth_register('great@gmail.com', '12323452', 'goodness', 'me')
+    u_id2, token2 = auth_register('niceandcorrect1@gmail.com', '123454542', 'hello', 'guy') 
+    channels_create_dict = channels_create(token1, 'My channel', False)
+    channelID = channels_create_dict['channel_id'] 
+    
+    channel_addowner(token1, channelID, u_id2) 
+    channel_removeowner(token1, channelID, u_id2)
+    
+    with pytest.raises(AccessError, match=r"*"):
+        channel_addowner(token2, channelID, u_id2) #u_id2 does not have to power to make themselfs owner of the channel (assume the token
+
+def test_channel_removeowner_id_not_exist(): 
+    u_id1, token1 = auth_register('best@gmail.com', '123dsf8', 'correct', 'girl')
+    u_id2, token2 = auth_register('niceandcorrect1@gmail.com', '123454542', 'hello', 'guy') 
+    channels_create_dict = channels_create(token1, 'My channel', False)
+    channelID = channels_create_dict['channel_id']
+    name = 'god channel' 
+    unexisiting_channel = 'random name that is not a channel' 
+    channels_create_dict = channels_create(token1, name, False)
+    
+    channelID = channels_create_dict['channel_id']
+    
+    channel_addowner(token1, channelID, u_id2)
+    channel_removeowner(token1, channelID, u_id2) 
+    
+    with pytest.raises(ValueError): 
+        channel_addowner(token1, unexisiting_channel, u_id2)
+
+def test
