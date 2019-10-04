@@ -248,12 +248,12 @@ def test_channel_removeowner_user_not_owner():
 
 def test_channel_removeowner_non_owners(): 
     u_id1, token1 = auth_register('godly@gmail.com', '12323452', 'please', 'finish')
-    u_id2, token2 = auth_register('endasap1@gmail.com', '123454542', 'imso', 'done') 
+    u_id2, token2 = auth_register('endasap1@gmail.com', '123454542', 'imso', '') 
     channels_create_dict = channels_create(token1, 'This channel', False)
     channelID = channels_create_dict['channel_id'] 
     
-    channel_addowner(token1, channelID, u_id2) 
-    channel_removeowner(token1, channelID, u_id2)
-    
+    #channel_addowner(token1, channelID, u_id2) 
+    #channel_removeowner(token1, channelID, u_id2)
+    channel_invite(token1, channelID, u_id2)
     with pytest.raises(AccessError, match=r"*"):
-        channel_addowner(token2, channelID, u_id2) #u_id2 does not have to power to remove owners of the channel (assume the token is a key that give the u_id1 power) 
+        channel_removeowner(token2, channelID, u_id1) #u_id2 does not have to power to remove owners of the channel (assume the token1 is a key that give the the_id1 user power) 
