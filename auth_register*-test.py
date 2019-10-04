@@ -27,49 +27,156 @@ def auth_register(email,password,name_first,name_last):
         
 '''        
         
-        
-        
-        
-        
+import pytest 
+import re 
+
+
   
-def test_auth_register1(): 
-    result = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
-    token = 'this works' 
-    assert result == {'token' : 'this works'} 
+def test_auth_register_valid_token():  
+    register_details = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
+    token = register_details['token']
+    #user_id = register_details.get['u_id']
+    assert validToken(token) == True
+    #assert user_id == True
     
-    pass
+  
 
-def test_auth_register2(): 
-    result = auth_register('hello.com', 'stronkpassword123', 'John', 'Super')
-    with.pytest.raises(ValueError):
-        print ("Email entered is not a valid email")   
+def test_auth_register_correctemail(): 
+'''
+    register_details = auth_register(('hello.com', 'stronkpassword123', 'John', 'Super')
+    user_id = register_details.get['u_id']
+    token = register_details['token']
+    assert user_id == False
+    assert validToken(token) == False
+'''
+    with pytest.raises(ValueError):
+        auth_register('hello.com', 'stronkpassword123', 'John', 'Super')
     
-    pass 
     
-def test_auth_register3():
-    result = auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei')
-    with.pytest.raises(ValueError):
-        print('Email address is already being used by others') 
+def test_auth_register_emailused():
+    auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei')
+    with pytest.raises(ValueError):
+        auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei')
+   
+def test_auth_register_password_length():
+    '''
+    register_details = auth_register('correctemail@gmail.com', '123', 'ShortN', 'Sweet')
+    user_id = register_details.get['u_id']
+    token = register_details['token']
+    assert user_id == False
+    assert validToken(token) == False
+    '''
+    with pytest.raises(ValueError):
+        auth_register('correctemail@gmail.com', '123', 'ShortN', 'Sweet')
     
-    pass 
-    
-def test_auth_register4():
-    result = auth_register('correctemail@gmail.com', '123', 'ShortN', 'Sweet')
-    with.pytest.raises(ValueError):
-        print ("Password entered is not a valid password")  
-    
-    pass 
+   
 
-def test_auth_register5(): 
-    result = auth_register('doyourfingershurt@hotmail.com', '324sf223', 'sdfsvsdbgsdvsvbnsdvnsdovosdnvodsnvosdnvodsvnsdvnsdvfwj', 'LongAssFirstName') 
-    with.pytest.raises(ValueError):
-        print ("name_first is more than 50 characters")  
+def test_auth_register_first_name(): 
+'''
+    register_details = auth_register('doyourfingershurt@hotmail.com', '324sf223', 'sdfsvsdbgsdvsvbnsdvnsdovosdnvodsnvosdnvodsvnsdvnsdvfwj', 'LongAssFirstName')
+    user_id = register_details.get['u_id']
+    token = register_details['token']
+    assert user_id == False
+    assert validToken(token) == False
+'''
+    with pytest.raises(ValueError):
+        auth_register('doyourfingershurt@hotmail.com', '324sf223', 'sdfsvsdbgsdvsvbnsdvnsdovosdnvodsnvosdnvodsvnsdvnsdvfwj', 'LongAssFirstName')
     
-    pass
+   
 
-def test_auth_register6(): 
-    result = auth_register('donthateme@gmail.com', 'ihavegivenup232e', 'Joe', 'tehrhdbfsmohteojfblkdnfgojdvfjgbfgodbdljhpobfhfdjhpdrsdsvr')
-    with.pytest.raises(ValueError):
-        print ("name_last is more than 50 characters")  
+def test_auth_register_last_name(): 
+'''
+    register_details = auth_register('donthateme@gmail.com', 'ihavegivenup232e', 'Joe', 'tehrhdbfsmohteojfblkdnfgojdvfjgbfgodbdljhpobfhfdjhpdrsdsvr') 
+    user_id = register_details.get['u_id']
+    token = register_details['token']
+    assert user_id == False
+    assert validToken(token) == False
+'''
+    with pytest.raises(ValueError):
+        auth_register('donthateme@gmail.com', 'ihavegivenup232e', 'Joe', 'tehrhdbfsmohteojfblkdnfgojdvfjgbfgodbdljhpobfhfdjhpdrsdsvr') 
         
-    pass
+ 
+    
+'''
+def test_auth_passwordrest_request_registered_user():
+    register_details_one = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
+    user_id_one = register_details_one.get['u_id']
+    assert user_id_one == True
+    
+    register_details_two = auth_register('random@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
+    user_id_two = register_details_one.get['u_id']
+    assert user_id_two = False
+   
+    auth_passwordreset_request('memes@gmail.com) 
+   
+    with pytest.raises(ValueError): 
+        auth_passwordreset_request('random@gmail.com')
+    
+def test_auth_passwordreset_reset(): 
+    '''
+
+def test_channel_leave_channel_not_exist(): 
+    register_details = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
+    token = register_details['token']
+    name = 'super room' 
+    unexisiting_channel = 'dsvfswvdsgrenvkscn dsknfkewbvkabdwoghodn l' 
+    channels_create_dict = channels_create(token, name, True)
+    
+    channelID = channels_create_dict['channel_id']
+    
+    channel_leave(token, channelID)
+    
+    with pytest.raises(ValueError): 
+        channel_leave(token, unexisiting_channel)
+
+def test_channel_join_channel_not_exisit(): 
+    register_details = auth_register('1337@gmail.com', '4253214', 'Yaba', 'Dabadoo')
+    token = register_details['token']
+    name = 'random channel' 
+    unexisiting_channel= 'hi this channel does not exist'
+    channels_create_dict = channels_create(token, name, True)
+   
+    channelID = channels_create_dict['channel_id']
+    
+    channel_join(token, channelID)
+    
+    with pytest.raises(ValueError): 
+        channel_join(token, unexisiting_channel)
+        
+        
+def test_channel_join_private_channel_one(): 
+    register_details = auth_register('auto@gmail.com', '123456', 'the', 'dude')
+    token = register_details['token'] 
+    user_id = register_details['u_id']
+    name = 'admin room' 
+    channels_create_dict = channels_create(token, name, False)
+    
+    channelID = channels_create_dict['channel_id']
+    channel_removeowner(token, channelID, user_id)
+    channel_leave(token, channelID)
+    
+    with pytest.raises(ValueError): 
+        channel_join(token, channelID)
+    
+def test_channel_join_private_channel_two(): 
+    register_details = auth_register('good@gmail.com', '1234567', 'happy', 'guy')
+    token = register_details['token'] 
+    user_id = register_details['u_id']
+    name = 'secret room' 
+    channels_create_dict = channels_create(token, name, False)
+    
+    channelID = channels_create_dict['channel_id']
+    
+    channel_removeowner(token, channelID, user_id)
+    channel_leave(token, channelID)
+    channel_invite(token, channelID, user_id) 
+    channel_join(token, channelID)
+    channel_leave(token, channelID) 
+    
+    with pytest.raises(ValueError):
+        channel_join(token, channelID)
+
+def test_channel_addowner_id_not_exist(): 
+    
+        
+    
