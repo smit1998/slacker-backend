@@ -1,5 +1,7 @@
-'''
+
 import pytest 
+import time
+'''
 import re
 
 regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'     
@@ -30,167 +32,234 @@ def channel_details(token, channel_id):
 def auth_login(email, password):
     pass
     
+def auth_logout(token):
+    pass
+    
+def channel_invite(token, channel_id, u_id):
+    pass
+   
+def channel_details(token, channel_id):
+    pass
+
+def channel_messages(token, channel_id. start):
+    pass
+    
+def message_send(token, channel_id, message):
+    pass
+
+def message_sendlater(token, channel_id, message, time_sent):
+    pass
+    
+def user_profile(token, u_id):
+    pass
+          
 # when both of email and password are valid, return the valid token
 def test_auth_login1():
-    result = auth_login('ankitrai326@gmail.com', '224232r4')
+    result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
-    assert result['u_id'] = 23
+    assert result['u_id'] == 23
 
 # when the email is valid and password is invalid, print error message
 def test_auth_login2():
-    with.pytest.raises(ValueError):
-        result = auth_login('ankitrai326@gmail.com', '2242')
+    with pytest.raises(ValueError):
+        auth_login('andyWei326@gmail.com', '2242')
         
 # when the password is valid and email is invalid, print error message
 def test_auth_login3(): 
-    with.pytest.raises(ValueError):
-        result = auth_login('1337memesgmail.com', '123243223') 
+    with pytest.raises(ValueError):
+        auth_login('1337memesgmail.com', '123243223') 
     
 # when both of email and password are invalid, print error message
 def test_auth_login4(): 
-    with.pytest.raises(ValueError):
-        result = auth_login('tisisatest.comgamil', '66666') 
+    with pytest.raises(ValueError):
+        auth_login('tisisatest.comgamil', '66666') 
 
 # when both of email and password are valid, return the valid token
 def test_auth_login5():
-    result = auth_login('2199009762@qq.com', '123456789')
+    result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
+    assert result['u_id'] == 66
 
 # invalidating the authorized user 
 def test_auth_logout1():
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
     auth_logout('easy easy easy')
     assert result == {}
 
 # the token is invalide, nothing should be changed
 def test_auth_logout2():
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
     auth_logout('really funny_123')
-    assert result == {"email": 'ankitrai326@gmail.com', "password": '2242'}
+    assert result == {"u_id": 23, "token": 'easy easy easy'}
 
 # the token is invalide, nothing should be changed
 def test_auth_logout3():
+    result = auth_login('2199009762@qq.com', '123456q789')
+    assert result['token'] == 'right user'
+    assert result['u_id'] == 66
     auth_logout('what should i do')
-    assert result == {'email': '1337memesgmail.com', 'password': '123243223'}
-
-# the token is invalide, nothing should be changed
-def test_auth_logout4():
-    auth_logout('code1234code')
-    assert result == {'email': 'tisisatest.comgamil', 'password': '66666'}
-
-# invalidating the authorized user
-def test_auth_logout5():
-    auth_logout('right user')
-    assert result == {}
-
-# register failed because the email have already being used by others
-def test_auth_register1():
-    result = auth_register('AndyWei@gmail.com','314f42','Andrew','Wei')
-    with.pytest.raises(ValueError):
-        result = auth_register('bad_mail', '224232r4', 'Andy', 'Wei')
-    assert result['token'] = 'team'
-    
-# register for a new user and return a new token
-def test_auth_register2():
-    result = auth_register('ededed12@gmail.com', '3453257B', 'Andy', 'Wei')
-    with.pytest.raises(ValueError):
-        auth_register('bad_mail', '224232r4', 'Andy', 'Wei')
-    assert result['token'] == 'secret'
-    
-# show the details of current channel under the authorised user
+    assert result == {'u_id': 66, 'token': 'right user'}
+        
+# show the details of current channel under the authorised user, and also name is public
 def test_channel_details1():
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
+    basic_info = user_profile('easy easy easy', 23)
+    assert basic_info['name_first'] == 'Andy'
+    assert basic_info['name_last'] == 'Wei'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
-    chann_id = channel_id['channel_id']
+    chann_id = channel_id['channel_id'] 
     result = channel_details('easy easy easy', chann_id)
-    assert result == {'name': 'a new channel', 'owner_members': {['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei']}, 
-    'all_members': {['u_id': 1, 'name_first': 'Andy', 'name_last': 'Wei']}}
+    assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first': 'Andy', 'name_last': 'Wei'}], 
+    'all_members': [{'u_id': 23, 'name_first': 'Andy', 'name_last': 'Wei'}]}
 
-# when authorised user is not a member of this channel, print error message
+# show the details of current channel under the authorised user, and also name is private 
+def test_channel_details1():
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
+    basic_info = user_profile('easy easy easy', 23)
+    assert basic_info['name_first'] == 'Andy'
+    assert basic_info['name_last'] == 'Wei'
+    channel_id = channels_create('easy easy easy', 'a new channel', False)
+    chann_id = channel_id['channel_id'] 
+    result = channel_details('easy easy easy', chann_id)
+    assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first': 'Andy', 'name_last': 'Wei'}], 
+    'all_members': [{'u_id': 23, 'name_first': 'Andy', 'name_last': 'Wei'}]}
+
+# when authorised user is not a member of this channel, just ValueError message
 def test_channel_details2():
-    channel_id = channels_create('right user', 'a new channel', True)
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    result = auth_login('2199009762@qq.com', '123456q789')
+    assert result['token'] == 'right user'
+    channel_id = channels_create('right user' 'funny_channel', True)
     result = channel_id['channel_id']
-    with.pytest.raises(ValueError):
-        channel_details('hahaha', result)
+    with pytest.raises(ValueError):
+        channel_details('easy easy easy', result)
 
 # when channel doesn't exist, print error message
 def test_channel_details3():
-    channel_id = channels_create('right user', 'unknown group', True)
-    result = channel_id['channel_id']
-    with.pytest.raises(AccessError):
-        channel_details('right user', result)
+    result = auth_login('2199009762@qq.com', '123456q789')
+    assert result['token'] == 'right user'
+    with pytest.raises(AccessError):
+        channel_details('right user', 29)
 
 # add one user into the channel, and print the detail of this channel
 def test_channel_details4():
+    result = auth_login('2199009762@qq.com', '123456q789')
+    assert result['token'] == 'right user'
+    assert result['u_id'] == 66
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
     channel_id = channels_create('easy easy easy', 'a new channel', True) 
-    u_id = channel_id['u_id']
     chann_id = channel_id['channel_id']
-    channel_invite('easy easy easy', chann_id, u_id)
+    channel_invite('right user', chann_id, 66)
+    basic_info = user_profile('right user', 66)
+    assert basic_info['name_first'] == 'Jack'
+    assert basic_info['name_last'] == 'Ma'
     result = channel_details('easy easy easy', chann_id)
-    assert result == {'name': 'a new channel', 'owner_members': {['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei']}, 
-    'all_members': {['u_id': 1, 'name_first':'Andy', 'name_last': 'Wei'], ['u_id': 2, 'name_first':'Bill', 'name_last': 'Wei']} }
- 
-# failed to create a new private channel, because name is more than 20 characters long
-def test_channels_create1():
-    is_public = False
-    with.pytest.raises(ValueError):
-        channel_id = channel_create('right user', 'a new channel fanstic right right right right', False)
+    assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei']}, 
+    'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}]}
         
 # return up to 50 messages between start and end under the authorized user
 def test_channel_messages1():
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
     chann_id = channel_id['channel_id']
-    messages = seach('easy easy easy', 'dummychoice')
-    result = channel_messages('easy easy easy', chann_id, 1)
-    assert result == {messages, 'start': 1, 'end': 50}
+    # question on the 'query_str' ? ? ? ?
+    messages = search('easy easy easy', 'dummychoice')
+    result = channel_messages('easy easy easy', chann_id, 0)
+    assert result == {'messages': [messages], 'start': 0, 'end': 49}
   
 # valueError because of the start is greater than the total number of messages in the channel
 def test_channel_messages2():
+     result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
     chann_id = channel_id['channel_id']
     start = 10000 
-    messages = seach('easy easy easy', 'dummychoice')
-    if(start > len(message['messages']):
-        with.pytest.raises(ValueError):
+    message = search('easy easy easy', 'dummychoice')
+    #if the start is greater than the total message ? ? ? ? 
+    if(start > len(message['message']):
+        with pytest.raises(ValueError):
             channel_messages('easy easy easy', chann_id, start)    
        
 # valueError because of the channel doesn't exist
 def test_channel_messages3():
-    token = 'easy easy easy'
-    start = 1
-    channel_id = 4
-    query_str = 'dummychoice'
-    messages = seach(token, query_str)
-    with.pytest.raises(ValueError):
-        result = channel_messages(token, channel_id, start)
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    result = auth_login('2199009762@qq.com', '123456q789')
+    assert result['token'] == 'right user'
+    channel_id01 = channels_create('easy easy easy', 'a new channel', True)
+    chann_id01 = channel_id01['channel_id']
+    channel_id02 = channels_create('right user', 'another channel', True)
+    chann_id02 = channel_id02['channel_id']
+    with pytest.raises(ValueError):
+        channel_messages('right user', chann_id01, 0)
  
 # valueError because of the authorized user is not a number of this current channel
 def test_channel_messages4():
-    token = 'right user'
-    name = 'a new channel'
-    start = 5
-    with.pytest.raises(AccessError):
-       channel_id = channels_create(token, name, True)
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    result = auth_login('2199009762@qq.com', '123456q789')
+    assert result['token'] == 'right user'
+    channel_id01 = channels_create('easy easy easy', 'a new channel', True)
+    chann_id01 = channel_id01['channel_id']
+    with pytest.raises(AccessError):
+        channels_create('a right user', 'a new channel', True)
     
-# test message_send(......) function
+# when message is more than 1000 characters, just ValueError 
 def test_message_send1():
-    token = 'easy easy easy'
-    name = 'a new channel'
-    channel_id = channels_create(token, name, True)
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    channel_id = channels_create('easy easy easy', 'a new channel', True)
+    chann_id = channel_id['channel_id']
     qury_str = 'dummychoice'
-    messages = search(token, query_str)
-    message_send(token, channel_id, message)
-    # i want to use function channel_messages(.....) to check the messages updated, but how ?
+    messages = search('easy easy easy', query_str)
+    message = messages['message']
+    with pytest.raises(ValueError):
+        message_send('easy easy easy', chann_id, message)
+    
+# if the channel doesn't exist, just ValueError
+def test_message_sendlater1():
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    channel_id = channels_create('easy easy easy', 'a new channel', True)
+    chann_id = channel_id['channel_id']
+    today = data.today()
+    messages = search('easy easy easy', 'dummychoice')
+    message = messages['message']
+    with pytest.raises(ValueError):
+        message_sendlater('easy easy easy','wrong channel', message, today)
+
+# 
+
 
 # test user_profile(....) function and return the valid user's information 
 def test_user_profile1():
-    token = 'easy easy easy' 
-    u_id = 1
-    information = user_profile(token, u_id)
-    assert information == {'email': 'ankitrai326@gmail.com', 'name_first': 'Andy', 'name_last': 'Wei', 'handle_str': 'change'}
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
+    basic_info = user_profile('easy easy easy', 23)
+    # what's the handle_str ? ? ? ?
+    assert basic_info == {'email': 'andyWei326@gmail.com', 'name_first': 'Andy', 'name_last': 'Wei', 'handle_str': 'change'}
     
 # when user is invalid, valueError would happen
 def test_user_profile2():
-    with.pytest.raises(ValueError):
-        information = user_profile('easy easy easy', 34)
-        
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
+    with pytest.raises(ValueError):
+        user_profile('easy easy easy', 34)
+       
     
     
     
