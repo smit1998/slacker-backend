@@ -215,7 +215,7 @@ def test_channel_addowner_non_owners():
     channel_removeowner(token1, channelID, u_id2)
     
     with pytest.raises(AccessError, match=r"*"):
-        channel_addowner(token2, channelID, u_id2) #u_id2 does not have to power to make themselfs owner of the channel (assume the token
+        channel_addowner(token2, channelID, u_id2) #u_id2 does not have to power to make themselfs owner of the channel (assume the token is a key that give the u_id1 power) 
 
 def test_channel_removeowner_id_not_exist(): 
     u_id1, token1 = auth_register('best@gmail.com', '123dsf8', 'correct', 'girl')
