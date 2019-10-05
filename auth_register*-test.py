@@ -261,9 +261,6 @@ def test_channel_removeowner_non_owners():
         channel_removeowner(token2, channelID, u_id1) #u_id2 does not have to power to remove owners of the channel (assume the token1 is a key that give the the_id1 user power) 
         
 def test_messages_edit_not_poster_of_message():
-'''
-    So we make a valid token, then call channels_create(token1, 'channelName', True) will return a channel ID. We use this for channel_messages (and assume start is 0) so it returns messages. Finally we can just retrieve the message_id since it's a dictionary?
-'''
     u_id1, token1 = auth_register('one@gmail.com', '12323452', 'one', 'two')
     u_id2, token2 = auth_register('two@gmail.com', '123sad542', 'three', 'four') 
     channels_create_dict = channels_create(token1, 'Our channel', True)
