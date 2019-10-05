@@ -90,11 +90,11 @@ def user_profile_sethandle_test_1():
         user_profile_sethandle('123',handle_str)
 
 #last name is more than 50 words
-def user_profile_sethandle_test_2(token, handle_str):
+def user_profile_sethandle_test_2():
     result = auth_login('smitdob@gmail.com', '22abcd23')
     assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 20
-    basic_info = user_profile('easy easy easy', 20)
+    assert result['u_id'] == '20'
+    basic_info = user_profile('easy easy easy', '20')
     assert basic_info['name_first'] == 'smit'
     assert basic_info['name_last'] == 'dobsHHHHHHHHHJHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHADSSDHDSHJSDDSHHDSHJSDHJDSHDSHHJDD'
     handle_str = 'myHandle1234567890123456767990'
@@ -115,11 +115,15 @@ def user_profile_sethandle_test_1():
         user_profile_sethandle('123',handle_str)
 # image in the url_img is not jpg
 #############################################################################################  
-def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
+def user_profiles_uploadphoto_test_1(token, img_url, x_start, y_start, x_end, y_end):
+    
 
 #########################################################################################
 # chanel id is valid
 def standup_start_test_1():
+    start = auth_login('smitdobaria@gmail.com','22abcd23')
+    assert start['token'] == '123'
+    assert start['u_id'] == '20'
     
 def standup_send(token, channel_id, message):
 
