@@ -64,3 +64,11 @@ def test_4():
     auth_logout(result)
     assert result == {'email': 'tisisatest.comgamil', 'password': '66666'}
 
+##########################################################################################
+##########################################################################################
+
+def user_profile_setname(token, name_first, name_last):
+    return 
+
+def user_profile_setname_TEST():
+    assert user_profile_setname()
