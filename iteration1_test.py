@@ -8,109 +8,182 @@ import re
 #3. the given is not NULL
 
 def user_profile_setname_test_1():
-    user_setname = auth_login('20','hey123')
+    user_setname = auth_login('smitdobaria@gmail.com','hey123')
     token = user_setname['token']
 # updating user first name and last name
-    user_profile_setname('token','taraj','naga')
+    user_profile_setname(token,'taraj','naga')
     #returns fist name and last name of given email and password
-    assert check_names('abcd@gmail.com','idnotknowpass') == taraj naga
+    assert check_names('smitdobaria@gmail.com','hey123') == taraj naga
 
 #user first name is more than 50 words and last name is less than 50
 
 def user_profile_setname_test_2():
-    user_setname = auth_login('1','12345')
+    user_setname = auth_login('smitdobaria@gmail.com','hey123')
     token = user_setname['token']
 
     with pytest.raises(ValueError):
-        user_profile_setname('token','ansjdhaahahahahahahahahahahabdvdsvsgsdgsdgsdbxchgsdbseghdsbsdgsdbdsgsdbsdsd','dobaria')
+        user_profile_setname(token,'ansjdhaahahahahahahahahahahabdvdsvsgsdgsdgsdbxchgsdbseghdsbsdgsdbdsgsdbsdsd','dobaria')
 
 def user_profile_setname_test_3():
-    user_setname = auth_login('2','ljahdf')
+    user_setname = auth_login('smitdobaria@gmail.com','hey123')
     token = user_setname['token']
 
     with pytest.raises(ValueError):
-        user_profile_setname('token','mike','nasdfkbjdakjdfakjlbfalsbfbasfbalsfjlasbfbjsadflafdsafsfasdfasfaafa')
+        user_profile_setname(token,'mike','nasdfkbjdakjdfakjlbfalsbfbasfbalsfjlasbfbjsadflafdsafsfasdfasfaafa')
 
 #both are invalid
 def user_profile_setname_test_4():
-    user_setname = auth_login('3','5638')
+    user_setname = auth_login('smitdob@gmail.com','pass1234')
     token = user_setname['token']
 
     with pytest.raises(ValueError):
-        user_profile_setname('token','askjjbvdansjdhaahahahahahahahahahahabdvdsvsgsdgsdgsdbxchgsdbseghdsbsdgsdbdsgsdbsdsd','saljdchalsvchvakchvaskcvkasvcksvckvckavkcvadskhcvakhscvkhavckhgackavkcacvasvgc')
+        user_profile_setname(token,'askjjbvdansjdhaahahahahahahahahahahabdvdsvsgsdgsdgsdbxchgsdbseghdsbsdgsdbdsgsdbsdsd','saljdchalsvchvakchvaskcvkasvcksvckvckavkcvadskhcvakhscvkhavckhgackavkcacvasvgc')
 
 def user_profile_setname_test_5():
-    user_setname = auth_login('4','3568')
+    user_setname = auth_login('smitdob@gmail.com','pass1234')
     token = user_setname['token']
     # first and last names cant be null
     assert user_profile_setname('123@gmail.com','heythere12345','','') == True
     
 #############################################################################################
+
 # email is valid and not used already
 def user_profile_setemail_test_1(token, email):
     result = auth_login('smitdob@gmail.com', '22abcd23')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 20
-    basic_info = user_profile('easy easy easy', 20)
-    assert basic_info['name_first'] == 'smit'
-    assert basic_info['name_last'] == 'dob'
+    token = result['token']
 
-    #checks if email is valid and not in use already
-    assert isValidEmail('smitdobaria123@yahoo.com') == True
-    assert isAlreadyEmail('smitdobaria123@yahoo.com') == False
+    with pytest.raises(ValueError):
+            user_profile_setemail(token, 'smit@gmail.com')
 
-    user_profile_setemail('easy easy easy','smitdobaria123@yahoo.com')
-    assert user_profile('easy easy easy', '20') == ('smitdobaria123@yahoo.com','smit','dobaria','20')
 # email is valid but not available
 def user_profile_setemail_test_2(token, email):
     result = auth_login('smitdob@gmail.com', '22abcd23')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 20
-    basic_info = user_profile('easy easy easy', 20)
-    assert basic_info['name_first'] == 'smit'
-    assert basic_info['name_last'] == 'dob'
-    
-    assert isValidEmail('smitdob12345@gmail.com') == True
-    assert isAlreadyEmail('smitdob12345@gmail.com') == False
+    token = result['token']
 
-# email is not valid but is not already used
-def user_profile_setemail_test_2(token, email):
+    with pytest.raises(ValueError):
+            user_profile_setemail(token, 'smitdobaria@gmail.com')
+# not valid but available
+def user_profile_setemail_test_3(token, email):
     result = auth_login('smitdob@gmail.com', '22abcd23')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 20
-    basic_info = user_profile('easy easy easy', 20)
-    assert basic_info['name_first'] == 'smit'
-    assert basic_info['name_last'] == 'dob'
-    
-    assert isValidEmail('smit.gmail.com') == True
-    assert isAlreadyEmail('smit.gmail.com') == False
+    token = result['token']
+
+    with pytest.raises(ValueError):
+            user_profile_setemail(token, 'smitdobgmail.com')           
+
 # for the case of both not valid and not available is not possible because if it is not valid is not used also
 
+############################################################################################
+
 #user set handle
-# handle is valid and less than 20 char
-def user_profile_sethandle_test_1(token, handle_str):
+# handle is no more than 20
+def user_profile_sethandle_test_1():
     result = auth_login('smitdob@gmail.com', '22abcd23')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 20
-    basic_info = user_profile('easy easy easy', 20)
+    assert result['token'] == '123'
+    assert result['u_id'] == '20'
+    basic_info = user_profile('123', '20')
     assert basic_info['name_first'] == 'smit'
     assert basic_info['name_last'] == 'dob'
 
-    assert isValidHandle('12345') == True
+    handle_str = 'my_handle1234'
 
-    user_profile_sethandle('easy easy easy', '12345')
-    assert user_profile('easy easy easy', '20') == ('smitdob@gmail.com','smit','dob','12345')
+    with pytest.raises(ValueError):
+        user_profile_sethandle('123',handle_str)
 
-#handle is more than 20 char
+#last name is more than 50 words
 def user_profile_sethandle_test_2(token, handle_str):
     result = auth_login('smitdob@gmail.com', '22abcd23')
     assert result['token'] == 'easy easy easy'
     assert result['u_id'] == 20
     basic_info = user_profile('easy easy easy', 20)
     assert basic_info['name_first'] == 'smit'
+    assert basic_info['name_last'] == 'dobsHHHHHHHHHJHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHADSSDHDSHJSDDSHHDSHJSDHJDSHDSHHJDD'
+    handle_str = 'myHandle1234567890123456767990'
+    with pytest.raises(ValueError):
+        user_profile_sethandle('easy easy easy', handle_str)
+# last name more than 50 and handle less than 20
+def user_profile_sethandle_test_1():
+    result = auth_login('smitdob@gmail.com', '22abcd23')
+    assert result['token'] == '123'
+    assert result['u_id'] == '20'
+    basic_info = user_profile('123', '20')
+    assert basic_info['name_first'] == 'smit'
+    assert basic_info['name_last'] == 'doblashhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhdbhsdchjsadhcavschacvasvchahcahvcvasvcavsgc'
+
+    handle_str = 'my_handle1236'
+
+    with pytest.raises(ValueError):
+        user_profile_sethandle('123',handle_str)
+# image in the url_img is not jpg
+#############################################################################################  
+def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
+
+#########################################################################################
+# chanel id is valid
+def standup_start_test_1():
+    
+def standup_send(token, channel_id, message):
+
+#search test cases
+# worng token
+def search_test_1():
+    result = auth_login('smitdob@gmail.com', '22abcd23')
+    assert result['token'] == '123'
+    assert result['u_id'] == '20'
+    basic_info = user_profile('123', '20')
+    assert basic_info['name_first'] == 'smit'
     assert basic_info['name_last'] == 'dob'
 
-    assert isValidHandle('h123456789rabschedhjsil') == True
+    with pytest.raises(ValueError):
+        search('1234', 'heythere')
+# Null string
+def search_test_2():
+    result = auth_login('smitdob@gmail.com', '22abcd23')
+    assert result['token'] == '123'
+    assert result['u_id'] == '20'
+    basic_info = user_profile('123', '20')
+    assert basic_info['name_first'] == 'smit'
+    assert basic_info['name_last'] == 'dob'
 
-    user_profile_sethandle('easy easy easy', 'h123456789rabschedhjsil')
-    assert user_profile('easy easy easy', '20') == ('smitdob@gmail.com','smit','dob','h123456789rabschedhjsil')
+    with pytest.raises(ValueError):
+        search('123', ' ')
+
+# tests for admin userpermission changes
+# not a valid user id
+def admin_userpermission_change_test_1():
+    result = auth_login('smitdob@gmail.com', '22abcd23')
+    assert result['token'] == '123'
+    assert result['u_id'] == '20'
+
+    basic_info = user_profile('123', '20')
+    assert basic_info['name_first'] == 'smit'
+    assert basic_info['name_last'] == 'dob'
+    
+    with pytest.raises(ValueError):
+        admin_userpermission_change('123','','1')
+    
+# not a valid permission
+def admin_userpermission_change_test_2():
+    result = auth_login('smitdob@gmail.com', '22abcd23')
+    assert result['token'] == '123'
+    assert result['u_id'] == '20'
+
+    basic_info = user_profile('123', '20')
+    assert basic_info['name_first'] == 'smit'
+    assert basic_info['name_last'] == 'dob'
+    
+    with pytest.raises(ValueError):
+        admin_userpermission_change('123','20','3')
+#not an admin or owner
+def admin_userpermission_change_test_3():
+    result = auth_login('smitdob@gmail.com', '22abcd23')
+    assert result['token'] == '123'
+    assert result['u_id'] == '20'
+
+    basic_info = user_profile('123', '20')
+    assert basic_info['name_first'] == 'smit'
+    assert basic_info['name_last'] == 'dob'
+    
+    with pytest.raises(AccessError):
+        admin_userpermission_change('123','20','3')
+
+
