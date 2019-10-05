@@ -163,10 +163,49 @@ def test_channel_details5():
     basic_info = user_profile('right user', 66)
     assert basic_info['name_first'] == 'Jack'
     assert basic_info['name_last'] == 'Ma'
+    basic_info = user_profile('easy easy easy', 23)
+    assert basic_info['name_first'] == 'Andy'
+    assert basic_info['name_last'] == 'Wei'
     result = channel_details('easy easy easy', chann_id)
     assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei']}, 
     'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}]}
-        
+
+# get involved more users and have a test of channel_detail()
+def test_channel_details6():
+    result = auth_login('2199009762@qq.com', '123456q789')
+    assert result['token'] == 'right user'
+    assert result['u_id'] == 66
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
+    result = auth_login('queenking@gmail.com', '234#4$Ss432')
+    assert result['token'] == 'great person'
+    assert result['u_id'] == 12
+    result = auth_login('reallygreat@gmail.com', 'fan123#123')
+    assert result['token'] == 'win win'
+    assert result['u_id'] == 10
+    channel_id = channels_create('right user', 'funny channel', True)
+    chann_id = channel_id['channel_id'] 
+    channel_invite('easy easy easy', chann_id, 23)
+    channel_invite('great person', chann_id, 12)
+    channel_invite('win win', chann_id, 10)
+    basic_info01 = user_profile('easy easy easy', 23)
+    assert basic_info01['name_first'] == 'Andy'
+    assert basic_info01['name_last'] == 'Wei'
+    basic_info01 = user_profile('right user', 66)
+    assert basic_info01['name_first'] == 'Jack'
+    assert basic_info01['name_last'] == 'Ma'
+    basic_info01 = user_profile('great person', 12)
+    assert basic_info01['name_first'] == 'Bill'
+    assert basic_info01['name_last'] == 'Chung'
+    basic_info01 = user_profile('win win', 10)
+    assert basic_info01['name_first'] == 'Cameron'
+    assert basic_info01['name_last'] == 'He'
+    result = channel_details('right user', chann_id)
+    assert result == {'name': 'funny channel', 'owner_members': [{'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma']}, 
+    'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 12, 'name_first':'Bill', 'name_last': 'Chung'},
+    {'u_id': 10, 'name_first': 'Cameron', 'name_first': 'He'}]}
+    
 # return up to 50 messages between start and end under the authorized user
 def test_channel_messages1():
     result = auth_login('andyWei326@gmail.com', '224232r4')
