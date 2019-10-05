@@ -1,8 +1,8 @@
 def user_profile_setname(token, name_first, name_last):
-    return
+    pass
  
 def user_profile_setemail(token, email):
-    return
+    pass
 
 def user_profile_sethandle(token, handle_str):
     return 
@@ -20,3 +20,15 @@ def search(token, query_str):
     return "Message:)"
 
 def admin_userpermission_change(token, u_id, permission_id):
+    pass
+
+#helper function for user_profile_setname
+def check_names(email, password):
+    pass
+
+#helper function for user_profile_setemail
+def isValidEmail(email):
+    return False
+
+def isAlreadyEmail(email):
+    return False
