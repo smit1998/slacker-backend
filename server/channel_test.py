@@ -46,7 +46,7 @@ def test_channel_details4():
     with pytest.raises(AccessError):
         channel_details('right user', 29)
 
-# add one user into the channel, and print the detail of this channel
+# add one user into the private channel, and print the detail of this channel
 def test_channel_details5():
     result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
@@ -54,7 +54,7 @@ def test_channel_details5():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     assert result['u_id'] == 23
-    channel_id = channels_create('easy easy easy', 'a new channel', True) 
+    channel_id = channels_create('easy easy easy', 'a new channel', False) 
     chann_id = channel_id['channel_id']
     channel_invite('right user', chann_id, 66)
     basic_info = user_profile('right user', 66)
@@ -67,8 +67,29 @@ def test_channel_details5():
     assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei']}, 
     'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}]}
 
-# get involved more users and have a test of channel_detail()
+# one user join into the public channel, and print the detail of this channel
 def test_channel_details6():
+    result = auth_login('2199009762@qq.com', '123456q789')
+    assert result['token'] == 'right user'
+    assert result['u_id'] == 66
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    assert result['u_id'] == 23
+    channel_id = channels_create('easy easy easy', 'a new channel', True) 
+    chann_id = channel_id['channel_id']
+    channel_join('right user', chann_id)
+    basic_info = user_profile('right user', 66)
+    assert basic_info['name_first'] == 'Jack'
+    assert basic_info['name_last'] == 'Ma'
+    basic_info = user_profile('easy easy easy', 23)
+    assert basic_info['name_first'] == 'Andy'
+    assert basic_info['name_last'] == 'Wei'
+    result = channel_details('easy easy easy', chann_id)
+    assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei']}, 
+    'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}]}
+
+# get involved more users and have a test of channel_detail()
+def test_channel_details7():
     result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
     assert result['u_id'] == 66
@@ -81,7 +102,7 @@ def test_channel_details6():
     result = auth_login('reallygreat@gmail.com', 'fan123#123')
     assert result['token'] == 'win win'
     assert result['u_id'] == 10
-    channel_id = channels_create('right user', 'funny channel', True)
+    channel_id = channels_create('right user', 'funny channel', False)
     chann_id = channel_id['channel_id'] 
     channel_invite('easy easy easy', chann_id, 23)
     channel_invite('great person', chann_id, 12)
@@ -109,10 +130,9 @@ def test_channel_messages1():
     assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
     chann_id = channel_id['channel_id']
-    # question on the 'query_str' ? ? ? ?
     messages = search('easy easy easy', 'dummychoice')
     result = channel_messages('easy easy easy', chann_id, 0)
-    assert result == {'messages': [messages], 'start': 0, 'end': 49}
+    assert result == {'messages': messages, 'start': 0, 'end': 49}
   
 # valueError because of the start is greater than the total number of messages in the channel
 def test_channel_messages2():
@@ -122,7 +142,6 @@ def test_channel_messages2():
     chann_id = channel_id['channel_id']
     start = 10000 
     message = search('easy easy easy', 'dummychoice')
-    #if the start is greater than the total message ? ? ? ? 
     if(start > len(message['message']):
         with pytest.raises(ValueError):
             channel_messages('easy easy easy', chann_id, start)    
