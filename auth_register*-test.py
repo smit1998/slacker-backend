@@ -147,52 +147,54 @@ def test_channel_join_channel_not_exisit():
         
         
 def test_channel_join_private_channel_one(): 
-    register_details = auth_register('auto@gmail.com', '123456', 'the', 'dude')
-    token = register_details['token'] 
-    user_id = register_details['u_id']
+    u_id1, token1 = auth_register('bot@gmail.com', '12323we452', 'real', 'bot')
+    u_id2, token2 = auth_register('auto@gmail.com', '123456', 'the', 'dude') 
     name = 'admin room' 
     channels_create_dict = channels_create(token, name, False)
     
     channelID = channels_create_dict['channel_id']
-    channel_removeowner(token, channelID, user_id)
-    channel_leave(token, channelID)
+    
+    channel_invite(token1, channelID, u_id2)
+    channel_join(token1, channelID)
+    channel_leave(token2, channelID)
     
     with pytest.raises(ValueError): 
-        channel_join(token, channelID)
+        channel_join(token2, channelID)
     
-def test_channel_join_private_channel_two(): 
-    register_details = auth_register('good@gmail.com', '1234567', 'happy', 'guy')
-    token = register_details['token'] 
-    user_id = register_details['u_id']
+def test_channel_join_private_channel_two():
+    u_id1, token1 = auth_register('human@gmail.com', '12323452', 'legit', 'human')
+    u_id2, token2 = auth_register('good@gmail.com', '1234567', 'happy', 'guy') 
     name = 'secret room' 
     channels_create_dict = channels_create(token, name, False)
     
     channelID = channels_create_dict['channel_id']
     
-    channel_removeowner(token, channelID, user_id)
-    channel_leave(token, channelID)
-    channel_invite(token, channelID, user_id) 
-    channel_join(token, channelID)
-    channel_leave(token, channelID) 
+    channel_invite(token1, channelID, u_id2)
+    channel_join(token2, channelID)
+    channel_addowner(token1, channelID, u_id2)
+    channel_removeowner(token1, channelID, u_id2)
+    channel_leave(token2, channelID)
+    channel_invite(token1, channelID, u_id2) 
+    channel_join(token2, channelID)
+    channel_leave(token2, channelID) 
     
     with pytest.raises(ValueError):
-        channel_join(token, channelID)
+        channel_join(token2, channelID)
 
 def test_channel_addowner_id_not_exist(): 
-    register_details = auth_register('niceemail@gmail.com', '12345678', 'nice', 'person')
-    token = register_details['token'] 
-    user_id = register_details['u_id']
+    u_id1, token1 = auth_register('niceemail@gmail.com', '12323452', 'nice', 'person')
+    u_id2, token2 = auth_register('ndsvvs@gmail.com', '123454542', 'hello', 'hi') 
     name = 'god channel' 
     unexisiting_channel = 'does not exist' 
     channels_create_dict = channels_create(token, name, False)
     
     channelID = channels_create_dict['channel_id']
     
-    channel_addowner(token, channelID, user_id)
-    channel_removeowner(token, channelID, user_id) 
+    channel_addowner(token1, channelID, u_id2)
+    channel_removeowner(token1, channelID, u_id2) 
     
     with pytest.raises(ValueError): 
-        channel_addowner(token, unexisiting_channel, user_id)
+        channel_addowner(token1, unexisiting_channel, u_id2)
 
 def test_channel_addowner_user_already_owner(): 
     u_id1, token1 = auth_register('nicenicenice@gmail.com', '12323452', 'good', 'smart')
@@ -248,7 +250,7 @@ def test_channel_removeowner_user_not_owner():
 
 def test_channel_removeowner_non_owners(): 
     u_id1, token1 = auth_register('godly@gmail.com', '12323452', 'please', 'finish')
-    u_id2, token2 = auth_register('endasap1@gmail.com', '123454542', 'imso', '') 
+    u_id2, token2 = auth_register('endasap1@gmail.com', '123454542', 'imso', 'done') 
     channels_create_dict = channels_create(token1, 'This channel', False)
     channelID = channels_create_dict['channel_id'] 
     
@@ -257,3 +259,42 @@ def test_channel_removeowner_non_owners():
     channel_invite(token1, channelID, u_id2)
     with pytest.raises(AccessError, match=r"*"):
         channel_removeowner(token2, channelID, u_id1) #u_id2 does not have to power to remove owners of the channel (assume the token1 is a key that give the the_id1 user power) 
+        
+def test_messages_edit_not_poster_of_message():
+'''
+    So we make a valid token, then call channels_create(token1, 'channelName', True) will return a channel ID. We use this for channel_messages (and assume start is 0) so it returns messages. Finally we can just retrieve the message_id since it's a dictionary?
+'''
+    u_id1, token1 = auth_register('one@gmail.com', '12323452', 'one', 'two')
+    u_id2, token2 = auth_register('two@gmail.com', '123sad542', 'three', 'four') 
+    channels_create_dict = channels_create(token1, 'Our channel', True)
+    channelID = channels_create_dict['channel_id'] 
+
+    channels_messages_dict = channels_messages(token1, channelID, 0) 
+    messageID = channels_messages_dict['message_id']
+    message = channels_messages_dict['messages']
+    
+    #add other user to the the channel but they should not be able to edit the message posted 
+    channel_invite(token1, channelID, u_id2)
+    
+    message_edit(token1, messageID, message)
+    
+    with pytest.raises(ValueError): 
+        message_edit(token2, messageID, message)
+ 
+def test_messges_edit_not_owner(): 
+    u_id1, token1 = auth_register('12345@gmail.com', '123456', 'one', 'two')
+    u_id2, token2 = auth_register('23456@gmail.com', '1234567', 'three', 'four') 
+    #u_id3, token3 = auth_register('34567@gmail.com', '12345678', 'five', 'six')
+    channels_create_dict = channels_create(token1, 'Moe Money Moe Awps', True)
+    channelID = channels_create_dict['channel_id'] 
+
+    channels_messages_dict = channels_messages(token1, channelID, 0) 
+    messageID = channels_messages_dict['message_id']
+    message = channels_messages_dict['messages']
+
+    channel_addowner(token1, channelID, u_id2) #using the admin powers of the creater of the channel token1 give channel owner to u_id2 
+    message_edit(token2, messageID, message) #as u_id2 has now been made owner and is able to edit messages that are not there own this edit functions should work 
+    channel_removeowner(token1, channelID, u_id2) #u_id1 has removed user u_id2 from being an owner 
+    
+    with pytest.raises(ValueError): 
+        message_edit(token2, messageID, message)
