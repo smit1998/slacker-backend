@@ -118,7 +118,7 @@ def test_channel_details1():
     'all_members': [{'u_id': 23, 'name_first': 'Andy', 'name_last': 'Wei'}]}
 
 # show the details of current channel under the authorised user, and also name is private 
-def test_channel_details1():
+def test_channel_details2():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     assert result['u_id'] == 23
@@ -132,7 +132,7 @@ def test_channel_details1():
     'all_members': [{'u_id': 23, 'name_first': 'Andy', 'name_last': 'Wei'}]}
 
 # when authorised user is not a member of this channel, just ValueError message
-def test_channel_details2():
+def test_channel_details3():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     result = auth_login('2199009762@qq.com', '123456q789')
@@ -143,14 +143,14 @@ def test_channel_details2():
         channel_details('easy easy easy', result)
 
 # when channel doesn't exist, print error message
-def test_channel_details3():
+def test_channel_details4():
     result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
     with pytest.raises(AccessError):
         channel_details('right user', 29)
 
 # add one user into the channel, and print the detail of this channel
-def test_channel_details4():
+def test_channel_details5():
     result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
     assert result['u_id'] == 66
@@ -221,11 +221,21 @@ def test_message_send1():
     assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
     chann_id = channel_id['channel_id']
-    qury_str = 'dummychoice'
-    messages = search('easy easy easy', query_str)
+    messages = search('easy easy easy', 'dummychoice')
     message = messages['message']
-    with pytest.raises(ValueError):
-        message_send('easy easy easy', chann_id, message)
+    if(len(message) > 1000):
+        with pytest.raises(ValueError):
+            message_send('easy easy easy', chann_id, message)
+
+# send the meessage to another private channel of name 
+def test_message_send2():
+    result = auth_login('andrewzhu@gmail.com', '66wz3#d')
+    assert result['token'] == 'good job'
+    channel_id = channels_create('good job', 'greate channel', False)
+    chann_id = channel_id['channel_id']
+    messages = search('good job', 'hahahahaha')
+    message = messages['message']
+    message_send('good job', chann_id, message)
     
 # if the channel doesn't exist, just ValueError
 def test_message_sendlater1():
@@ -233,7 +243,7 @@ def test_message_sendlater1():
     assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
     chann_id = channel_id['channel_id']
-    today = datetime.datatime(2019,10,1,18,54,36,280121)
+    today = datetime.datatime(2019,10,6,18,54,36,280121)
     messages = search('easy easy easy', 'dummychoice')
     message = messages['message']
     with pytest.raises(ValueError):
@@ -248,8 +258,21 @@ def test_message_sendlater2():
     today = datetime.datatime(2020,3,1,18,54,36,280121)
     messages = search('easy easy easy', 'dummychoice')
     message = messages['message']
-    if(len(message
-
+    if(len(message) > 1000):
+        with pytest.raises(ValueError):
+            message_sendlater('easy easy easy', chann_id, message, today)
+            
+# if the time sent is a time in the past, need to be considered as a valueError
+def test_message_sendlater3():
+    result = auth_login('andyWei326@gmail.com', '224232r4')
+    assert result['token'] == 'easy easy easy'
+    channel_id = channels_create('easy easy easy', 'a new channel', True)
+    chann_id = channel_id['channel_id']
+    today = datetime.datatime(2018,3,1,18,54,36,280121)
+    messages = search('easy easy easy', 'dummychoice')
+    message = messages['message']
+    with pytest.raises(ValueError):
+            message_sendlater('easy easy easy', chann_id, message, today)
 
 # test user_profile(....) function and return the valid user's information 
 def test_user_profile1():
@@ -268,7 +291,7 @@ def test_user_profile2():
     with pytest.raises(ValueError):
         user_profile('easy easy easy', 34)
        
-    
+
     
     
     
