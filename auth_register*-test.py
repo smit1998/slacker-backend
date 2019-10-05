@@ -58,34 +58,34 @@ def test_auth_passwordreset_reset():
     '''
 
 def test_channel_leave_channel_not_exist(): 
-    register_details = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
-    token = register_details['token']
+    u_id1, token1 = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
+    u_id2, token2 = auth_register('nicenice6@gmail.com', '12323452', 'looksn', 'smarts')
     name = 'super room' 
     unexisiting_channel = 'dsvfswvdsgrenvkscn dsknfkewbvkabdwoghodn l' 
     channels_create_dict = channels_create(token, name, True)
     
     channelID = channels_create_dict['channel_id']
     
-    channel_leave(token, channelID)
-    channel_join(token, channelID)
+    channel_leave(token2, channelID)
+    channel_join(token2, channelID)
     
     with pytest.raises(ValueError): 
-        channel_leave(token, unexisiting_channel)
+        channel_leave(token1, unexisiting_channel)
 
 def test_channel_join_channel_not_exisit(): 
-    register_details = auth_register('1337@gmail.com', '4253214', 'Yaba', 'Dabadoo')
-    token = register_details['token']
+    u_id1, token1 = auth_register('1337@gmail.com', '4253214', 'Yaba', 'Dabadoo')
+    u_id2, token2 = auth_register('autobots@gmail.com', '123456', 'thee', 'dudee') 
     name = 'random channel' 
     unexisiting_channel= 'hi this channel does not exist'
     channels_create_dict = channels_create(token, name, True)
    
     channelID = channels_create_dict['channel_id']
     
-    channel_join(token, channelID)
-    channel_leave(token, channelID) 
+    channel_join(token2, channelID)
+    channel_leave(token2, channelID) 
     
     with pytest.raises(ValueError): 
-        channel_join(token, unexisiting_channel)
+        channel_join(token2, unexisiting_channel)
         
         
 def test_channel_join_private_channel_one(): 
