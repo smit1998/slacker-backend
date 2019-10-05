@@ -1,7 +1,8 @@
 import pytest 
+import dummy_error import AccessError
 
 # show the details of current channel under the authorised user, and also name is public
-def test_channel_details1():
+def test_public_channel_details():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     assert result['u_id'] == 23
@@ -15,7 +16,7 @@ def test_channel_details1():
     'all_members': [{'u_id': 23, 'name_first': 'Andy', 'name_last': 'Wei'}]}
 
 # show the details of current channel under the authorised user, and also name is private 
-def test_channel_details2():
+def test_private_channel_details():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     assert result['u_id'] == 23
@@ -29,7 +30,7 @@ def test_channel_details2():
     'all_members': [{'u_id': 23, 'name_first': 'Andy', 'name_last': 'Wei'}]}
 
 # when authorised user is not a member of this channel, just ValueError message
-def test_channel_details3():
+def test_channel_details_user_is_not_in_channel():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     result = auth_login('2199009762@qq.com', '123456q789')
@@ -40,14 +41,14 @@ def test_channel_details3():
         channel_details('easy easy easy', result)
 
 # when channel doesn't exist, print error message
-def test_channel_details4():
+def test_channel_details_channel_not_exist():
     result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
     with pytest.raises(AccessError):
         channel_details('right user', 29)
 
 # add one user into the private channel, and print the detail of this channel
-def test_channel_details5():
+def test_private_channel_details_invite_one_more_user():
     result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
     assert result['u_id'] == 66
@@ -68,7 +69,7 @@ def test_channel_details5():
     'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}]}
 
 # one user join into the public channel, and print the detail of this channel
-def test_channel_details6():
+def test_public_channel_details_add_more_people():
     result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
     assert result['u_id'] == 66
@@ -89,7 +90,7 @@ def test_channel_details6():
     'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}]}
 
 # get involved more users and have a test of channel_detail()
-def test_channel_details7():
+def test_private_channel_details_invite_more_user():
     result = auth_login('2199009762@qq.com', '123456q789')
     assert result['token'] == 'right user'
     assert result['u_id'] == 66
@@ -125,7 +126,7 @@ def test_channel_details7():
     {'u_id': 10, 'name_first': 'Cameron', 'name_first': 'He'}]}
     
 # return up to 50 messages between start and end under the authorized user
-def test_channel_messages1():
+def test_channel_messages_authorized_user():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
@@ -135,7 +136,7 @@ def test_channel_messages1():
     assert result == {'messages': messages, 'start': 0, 'end': 49}
   
 # valueError because of the start is greater than the total number of messages in the channel
-def test_channel_messages2():
+def test_channel_messages_start_value_invalid():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     channel_id = channels_create('easy easy easy', 'a new channel', True)
@@ -147,7 +148,7 @@ def test_channel_messages2():
             channel_messages('easy easy easy', chann_id, start)    
        
 # valueError because of the channel doesn't exist
-def test_channel_messages3():
+def test_channel_messages_channel_not_exist():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     result = auth_login('2199009762@qq.com', '123456q789')
@@ -160,7 +161,7 @@ def test_channel_messages3():
         channel_messages('right user', chann_id01, 0)
  
 # valueError because of the authorized user is not a number of this current channel
-def test_channel_messages4():
+def test_channel_messages_user_not_in_channel():
     result = auth_login('andyWei326@gmail.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     result = auth_login('2199009762@qq.com', '123456q789')
