@@ -1,31 +1,4 @@
-'''
-import pytest 
-import re
-
-def auth_register(email,password,name_first,name_last): 
     
-    
-
-
-
-
-
-    #dictionarys = have no sence of order a clump of key value pairs (store data that 
-    #makes sense to look up (kind of like structs)
-    #userData = { 
-     #'name' : 'sally', 
-     #'age' : 18, 
-     #'height' : '186cm',
-   # }
-    #userData['height'] = '187cm'
-    #print(userData) 
-
-#this tests if the email is already used by another user
-
-        
-        
-        
-'''        
 from Error import AccessError       
 import pytest 
 import re 
@@ -35,20 +8,10 @@ import re
 def test_auth_register_valid_token():  
     register_details = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
     token = register_details['token']
-    #user_id = register_details.get['u_id']
     assert validToken(token) == True
-    #assert user_id == True
     
-  
 
 def test_auth_register_correctemail(): 
-'''
-    register_details = auth_register(('hello.com', 'stronkpassword123', 'John', 'Super')
-    user_id = register_details.get['u_id']
-    token = register_details['token']
-    assert user_id == False
-    assert validToken(token) == False
-'''
     with pytest.raises(ValueError):
         auth_register('hello.com', 'stronkpassword123', 'John', 'Super')
     
@@ -58,40 +21,19 @@ def test_auth_register_emailused():
     with pytest.raises(ValueError):
         auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei')
    
+
 def test_auth_register_password_length():
-    '''
-    register_details = auth_register('correctemail@gmail.com', '123', 'ShortN', 'Sweet')
-    user_id = register_details.get['u_id']
-    token = register_details['token']
-    assert user_id == False
-    assert validToken(token) == False
-    '''
     with pytest.raises(ValueError):
         auth_register('correctemail@gmail.com', '123', 'ShortN', 'Sweet')
-    
-   
+       
 
 def test_auth_register_first_name(): 
-'''
-    register_details = auth_register('doyourfingershurt@hotmail.com', '324sf223', 'sdfsvsdbgsdvsvbnsdvnsdovosdnvodsnvosdnvodsvnsdvnsdvfwj', 'LongAssFirstName')
-    user_id = register_details.get['u_id']
-    token = register_details['token']
-    assert user_id == False
-    assert validToken(token) == False
-'''
     with pytest.raises(ValueError):
         auth_register('doyourfingershurt@hotmail.com', '324sf223', 'sdfsvsdbgsdvsvbnsdvnsdovosdnvodsnvosdnvodsvnsdvnsdvfwj', 'LongAssFirstName')
     
    
 
 def test_auth_register_last_name(): 
-'''
-    register_details = auth_register('donthateme@gmail.com', 'ihavegivenup232e', 'Joe', 'tehrhdbfsmohteojfblkdnfgojdvfjgbfgodbdljhpobfhfdjhpdrsdsvr') 
-    user_id = register_details.get['u_id']
-    token = register_details['token']
-    assert user_id == False
-    assert validToken(token) == False
-'''
     with pytest.raises(ValueError):
         auth_register('donthateme@gmail.com', 'ihavegivenup232e', 'Joe', 'tehrhdbfsmohteojfblkdnfgojdvfjgbfgodbdljhpobfhfdjhpdrsdsvr') 
         
@@ -178,9 +120,24 @@ def test_channel_join_private_channel_two():
     channel_join(token2, channelID)
     channel_leave(token2, channelID) 
     
-    with pytest.raises(ValueError):
+    with pytest.raises(AccessError, match=r"*"):
         channel_join(token2, channelID)
-
+        
+def test_channel_join_non_admin():
+    u_id1, token1 = auth_register('human@gmail.com', '12323452', 'legit', 'human')
+    u_id2, token2 = auth_register('good@gmail.com', '1234567', 'happy', 'guy') 
+    name = 'mega room' 
+    channels_create_dict = channels_create(token, name, False)
+    
+    admin_userpermission_change(token1, u_id2, permission_id 2)
+    channel_join(token2, channelID) # as user 1 has made user admin should be able to join with_out invite
+    channel_leave(token2, channelID) 
+    admin_userpermission_change(token1, u_id2, permission_id 3)
+    
+    with pytest.raises(AccessError, match=r"*"):
+        channel_join(token2, channelID)
+    
+    channelID = channels_create_dict['channel_id']
 def test_channel_addowner_id_not_exist(): 
     u_id1, token1 = auth_register('niceemail@gmail.com', '12323452', 'nice', 'person')
     u_id2, token2 = auth_register('ndsvvs@gmail.com', '123454542', 'hello', 'hi') 
@@ -219,6 +176,21 @@ def test_channel_addowner_non_owners():
     with pytest.raises(AccessError, match=r"*"):
         channel_addowner(token2, channelID, u_id2) #u_id2 does not have to power to make themselfs owner of the channel (assume the token is a key that give the u_id1 power) 
 
+def test_channel_addowner_non_slack_owner(): 
+    u_id1, token1 = auth_register('wide@gmail.com', '12323452', 'trihard', '7')
+    u_id2, token2 = auth_register('hardo@gmail.com', '123454542', 'wide', 'hardo') 
+    u_id3, token3 = auth_register('34567@gmail.com', '12345678', 'five', 'six')
+    channels_create_dict = channels_create(token1, 'yea channel', False)
+    channelID = channels_create_dict['channel_id'] 
+
+    admin_userpermission_change(token1, u_id2, permission_id 1)
+    channel_addowner(token2, channelID, u_id3)
+    channel_removeowner(token2, channelID, u_id3) 
+    admin_userpermission_change(token1, u_id2, permission_id 3) 
+    
+    with pytest.raises(AccessError, match=r"*"):
+        channel_addowner(token2, channelID, u_id3)
+        
 def test_channel_removeowner_id_not_exist(): 
     u_id1, token1 = auth_register('best@gmail.com', '123dsf8', 'correct', 'girl')
     u_id2, token2 = auth_register('niceandcorrect1@gmail.com', '123454542', 'hello', 'guy') 
@@ -259,7 +231,21 @@ def test_channel_removeowner_non_owners():
     channel_invite(token1, channelID, u_id2)
     with pytest.raises(AccessError, match=r"*"):
         channel_removeowner(token2, channelID, u_id1) #u_id2 does not have to power to remove owners of the channel (assume the token1 is a key that give the the_id1 user power) 
-        
+
+def test_channel_removeowner_non_slack_owner(): 
+    u_id1, token1 = auth_register('godly@gmail.com', '12323452', 'please', 'finish')
+    u_id2, token2 = auth_register('endasap1@gmail.com', '123454542', 'imso', 'done') 
+    u_id3, token3 = auth_register('niceandcorrect1@gmail.com', '123454542', 'hello', 'guy') 
+    channels_create_dict = channels_create(token1, 'erobb waiting room', False)
+    channelID = channels_create_dict['channel_id'] 
+    
+    admin_userpermission_change(token1, u_id2, permission_id 1)
+    channel_addowner(token2, channelID, u_id3)
+    admin_userpermission_change(token1, u_id2, permission_id 3) 
+    
+    with pytest.raises(AccessError, match=r"*"):
+        channel_removeowner(token2, channelID, u_id3)
+    
 def test_messages_edit_not_poster_of_message():
     u_id1, token1 = auth_register('one@gmail.com', '12323452', 'one', 'two')
     u_id2, token2 = auth_register('two@gmail.com', '123sad542', 'three', 'four') 
@@ -281,7 +267,7 @@ def test_messages_edit_not_poster_of_message():
 def test_messges_edit_not_owner(): 
     u_id1, token1 = auth_register('12345@gmail.com', '123456', 'one', 'two')
     u_id2, token2 = auth_register('23456@gmail.com', '1234567', 'three', 'four') 
-    #u_id3, token3 = auth_register('34567@gmail.com', '12345678', 'five', 'six')
+    u_id3, token3 = auth_register('34567@gmail.com', '12345678', 'five', 'six')
     channels_create_dict = channels_create(token1, 'Moe Money Moe Awps', True)
     channelID = channels_create_dict['channel_id'] 
 
@@ -294,4 +280,38 @@ def test_messges_edit_not_owner():
     channel_removeowner(token1, channelID, u_id2) #u_id1 has removed user u_id2 from being an owner 
     
     with pytest.raises(ValueError): 
+        message_edit(token2, messageID, message)
+        
+def test_messages_edit_not_slack_admin(): 
+    u_id1, token1 = auth_register('123456@gmail.com', '123456', 'onetow', 'two')
+    u_id2, token2 = auth_register('234567@gmail.com', '1234567', 'threefour', 'four') 
+    channels_create_dict = channels_create(token1, 'Tyler1Sleeper', True)
+    channelID = channels_create_dict['channel_id'] 
+
+    channels_messages_dict = channels_messages(token1, channelID, 0) 
+    messageID = channels_messages_dict['message_id']
+    message = channels_messages_dict['messages']
+    
+    admin_userpermission_change(token1, u_id2, permission_id 2)
+    message_edit(token2, messageID, message)
+    admin_userpermission_change(token1, u_id2, permission_id 3)
+    
+    with pytest.raises(AccessError, match=r"*"):
+        message_edit(token2, messageID, message)
+
+def test_messages_edit_not_slack_owner(): 
+     u_id1, token1 = auth_register('king@gmail.com', '123456', 'hifive', 'two')
+    u_id2, token2 = auth_register('gorge@gmail.com', '1234567', 'threefour', 'four') 
+    channels_create_dict = channels_create(token1, 'Sleep room', True)
+    channelID = channels_create_dict['channel_id'] 
+
+    channels_messages_dict = channels_messages(token1, channelID, 0) 
+    messageID = channels_messages_dict['message_id']
+    message = channels_messages_dict['messages']
+    
+    admin_userpermission_change(token1, u_id2, permission_id 1)
+    message_edit(token2, messageID, message)
+    admin_userpermission_change(token1, u_id2, permission_id 3)
+    
+    with pytest.raises(AccessError, match=r"*"):
         message_edit(token2, messageID, message)
