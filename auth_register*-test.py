@@ -53,16 +53,16 @@ def test_auth_passwordrest_request_registered_user():
    
     with pytest.raises(ValueError): 
         auth_passwordreset_request('random@gmail.com')
-    
+'''
 def test_auth_passwordreset_reset(): 
-    '''
+    
 
 def test_channel_leave_channel_not_exist(): 
     u_id1, token1 = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
     u_id2, token2 = auth_register('nicenice6@gmail.com', '12323452', 'looksn', 'smarts')
     name = 'super room' 
     unexisiting_channel = 'dsvfswvdsgrenvkscn dsknfkewbvkabdwoghodn l' 
-    channels_create_dict = channels_create(token, name, True)
+    channels_create_dict = channels_create(token1, name, True)
     
     channelID = channels_create_dict['channel_id']
     
@@ -77,7 +77,7 @@ def test_channel_join_channel_not_exisit():
     u_id2, token2 = auth_register('autobots@gmail.com', '123456', 'thee', 'dudee') 
     name = 'random channel' 
     unexisiting_channel= 'hi this channel does not exist'
-    channels_create_dict = channels_create(token, name, True)
+    channels_create_dict = channels_create(token1, name, True)
    
     channelID = channels_create_dict['channel_id']
     
@@ -300,7 +300,7 @@ def test_messages_edit_not_slack_admin():
         message_edit(token2, messageID, message)
 
 def test_messages_edit_not_slack_owner(): 
-     u_id1, token1 = auth_register('king@gmail.com', '123456', 'hifive', 'two')
+    u_id1, token1 = auth_register('king@gmail.com', '123456', 'hifive', 'two')
     u_id2, token2 = auth_register('gorge@gmail.com', '1234567', 'threefour', 'four') 
     channels_create_dict = channels_create(token1, 'Sleep room', True)
     channelID = channels_create_dict['channel_id'] 
