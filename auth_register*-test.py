@@ -32,7 +32,12 @@ def test_auth_register_last_name():
         auth_register('donthateme@gmail.com', 'ihavegivenup232e', 'Joe', 'tehrhdbfsmohteojfblkdnfgojdvfjgbfgodbdljhpobfhfdjhpdrsdsvr') 
         
 def test_auth_passwordrest_request_registered_user():
-    
+    token = auth_register('human@gmail.com', '12323452', 'legit', 'human')
+    assert validToken(token) == True
+    auth_passwordreset_request('human@gmail.com') 
+    with pytest.raises(ValueError):
+        auth_passwordreset_request('nonhumanperson@gmail.com')
+        
 def test_auth_passwordreset_reset_works(): 
     assert validCode(reset_code) == True 
     assert (len(new_password) >= 5)
