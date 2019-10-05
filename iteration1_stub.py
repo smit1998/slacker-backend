@@ -5,8 +5,7 @@ def user_profile_setemail(token, email):
     pass
 
 def user_profile_sethandle(token, handle_str):
-    return 
-
+    pass
 def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
     return
 
@@ -31,4 +30,8 @@ def isValidEmail(email):
     return False
 
 def isAlreadyEmail(email):
+    return False
+
+#helper function for user_profile_handle_str
+def isValidHandle(handle_str):
     return False
