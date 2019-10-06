@@ -7,8 +7,7 @@ def user_profile_setname_test_1():
 # updating user first name and last name
     user_profile_setname(token,'taraj','naga')
     #returns fist name and last name of given email and password
-    assert check_names('smitdobaria@gmail.com','hey123') == taraj naga
-
+    assert check_names('smitdobaria@gmail.com','hey123') == 'taraj naga'
 #user first name is more than 50 words and last name is less than 50
 
 def user_profile_setname_test_2():

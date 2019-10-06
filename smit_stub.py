@@ -24,7 +24,8 @@ def admin_userpermission_change(token, u_id, permission_id):
     pass
 
 #helper function for user_profile_setemail
-
+def checknames(email, password):
+    pass
   
 # Make a regular expression 
 # for validating an Email 
