@@ -120,7 +120,7 @@ def test_private_channel_details_invite_more_user():
     assert basic_info01['name_first'] == 'Cameron'
     assert basic_info01['name_last'] == 'He'
     result = channel_details('right user', chann_id)
-    assert result == {'name': 'funny channel', 'owner_members': [{'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma']}, 
+    assert result == {'name': 'funny channel', 'owner_members': [{'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}], 
     'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 12, 'name_first':'Bill', 'name_last': 'Chung'},
     {'u_id': 10, 'name_first': 'Cameron', 'name_first': 'He'}]}
     

@@ -142,7 +142,7 @@ def test_channel_messages_start_value_invalid():
     chann_id = channel_id['channel_id']
     start = 10000 
     message = search('easy easy easy', 'dummychoice')
-    if(start > len(message['message']):
+    if(start > len(message['message'])):
         with pytest.raises(ValueError):
             channel_messages('easy easy easy', chann_id, start)    
        
