@@ -4,8 +4,7 @@ from Andy_first_iteration_stub import auth_login, auth_logout
 # when both of email and password are valid, return the valid token
 def test_auth_login_both_valid01():
     result = auth_login('andyWei326@gmail.com', '224232r4')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 23
+
 
 # when the email is valid and password is invalid, print error message
 def test_auth_login_password_invalid():
