@@ -154,10 +154,49 @@ def user_profiles_uploadphoto_test_3():
 def standup_start_test_1():
     start = auth_login('smitdobaria@gmail.com','22abcd23')
     assert start['token'] == '123'
-    assert start['u_id'] == '20'
-    
-def standup_send(token, channel_id, message):
+    ch_id = channels_create('123','easy',True)
+    with pytest.raises(ValueError):
+        standup_start('123', ch_id)
 
+def standup_start_test_2():
+    start = auth_login('smitdobaria@gmail.com','22abcd23')
+    assert start['token'] == '123'
+    ch_id = channels_create('123','e',False)
+    with pytest.raises(ValueError):
+        standup_start('123', ch_id)
+
+def standup_start_test_3():
+    start = auth_login('smitdobaria@gmail.com','22abcd23')
+    assert start['token'] == '123'
+    ch_id = channels_create('123','easy',true)
+    with pytest.raises(ValueError):
+        standup_start('12', ch_id)
+# everything is correct    
+def standup_send_test_1(token, channel_id, message):
+    start = auth_login('smitdobaria@gmail.com','22abcd23')
+    assert start['token'] == '123'
+    ch_id = channels_create('123','easy',true)
+    message = 'NO!!!!'
+    with pytest.raises(ValueError):
+        standup_send('123', ch_id, message)
+
+#channel id is not correct
+def standup_send_test_1(token, channel_id, message):
+    start = auth_login('smitdobaria@gmail.com','22abcd23')
+    assert start['token'] == '123'
+    ch_id = channels_create('12','easy',false)
+    message = 'NO!!!!'
+    with pytest.raises(ValueError):
+        standup_send('123', ch_id, message)
+#not the user of the channel
+def standup_send_test_1(token, channel_id, message):
+    start = auth_login('smitdobaria@gmail.com','22abcd23')
+    assert start['token'] == '123'
+    ch_id = channels_create('12','easy',false)
+    message = 'NO!!!!'
+    with pytest.raises(ValueError):
+        standup_send('1', ch_id, message)
+ 
 #search test cases
 # worng token
 def search_test_1():
