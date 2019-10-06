@@ -1,4 +1,5 @@
 import pytest 
+from Andy_first_iteration_stub import *
 
 # show the details of current channel under the authorised user, and also name is public
 def test_public_channel_details():

@@ -1,4 +1,5 @@
 import pytest 
+from Andy_first_iteration_stub import *
 
 # show the details of current channel under the authorised user, and also name is public
 def test_public_channel_details():
@@ -142,7 +143,7 @@ def test_channel_messages_start_value_invalid():
     chann_id = channel_id['channel_id']
     start = 10000 
     message = search('easy easy easy', 'dummychoice')
-    if(start > len(message['message']):
+    if(start > len(message['message'])):
         with pytest.raises(ValueError):
             channel_messages('easy easy easy', chann_id, start)    
        

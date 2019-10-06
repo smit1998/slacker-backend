@@ -1,5 +1,5 @@
 import pytest
-
+from Andy_first_iteration_stub import *
 
 # test user_profile(....) function and return the valid user's information 
 def test_user_profile_valid_user():

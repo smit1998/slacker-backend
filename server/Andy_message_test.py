@@ -1,4 +1,5 @@
 import pytest
+from Andy_first_iteration_stub import *
 
 # when message is more than 1000 characters, just ValueError 
 def test_message_send_many_characters():

@@ -1,5 +1,5 @@
 import pytest
-
+from Andy_first_iteration_stub import auth_login, auth_logout
 
 # when both of email and password are valid, return the valid token
 def test_auth_login_both_valid01():
