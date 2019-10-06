@@ -17,3 +17,10 @@ user first and last names are less than 50.
 9. Auth_addowner / remove owner assume only someone that is currently an owner has this power
 10. Assume the owner/admin to the slack is the developer and the channel owner is just people     that run the channel 
 11. If someone is made an admin, assume that they can join in channels that are private when      they have not been invited to them 
+#marcus
+12.The list of owners should also in the list of members of a channel.
+13. A 'Like' react has a 'reactID' equal to 1.
+14. An unreact has a 'reactID' equal to 0.
+15. Only owners and admins can pin messages in their respective channels.
+16. All users can view the list of members in a public channel.
+17. Only members of a private channel and view the list of members in that channel.
