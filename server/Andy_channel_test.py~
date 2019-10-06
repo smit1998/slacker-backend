@@ -1,6 +1,5 @@
 import pytest 
 
-
 # show the details of current channel under the authorised user, and also name is public
 def test_public_channel_details():
     result = auth_login('andyWei326@gmail.com', '224232r4')
@@ -65,7 +64,7 @@ def test_private_channel_details_invite_one_more_user():
     assert basic_info['name_first'] == 'Andy'
     assert basic_info['name_last'] == 'Wei'
     result = channel_details('easy easy easy', chann_id)
-    assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei']}, 
+    assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}], 
     'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}]}
 
 # one user join into the public channel, and print the detail of this channel

@@ -85,7 +85,7 @@ def test_public_channel_details_add_more_people():
     assert basic_info['name_first'] == 'Andy'
     assert basic_info['name_last'] == 'Wei'
     result = channel_details('easy easy easy', chann_id)
-    assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei']}, 
+    assert result == {'name': 'a new channel', 'owner_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}], 
     'all_members': [{'u_id': 23, 'name_first':'Andy', 'name_last': 'Wei'}, {'u_id': 66, 'name_first':'Jack', 'name_last': 'Ma'}]}
 
 # get involved more users and have a test of channel_detail()
