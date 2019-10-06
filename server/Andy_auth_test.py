@@ -1,6 +1,6 @@
 import pytest
 from Andy_first_iteration_stub import auth_login, auth_logout
-
+from Andy_dummy_error import ValueError
 # when both of email and password are valid, return the valid token
 def test_auth_login_both_valid01():
     result = auth_login('andyWei326@gmail.com', '224232r4')
