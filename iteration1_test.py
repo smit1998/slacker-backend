@@ -1,66 +1,231 @@
 import pytest 
 import re
 
-regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'     
+# assumptions:
+# 1. The list of owners are also in the list of members of a channel
+# 2. A 'Like' react has a 'reactID' equal to 1
 
-def auth_login(email, password):
-    
-    token = {}
-    if(re.search(regex, email)):
-        try:
-            token["email"] = email
-        except Exception:
-            print("Got wrong e-mail")
-    if(len(password) > 5):
-        try:
-            token["password"] = password
-        except Exception:
-            print("Got wrong password")
-    return token
-    
+def test_channels_list_no_channel1():
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
+    assert channels_list(token1) == {}
 
-def auth_logout(token):
-    
-    if(re.search(regex, token["email"]) and len(token["password"]) > 5):
-        del(token["email"])
-        del(token["password"])
-        return token 
-    return token 
-    
-   
-# when both of email and password are valid
-def test_1():
-    result = auth_login('ankitrai326@gmail.com', '224232r4')
-    assert result == {"email": 'ankitrai326@gmail.com', "password": '224232r4'}
-    
-    result = {"email": 'ankitrai326@gmail.com', "password": '224232r4'}
-    auth_logout(result)
-    assert result == {}
+def test_channels_list_one_channel():
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
 
-# when the email is valid and password is invalid
-def test_2(): 
-    result = auth_login('ankitrai326@gmail.com', '2242')
-    assert result == {"email": 'ankitrai326@gmail.com'}
-    
-    result = {"email": 'ankitrai326@gmail.com', "password": '2242'}
-    auth_logout(result)
-    assert result == {"email": 'ankitrai326@gmail.com', "password": '2242'}
-    
-# when the password is valid and email is invalid
-def test_3(): 
-    result = auth_login('1337memesgmail.com', '123243223') 
-    assert result == {'password': '123243223'}
-    
-    result = {'email': '1337memesgmail.com', 'password': '123243223'}
-    auth_logout(result)
-    assert result == {'email': '1337memesgmail.com', 'password': '123243223'}
-    
-# when both of email and password are invalid
-def test_4(): 
-    result = auth_login('tisisatest.comgamil', '66666')
-    assert result == {}   
-    
-    result = {'email': 'tisisatest.comgamil', 'password': '66666'}
-    auth_logout(result)
-    assert result == {'email': 'tisisatest.comgamil', 'password': '66666'}
+    channelsCreateDict = channels_create(token1, 'Channel 1', False)
+    channelID = channelsCreateDict['channel_id']
 
+    assert channels_list(token1) == {'channelID': channelID, 'name': 'Channel 1'}
+
+def test_channels_list_two_channels():
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
+
+    channelsCreateDict1 = channels_create(token1, 'Channel 1', False)
+    channelID1 = channelsCreateDict1['channel_id']
+
+    channelsCreateDict2 = channels_create(token1, 'Channel 2', False)
+    channelID2 = channelsCreateDict2['channel_id']
+
+    assert channels_list(token1) == {
+        'channelID': channelID1, 'name': 'Channel 1', 'channelID': channelID2, 'name': 'Channel 2'
+    }
+
+def test_channels_list_no_channel2():
+    authRegisterDict1 = auth_register('bot1@gmail.com', '123456', 'real', 'bot1')
+    token1 = authRegisterDict1['token']
+
+    authRegisterDict2 = auth_register('bot2@gmail.com', '123456', 'real', 'bot2')
+    token2 = authRegisterDict2['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    assert channels_list(token2) == {}
+
+def test_channels_listall_no_channel1():
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
+    assert channels_listall(token1) == {}
+
+def test_channels_listall_one_channel():
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+
+    assert channels_listall(token1) == {'channelID': channelID, 'name': 'Channel 1'}
+
+def test_channels_listall_two_channels():
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
+
+    channelsCreateDict1 = channels_create(token1, 'Channel 1', True)
+    channelID1 = channelsCreateDict1['channel_id']
+
+    channelsCreateDict2 = channels_create(token1, 'channel 2', True)
+    channelID2 = channelsCreateDict2['channel_id']
+
+    assert channels_listall(token1) == {
+        'channelID': channelID1, 'name': 'Channel 1', 'channelID': channelID2, 'name': 'Channel 2'
+    }
+
+def test_channels_listall_not_in_the_channel():
+    authRegisterDict1 = auth_register('bot1@gmail.com', '123456', 'real', 'bot1')
+    token1 = authRegisterDict1['token']
+
+    authRegisterDict2 = auth_register('bot2@gmail.com', '123456', 'real', 'bot2')
+    token2 = authRegisterDict2['token']
+    
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+
+    assert channels_list(token2) == {'channelID': channelID, 'name': 'Channel 1'}
+
+def test_channels_create_valid():
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+    
+    assert channel_details(token1, channelID) == {'Channel 1', 'real', 'real'}
+
+def test_channels_create_long_name()
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
+
+    with pytest.raises(ValueError):
+        channelsCreateDict = channels_create(token1, 'abcdefghijklmnopqrstuvwxyz', True)
+
+def test_message_remove_valid():
+    authRegisterDict = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+
+    message_send(token1, channelID, "Hello World")
+
+def test_message_remove_message_doesnt_exist():
+    authRegisterDict1 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+
+    message_send(token1, channelID, "Hello World")
+    channels_messages_dict = channels_messages(token1, channelID, 0)
+    messageID = channels_messages_dict['message_id']
+
+    message_remove(token1, messageID)
+    with pytest.raises(AccessError, match=r"*"):
+        message_remove(token1, messageID)
+
+def test_message_remove_no_permission():
+    authRegisterDict1 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+    authRegisterDict2 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token2 = authRegisterDict2['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+    channel_join(token2, channelID)
+
+    message_send(token1, channelID, "Hello World")
+    channels_messages_dict = channels_messages(token1, channelID, 0)
+    messageID = channels_messages_dict['message_id']
+
+    with pytest.raises(AccessError, match=r"*"):
+        message_remove(token2, messageID)
+
+def test_message_react_invalid_message():
+    authRegisterDict1 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+
+    reactID = 1
+    with pytest.raises(ValueError):
+        message_react(token1, random_message_id, reactID)
+
+def test_message_react_invalid_react():
+    authRegisterDict1 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+
+    message_send(token1, channelID, "Hello World")
+    channels_messages_dict = channels_messages(token1, channelID, 0)
+    messageID = channels_messages_dict['message_id']
+
+    invalidReactID = -420
+    with pytest.raises(ValueError):
+        message_react(token1, messageID, invalidReactID)
+
+def test_message_react_already_reacted():
+    authRegisterDict1 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+
+    message_send(token1, channelID, "Hello World")
+    channels_messages_dict = channels_messages(token1, channelID, 0)
+    messageID = channels_messages_dict['message_id']
+
+    reactID = 1
+    message_react(token1, messageID, reactID)
+    with pytest.raises(ValueError):
+        message_react(token1, messageID, reactID)
+
+def test_message_unreact_invalid_message():
+    authRegisterDict1 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+
+    unreactID = 0
+    with pytest.raises(ValueError):
+        message_unreact(token1, random_message_id, unreactID)
+def test_message_unreact_invalid_react():
+    authRegisterDict1 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+
+    message_send(token1, channelID, "Hello World")
+    channels_messages_dict = channels_messages(token1, channelID, 0)
+    messageID = channels_messages_dict['message_id']
+
+    invalidReactID = -420
+    with pytest.raises(ValueError):
+        message_unreact(token1, messageID, invalidReactID)
+def test_message_unreact_no_active_react():
+    authRegisterDict1 = auth_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+
+    channelsCreateDict = channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+
+    message_send(token1, channelID, "Hello World")
+    channels_messages_dict = channels_messages(token1, channelID, 0)
+    messageID = channels_messages_dict['message_id']
+
+    unreactID = 0
+    with pytest.raises(ValueError):
+        message_unreact(token1, messageID, unreactID)
+def test_message_pin_invalid_message():
+
+def test_message_pin_not_admin():
+
+def test_message_pin_already_pinned():
+
+def test_message_pin_not_member():
+
+def test_message_unpin_invalid_message():
+
+def test_message_unpin_not_admin():
+
+def test_message_unpin_already_unpinned():
+
+def test_message_unpin_not_member():
