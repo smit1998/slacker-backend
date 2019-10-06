@@ -1,6 +1,6 @@
-class AccessError(Execption): 
+class AccessError(): 
     pass
 
-class ValueError(Execption):
+class ValueError():
     pass
     
