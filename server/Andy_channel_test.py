@@ -1,5 +1,5 @@
 import pytest 
-from Andy_dummy_error import AccessError
+
 
 # show the details of current channel under the authorised user, and also name is public
 def test_public_channel_details():

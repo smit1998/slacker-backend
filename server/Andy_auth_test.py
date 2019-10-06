@@ -1,5 +1,5 @@
 import pytest
-from Andy_dummy_error import AccessError
+
 
 # when both of email and password are valid, return the valid token
 def test_auth_login_both_valid01():
