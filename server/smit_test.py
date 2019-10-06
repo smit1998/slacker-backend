@@ -42,7 +42,7 @@ def user_profile_setname_test_5():
 #############################################################################################
 
 # email is valid and not used already
-def user_profile_setemail_test_1(token, email):
+def user_profile_setemail_test_1():
     result = auth_login('smitdob@gmail.com', '22abcd23')
     token = result['token']
 
@@ -50,14 +50,14 @@ def user_profile_setemail_test_1(token, email):
             user_profile_setemail(token, 'smit@gmail.com')
 
 # email is valid but not available
-def user_profile_setemail_test_2(token, email):
+def user_profile_setemail_test_2():
     result = auth_login('smitdob@gmail.com', '22abcd23')
     token = result['token']
 
     with pytest.raises(ValueError):
             user_profile_setemail(token, 'smitdobaria@gmail.com')
 # not valid but available
-def user_profile_setemail_test_3(token, email):
+def user_profile_setemail_test_3():
     result = auth_login('smitdob@gmail.com', '22abcd23')
     token = result['token']
 
@@ -172,7 +172,7 @@ def standup_start_test_3():
     with pytest.raises(ValueError):
         standup_start('12', ch_id)
 # everything is correct    
-def standup_send_test_1(token, channel_id, message):
+def standup_send_test_1():
     start = auth_login('smitdobaria@gmail.com','22abcd23')
     assert start['token'] == '123'
     ch_id = channels_create('123','easy',true)
@@ -181,7 +181,7 @@ def standup_send_test_1(token, channel_id, message):
         standup_send('123', ch_id, message)
 
 #channel id is not correct
-def standup_send_test_1(token, channel_id, message):
+def standup_send_test_2():
     start = auth_login('smitdobaria@gmail.com','22abcd23')
     assert start['token'] == '123'
     ch_id = channels_create('12','easy',false)
@@ -189,7 +189,7 @@ def standup_send_test_1(token, channel_id, message):
     with pytest.raises(ValueError):
         standup_send('123', ch_id, message)
 #not the user of the channel
-def standup_send_test_1(token, channel_id, message):
+def standup_send_test_3():
     start = auth_login('smitdobaria@gmail.com','22abcd23')
     assert start['token'] == '123'
     ch_id = channels_create('12','easy',false)
