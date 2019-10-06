@@ -1,5 +1,5 @@
 import pytes
-import Andy_dummy_error import AccessError
+import dummy_error import AccessError
 
 # when message is more than 1000 characters, just ValueError 
 def test_message_send_many_characters():
