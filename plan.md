@@ -39,9 +39,23 @@ Written format:
         Message_pin
         message_unpin
 
-    -Functions testing and bug solving in week 7.
-    -Weekly meetings to discuss the code and help each other and discuss the progress of the    project.
-    -Daily discussion of the progress on discord and sharing the latest code on git lab         everyday.
+    -Function testing and bug resolving during week 7.
+    -Weekly meetings to discuss the code and the progress of the prooject.
+    -Constant discussion of project progress on discord.
+    
+    We decided on this order of function implementation based on the importance of each category of functions.
+    Since channel creation requires a user token, authentication forms the basis for the development of other functions.
+    When creating Channels tokens need to be given to be able to check things like who is the owner of the channel.
+    Hence they should be developed after user as messages can only be utilised within channels.
+    Other miscellaneous functions such as ‘Search’ can be developed later as we deem them to be less significant in comparison to other core features.
+    As there are around five functions under each category, we estimate that the time required for each category will be roughly equal.
+    But acknowledge that during the initial build more time should be allocated to the channels and authentication.
+    Each week there will be two team meetings, one code meeting and the other developer meetings,
+    in the developer meetings we will talk about what we are up to, what needs to be done
+    and if there are any user requirement updates. For code meetings, we will conduct code review to improve efficiency and optimize each others work.
+    This code review session will mostly happen over codeshare where we will demonstrate the features that we are working on,
+    during these sessions we will explain what our features do,
+    discuss if extra time is required and to make sure everyone is on the same page. 
 
 Diagram Format:
         Authentication functions ->UserProflie functions->Message functions->remaining functions
