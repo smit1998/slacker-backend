@@ -10,12 +10,13 @@ class token:
         
 def auth_login(email, password):
     # What's the functionality of regex
+    p1 = ""
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     if(re.search(regex, email)):
         print('valid email')
     else:
         raise Exception('Invalid email')
-        
+
     if (len(password) < 5):
         raise Exception('Invalid password')
     else:
@@ -41,5 +42,12 @@ def test_3(): #this tests the email if statement (vaild)
     assert result.password == '54351222'
     pass 
 
-
-xx
+def auth_logout(token): 
+    if (
+    return {} 
+    
+    
+    
+    
+    
+    
