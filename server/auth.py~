@@ -3,14 +3,17 @@ from flask import Flask, request
 import re
 import jwt 
 import hashlib
+import datatime 
 
 APP = Flask(__name__)
-       
+
+# the difference between SECRET and secret  (on video 15.00 mins)
 SECRET = 'comp1531 project'
  
 data = {
     'user_info': [{}],
-    'channel_info': [{}]
+    'channel_info': [{}],
+    'message_info': [{}]
 }
 
 def getData():
@@ -47,8 +50,18 @@ def findUser(inputName):
 
 def generateU_id(name_last):
     return name_last + 'z5183885'
-    
 
+timer = None 
+
+def timerStart():
+    global timer
+    timer = datetime.datetime.now()
+
+def timerGoing():
+    global timer
+    return datetime.datetime.now()
+
+    
 @APP.route('/auth/register', methods=['POST'])
 def user_register():
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
@@ -89,7 +102,7 @@ def user_login():
             newToken = generateToken(user['name_first'])
             user['token'].append(newToken)
             return sendSuccess({
-                'token': newToken
+                'token': newToken,
                 'u_id': generateU_id(email)
             })
     raise ValueError("Can't login in because of error message")
@@ -151,70 +164,148 @@ def channel_invite():
             i['all_members'].append(u_id)
     return sendSuccess({})
   
-# how to check the AccessError ? ? ? ? ? 
+# how to check the AccessError ? ? ? ? ? am i right ? ? ? ? ?
 @APP.route('/channel/details', methods=['GET'])
 def channel_details():
     data = getData()
     inputToken = request.args.get('token')
     channel_id = request.args.get('channel_id')
+    flag_1 = False
+    flag_2 = False
+    # check if the channel ID is invalid
+    display_channel = {}
     for i in data['channel_id']:
         if(channel_id == i['name']):
-            i['
+            flag_1 = True
+            display_channel['name'].append(channel_id)
+            display_channel['owner_members'].append(i['owner_members'])
+            display_channel['all_members'].append(i['all_members']) 
+        # check if the user is not a member in this channel with channel_id
+        for user in i['all_members']:
+            if(getUserFromToken(inputToken) == user):
+                flag_2 = True
+    if(flag_1 == False):
+        raise ValueError('channel_id is invalid')
+    if(flag_2 == False):
+        raise AccessError('u_id is not in this channel')
+    return sendSuccess({
+        'name': channel_id,
+        'owner_members': display_channel['owner_members'],
+        'all_members': display_channel['all_members']
+    })
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    for user in data['user_info']:
-        if(getUserFromToken(inputToken) == user['token'] and channel_id == user['channel_id']):
-            
-        raise AccessError("token is invalid")
-    for i in data['channel_info']['channel_id']:
-        if(channel_id == i):
-            return sendSuccess({
-                'name': channel_id
-                'owner_members': data['channel_info']['channel_id']['owner_members']
-                'all_member': data['channel_info']['channel_id']['all_members']
-            })
-    raise ValueError('channel_id is invalid')
-            
-
+# do we need to check the token in this case ? ? ? ?            
 @APP.route('/user/profile', methods=['GET'])
-def user_profile():
+def user_profile_server():
     data = getData()
     token = request.args.get('token')
     u_id = request.args.get('u_id')
-    if(not u_id == generateU_id(data['user_info']['email'])):
+    flag = False
+    user_display = {}
+    for i in data['user_info']:
+        if(u_id == i['u_id']):
+            flag = True
+            user_display['email'].append(i['email'])
+            user_display['name_first'].append(i['name_first'])
+            user_display['name_last'].append(i['name_last'])
+            user_display['handle_str'].append('win win win')
+    if(flag == False);
         raise ValueError("u_id is invalid")
     return sendSuccess({
-        'email': data['user_info']['email'],
-        'name_first': data['user_info']['name_first'],
-        'name_last': data['user_info']['name_last'],
-        'handle_str': 'who are you'
+        'email': user_display['email'],
+        'name_first': user_display['name_first'],
+        'name_last':  user_display['name_last'],
+        'handle_str': user_display['handle_str']
     })
     
+    
 @APP.route('/channel/messages', methods=['GET'])
-def channel_messages():
+def channel_messages_server():
     data = getData()
     token = request.args.get('token')
-    if(not token == getUserFromToken(data['user_info']['token'])):
-        raise AccessError('token is invalid')
+    channel_id = request.args.get('channel_id')
+    start = request.args.get('start')
+    flag_1 = False 
+    flag_2 = False
+    current_channel = {}
+    # check if the channel_id doesn't exist        
+    for i in data['channel_id']:
+        if(channel_id == i['name']):
+            flag_1 = True
+            current_channel = i
+            current_channel['messages'].append(i['messages'])
+        # check if the user is not a member in this channel with channel_id
+        for user in i['all_members']:
+            if(getUserFromToken(inputToken) == user):
+                flag_2 = True
+    if(flag_1 == False):
+        raise ValueError('channel_id is invalid')
+    if(flag_2 == False):
+        raise AccessError('u_id is not in this channel')
+    if(start > len(current_channel['messages'])):
+        raise ValueError=('start is greater than the total number of messages')
+    return sendSuccess({
+        'messages': current_channel['messages'],
+        'start': start,
+        'end' : start + 50
+    })
+
+@APP.route('/message/send', methods=['POST'])
+def send_message_server():
+    data = getData()
+    inputToken = request.form.get('token')
+    channel_id = request.form.get('channel_id')
+    message = request.form.get('message') 
+    if(len(message) > 1000):
+        raise ValueError('message is exceed the maximum')
+    return_message_id = 0
+    flag = False
+    for user in data['channel_info']:
+        for i in user['all_members']:
+            if(getUserFromToken(inputToken) == i):
+                flag = True
+                # question here : can you tell me the originality of message_id ? ? ? ?
+                return_message_id = user['message_id']
+    if(flag == False):
+        raise AccessError('this user is not in this channel')
+    message_info['message_id'].append(return_message_id)
+    message_info['messages'].append(message)
+    return sendSuccess({
+        'message_id': return_message_id
+    })
     
-
-
-
-
-
-
-
+@APP.route('message/sendlater', methods=['POST'])
+def sendlater_message_server():
+    data = getData()
+    inputToken = request.form.get('token')
+    channel_id = request.form.get('channel_id')
+    message = request.form.get('message')
+    time_sent = datetime.datetime.now()
+    if((time_sent - timer).total_seconds() < 0):
+        raise ValueError('the time sent is a time in the past')
+    if(len(message) > 1000):
+        raise ValueError('message is more than 1000')
+    flag = False
+    for i in data['channel_info']:
+        if(i['name'] == channel_id):
+            flag = True
+    if(flag == False):
+        raise ValueError('the channel_id is invalid')
+    return_message_id = 0
+    flag = False
+    for user in data['channel_info']:
+        for i in user['all_members']:
+            if(getUserFromToken(inputToken) == i):
+                flag = True
+                # question here : can you tell me the originality of message_id ? ? ? ?
+                return_message_id = user['message_id']
+    if(flag == False):
+        raise AccessError('this user is not in this channel')
+    return sendSuccess({
+        'message_id': return_message_id
+    })
+    
+    
 if __name__ == '__main__':
     APP.run()
 
