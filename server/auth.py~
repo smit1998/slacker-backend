@@ -213,23 +213,22 @@ def channel_details():
         'all_members': display_channel['all_members']
     })
     
-# do we need to check the token in this case ? ? ? ?            
+           
 @APP.route('/user/profile', methods=['GET'])
 def user_profile_server():
     data = getData()
     token = generateToken(request.args.get('token'))
     u_id = request.args.get('u_id')
+    u_id_integer = int(u_id)
     flag = False
     user_display = {}
-    print(data['user_info'])
     for i in data['user_info']:
-
-        if(u_id == i.get('u_id')):
+        if(u_id_integer == i['u_id']):
             flag = True
-            user_display['email'].append(i['email'])
-            user_display['name_first'].append(i['name_first'])
-            user_display['name_last'].append(i['name_last'])
-            user_display['handle_str'].append('win win win')
+            user_display['email'] = i['email']
+            user_display['name_first'] = i['name_first']
+            user_display'name_last'] = i['name_last']
+            user_display['handle_str'] = 'win win win'
     if(flag == False):
         raise ValueError(description = "u_id is invalid")
     return sendSuccess({
