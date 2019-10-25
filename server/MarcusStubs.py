@@ -27,19 +27,35 @@ def getData():
     global data
     return data
 
-def channels_list(token):
-    return channels
+def sendSuccess(data):
+    return dumps(data)
 
+@app.route('/channel/list', methods=['GET'])
+def channels_list(token):
+    return
+
+@app.route('/channel/listall', methods=['GET'])
 def channels_listall(token):
-    return channels
+    return
 
 @app.route('/channel/create', methods=['POST'])
-def channels_create(token, name, is_public):
+def channels_create():
     data = getData()
     inputToken = generateToken(request.args.get('token'))
-    channel_id = generateChannel_id()
-
-    return channel_id
+    channelName = request.args.get('name')
+    if (len(channelName) > 20):
+        raise ValueError(description = "invalid channel name")
+    is_public = request.args.get('is_public')
+    data['channel_info'].append({
+        'channel_id': generateChannel_id(),
+        'owner_members': inputToken,
+        'all_members': inputToken,
+        'name': channelName,
+        'is_public': True
+    })
+    return sendSuccess({
+        'channel_id': data['channel_info'][-1]['channel_id']
+    })
 
 def message_remove(token, message_id):
     pass
