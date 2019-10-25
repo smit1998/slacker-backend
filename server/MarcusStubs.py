@@ -33,14 +33,23 @@ def sendSuccess(data):
 
 @app.route('/channel/list', methods=['GET'])
 def channels_list():
-    return
+    data = getData()
+    input_token = generateToken(request.args.get('token'))
+    list_channels = {}
+    for channel in data['channels']:
+        for user in channel['all_members']:
+            if (user == input_token):
+                list_channels.append(channel)
+    return sendSuccess(list_channels)
 
 @app.route('/channel/listall', methods=['GET'])
 def channels_listall():
+    data = getData()
+    input_token = generateToken(request.args.get('token'))
     list_all_channels = {}
     for channel in data['channels']:
-        list_all_channels.append(channel['channel_id'])
-    return sendSuccess(allChannels)
+        list_all_channels.append(channel)
+    return sendSuccess(list_all_channels)
 
 @app.route('/channel/create', methods=['POST'])
 def channels_create():
@@ -61,17 +70,22 @@ def channels_create():
         'channel_id': data['channels'][-1]['channel_id']
     })
 
+@app.route('/message/remove', methods=['DELETE'])
 def message_remove(token, message_id):
     pass
-    
+
+@app.route('/message/react', methods=['POST']) 
 def message_react(token, message_id, react_id):
     pass
 
+@app.route('/message/unreact', methods=['POST'])
 def message_unreact(token, message_id, react_id):
     pass
 
+@app.route('/message/pin', methods=['POST'])
 def message_pin(token, message_id):
     pass
 
+@app.route('/message/unpin', methods=['POST'])
 def message_unpin(token, message_id):
     pass
