@@ -8,6 +8,7 @@ import hashlib
 import dateutil 
 from flask_cors import CORS
 from dummy_error import AccessError
+from datetime import timezone
 
 
 APP = Flask(__name__)
@@ -230,7 +231,6 @@ def channels_create():
     })
 
 
-# how to check the AccessError ? ? ? ? ? am i right ? ? ? ? ?
 @APP.route('/channel/details', methods=['GET'])
 def channel_details_server():
     data = getData()
@@ -238,8 +238,6 @@ def channel_details_server():
     channel_id = request.args.get('channel_id')
     channel_id_integer = int(channel_id)
     flag_1 = False
-    flag_2 = False
-    
     # check if the channel ID is invalid
     for i in data['channel_info']:
         if(channel_id_integer == i['channel_id']):
@@ -252,11 +250,10 @@ def channel_details_server():
         # check if the user is not a member in this channel with channel_id
         for user in i['all_members']:
             stored_token = getUserFromToken(inputToken) 
-            if(stored_token['name_first'] == user[1]):
-                flag_2 = True
+            if(stored_token['u_id'] == user['u_id']):
+                flag_1 = True
+    raise ValueError('channel_id is invalid')
     if(flag_1 == False):
-        raise ValueError('channel_id is invalid')
-    if(flag_2 == False):
         raise AccessError('u_id is not in this channel')
    
            
@@ -276,37 +273,45 @@ def user_profile_server():
             })
     raise ValueError(description = "u_id is invalid")
     
-    
+   
+# question: where is time_created and is_unread
 @APP.route('/channel/messages', methods=['GET'])
 def channel_messages_server():
     data = getData()
     token = generateToken(request.args.get('token'))
     channel_id = int(request.args.get('channel_id'))
     start = int(request.args.get('start'))
-    flag_1 = False 
+    basic_info = getUserFromToken(token)
+    flag_1 = False
     flag_2 = False
+    messages_list = []
     current_channel = {}
     # check if the channel_id doesn't exist        
     for i in data['channel_info']:
         if(channel_id == i['channel_id']):
             flag_1 = True
-            current_channel = i
-            current_channel['messages'].append(i['messages'])
-        # check if the user is not a member in this channel with channel_id
-        for user in i['all_members']:
-            if(getUserFromToken(inputToken) == user):
-                flag_2 = True
+             # check if the user is not a member in this channel with channel_id
+            for user in ['all_members']:
+                if(basic_info['u_id'] == user['u_id']):
+                    flag_2 = True
+                    current_channel['u_id'] = basic_info['u_id']
     if(flag_1 == False):
-        raise ValueError('channel_id is invalid')
+        raise ValueError(description = 'channel_id is invalid')
     if(flag_2 == False):
-        raise AccessError('u_id is not in this channel')
-    if(start > len(current_channel['messages'])):
-        raise ValueError('start is greater than the total number of messages')
-    return sendSuccess({
-        'messages': current_channel['messages'],
+        raise AccessError(description = 'u_id is not in this channel')    
+    for mess in data['message_info']:
+        if(start > len(mess['message'])): 
+            raise ValueError('start is greater than the total number of messages') 
+        current_channel['message'] = mess['message']
+    
+    
+    
+     return sendSuccess({
+        'messages': message_list.append(current_channel)
         'start': start,
         'end' : start + 50
     })
+
 
 @APP.route('/message/send', methods=['POST'])
 def send_message_server():
@@ -331,38 +336,37 @@ def send_message_server():
                 })
     raise AccessError(description = 'this user is not in this channel')
     
-   
-    
-@APP.route('/message/sendlater', methods=['POST']
+
+@APP.route('/message/sendlater', methods=['POST'])
 def sendlater_message_server():
     data = getData()
-    inputToken = request.form.get('token')
-    channel_id = request.form.get('channel_id')
+    inputToken = generateToken(request.form.get('token'))
+    channel_id = int(request.form.get('channel_id'))
     message = request.form.get('message')
-    time_sent = datetime.datetime.now()
+    dt = datetime(2020, 01, 01)
+    timestamp = dt.replace(tzinfo=timezone.utc).timestamp()
+    # question here ! ! ! ! ! 
     if((time_sent - timer).total_seconds() < 0):
-        raise ValueError('the time sent is a time in the past')
+        raise ValueError(description = 'the time sent is a time in the past')
     if(len(message) > 1000):
-        raise ValueError('message is more than 1000')
+        raise ValueError(description = 'message is more than 1000')
     flag = False
     for i in data['channel_info']:
-        if(i['name'] == channel_id):
+        if(i['channel_id'] == channel_id):
             flag = True
     if(flag == False):
         raise ValueError('the channel_id is invalid')
-    return_message_id = 0
-    flag = False
     for user in data['channel_info']:
         for i in user['all_members']:
-            if(getUserFromToken(inputToken) == i):
-                flag = True
-                # question here : can you tell me the originality of message_id ? ? ? ?
-                return_message_id = user['message_id']
-    if(flag == False):
-        raise AccessError('this user is not in this channel')
-    return sendSuccess({
-        'message_id': return_message_id
-    })
+            basic_info = getUserFromToken(inputToken)
+            if(basic_info['u_id'] == i['u_id']):
+                for mess in data['message_info']:
+                    if(mess['message'] = message):
+                        return sendSuccess({
+                            'message_id': mess['message_id']
+                        })  
+    raise AccessError('this user is not in this channel')
+    
     
    
 
