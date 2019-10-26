@@ -71,12 +71,30 @@ def channels_create():
     })
 
 @app.route('/message/remove', methods=['DELETE'])
-def message_remove(token, message_id):
-    pass
+def message_remove():
+    data = getData()
+    input_token = generateToken(request.args.get('token'))
+    input_message_id = request.args.get('message_id')
+    for user in data['user_info']:
+        if (user['permission'] == 'member'):
+            raise AccessError('user is not admin or owner')
+    flag_1 = False
+    for message in data['message_info']:
+        if (message['message_id'] == input_message_id):
+            if (message['sender'] != input_token):
+                raise AccessError('user is not sender')
+            flag_1 = True
+            del message
+    if (flag_1 == False):
+        raise ValueError('message does not exist')
+    return sendSuccess({})
 
 @app.route('/message/react', methods=['POST']) 
 def message_react(token, message_id, react_id):
-    pass
+    data = getData()
+    input_token = generateToken(request.args.get('token'))
+    input_message_id = request.args.get('message_id')
+    input_react_id = request.args.get('react_id')
 
 @app.route('/message/unreact', methods=['POST'])
 def message_unreact(token, message_id, react_id):
