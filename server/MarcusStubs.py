@@ -76,7 +76,7 @@ def message_remove():
     input_token = generateToken(request.form.get('token'))
     input_message_id = request.form.get('message_id')
     for user in data['user_info']:
-        if (user['permission'] == 'member'):
+        if (user['token'] == input_token and user['permission'] == 'member'):
             raise AccessError('user is not admin or owner')
     flag_1 = False
     for message in data['message_info']:
@@ -131,7 +131,23 @@ def message_unreact():
 def message_pin(token, message_id):
     data = getData()
     input_token = generateToken(request.form.get('token'))
+    for user in data['user_info']:
+        if (user['token'] == input_token and user['permission'] == 'member'):
+            raise ValueError('user is not admin or owner')
     input_message_id = request.form.get('message_id')
+
+    flag_1 = False
+    for message in data['message_info']:
+        if (message['message_id'] == input_message_id):
+            for channel in data['channels']:
+                for user in channel['all_members']:
+                    if 
+            if (message['is_pinned'] == True):
+                raise ValueError('message already pinned')
+            flag_1 = True
+            message['is_pinned'] == True
+    if (flag_1 == False):
+        raise ValueError('message does not exist')
     return sendSuccess({})
 
 @app.route('/message/unpin', methods=['POST'])
