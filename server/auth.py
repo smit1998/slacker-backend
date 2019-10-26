@@ -3,10 +3,12 @@ from flask import Flask, request
 import re
 import jwt 
 from werkzeug.exceptions import HTTPException
-
+import copy 
 import hashlib
 import dateutil 
 from flask_cors import CORS
+from dummy_error import AccessError
+
 
 APP = Flask(__name__)
 
@@ -18,14 +20,22 @@ data = {
     'message_info': []
 }
 
-user_id = 0
+user_id = 0;
+channel_id = 0
+message_id = 0
 
+def generateMessage_id(m_id):
+    global message_id 
+    message_id = message_id + 1
+    m_id = message_id
+    return m_id     
+       
 def generateU_id(u_id):
     global user_id
     user_id = user_id + 1
     u_id = user_id
     return u_id 
-    
+
 def getData():
     global data
     return data
@@ -52,6 +62,12 @@ class ValueError(HTTPException):
     code = 400
     message = 'No message specified'
 
+def generateChannel_id(c_id):
+    global channel_id
+    channel_id = channel_id + 1
+    c_id = channel_id
+    return c_id
+    
 # transform this token from bytes into string
 def generateToken(name_first):
     global SECRET
@@ -85,7 +101,7 @@ def timerGoing():
 
     
 @APP.route('/auth/register', methods=['POST'])
-def user_register():
+def user_register_server():
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     data = getData()
     email = request.form.get('email')
@@ -105,7 +121,8 @@ def user_register():
         'password': hashPassword(password),
         'name_first': name_first,
         'name_last': name_last,
-        'u_id': generateU_id(user_id)
+        'u_id': generateU_id(user_id),
+        'token': generateToken(name_first)
     })
     return sendSuccess({
         'token': generateToken(name_first),
@@ -114,25 +131,24 @@ def user_register():
 
 # how to test email doesn't belong to user 
 @APP.route('/auth/login', methods=['POST'])
-def user_login():
+def user_login_server():
     data = getData()
     email = request.form.get('email')
     password = hashPassword(request.form.get('password'))
-    print(password)
-    if(email == data['user_info'][-1]['email'] and hashPassword(password) == hashPassword(data['user_info'][-1]['password'])): 
-        newToken = generateToken(data['user_info'][-1]['name_first'])
-        data['user_info'][-1]['token'] = newToken
-        print(data['user_info'][-1])
-        return sendSuccess({
-            'token': newToken,
-            'u_id': data['user_info'][-1]['u_id']
-        })
-    else:
-        raise ValueError(description = "Can't login in because of error message")
+    for user in data['user_info']:
+        if (user['email'] == email and hashPassword(password) == hashPassword(user['password'])):
+            newToken = generateToken(user['name_first'])
+            user['token'] = newToken
+            return sendSuccess({
+                'token': newToken,
+                'u_id': user['u_id']
+            })
+        else:
+            raise ValueError(description = "Can't login in because of error message")
 
 
 @APP.route('/auth/logout', methods=['POST'])
-def user_logout():
+def user_logout_server():
     data = getData()
     inputToken = generateToken(request.form.get('name_first'))
     user = getUserFromToken(inputToken)
@@ -148,71 +164,101 @@ def user_logout():
 @APP.route('/channel/invite', methods=['POST'])
 def channel_invite():
     data = getData()
-    token = generateToken(request.form.get('name_first'))
+    inputToken = generateToken(request.form.get('token'))
     channel_id = request.form.get('channel_id')
-    u_id = generateU_id(request.form.get('u_id'))
+    basic_info = getUserFromToken(inputToken)
+    u_id = request.form.get('u_id')
+    channel_id_integer = int(channel_id)
+    u_id_integer = int(u_id)
     # consider the one AccessError
     flag_1 = False
-    for channel in data['channel_info']:
-        for i in channel['all_members']:
-            user = getUserFromToken(token)
-            if(user['u_id'] == i):
-                flag = True
+    for channel in data['channel_info']:        
+        if(basic_info['u_id'] == channel['token']):
+         
+            flag_1 = True
     if(flag_1 == False):
-        raise AccessError(discription = 'this authorised user is not in this channel')
+        raise AccessError(description = 'this authorised user is not in this channel')
     flag_2 = False
     # consider the u_id ValueError
     for user in data['user_info']:
-        if(u_id == user['u_id']):
+        if(u_id_integer == user['u_id']):
             flag_2 = True
     if(flag_2 == False):
-        raise ValueError("u_id is invalid")
-    flag_3 = False
+        raise ValueError(description = "u_id we want to invite is invalid")
     # consider the channel_id ValueError
     for channel in data['channel_info']:
-        if(channel_id == channel['name']):
-            for i in channel['all_members']:
-                user = getUserFromToken(token)
-                if(user['u_id'] == i):
-                    flag_3 = True
-    if(flag_3 == False):
-        raise ValueError("channel_id is invalid")
-    # invite this user into this channel
-    for i in data['channel_id']:
-        if(channel_id == i['name']):
-            i['all_members'].append(u_id)
-    return sendSuccess({})
-  
+        if(channel_id_integer == channel['channel_id']):
+            for user in data['user_info']:
+                if(user['u_id'] == u_id_integer):
+            # invite this user into this channel
+                    all_users = {}
+                    all_users['u_id'] = u_id_integer
+                    all_users['name_first'] = user['name_first']
+                    all_users['name_last'] = user['name_last']
+                    channel['all_members'].append(all_users)
+                    return sendSuccess({})
+    raise ValueError("channel_id is invalid")
+    
+   
+@APP.route('/channels/create', methods=['POST'])
+def channels_create():
+    data = getData()
+    inputToken = generateToken(request.form.get('token'))
+    channelName = request.form.get('name')
+    if (len(channelName) > 20):
+        raise ValueError(description = "invalid channel name")
+    is_public = request.form.get('is_public')
+    basic_info = getUserFromToken(inputToken)
+    owner = {}
+    all_users = {}
+    owner['u_id'] = basic_info['u_id']
+    owner['name_first'] = basic_info['name_first']
+    owner['name_last'] = basic_info['name_last']
+    all_users['u_id'] = basic_info['u_id']
+    all_users['name_first'] = basic_info['name_first']
+    all_users['name_last'] = basic_info['name_last']
+    data['channel_info'].append({
+        'channel_id': generateChannel_id(channel_id),
+        'owner_members': [owner],
+        'all_members': [all_users],
+        'name': channelName,
+        'is_public': is_public,
+        'token': basic_info['u_id']
+    })
+    return sendSuccess({
+        'channel_id': data['channel_info'][-1]['channel_id']
+    })
+
+
 # how to check the AccessError ? ? ? ? ? am i right ? ? ? ? ?
 @APP.route('/channel/details', methods=['GET'])
-def channel_details():
+def channel_details_server():
     data = getData()
     inputToken = generateToken(request.args.get('token'))
     channel_id = request.args.get('channel_id')
+    channel_id_integer = int(channel_id)
     flag_1 = False
     flag_2 = False
+    
     # check if the channel ID is invalid
-    display_channel = {}
-    for i in data['channel_id']:
-        if(channel_id == i['name']):
+    for i in data['channel_info']:
+        if(channel_id_integer == i['channel_id']):
             flag_1 = True
-            display_channel['name'].append(channel_id)
-            display_channel['owner_members'].append(i['owner_members'])
-            display_channel['all_members'].append(i['all_members']) 
+            return sendSuccess({
+                'name': i['name'],
+                'owner_members': i['owner_members'],
+                'all_members': i['all_members']
+             })
         # check if the user is not a member in this channel with channel_id
         for user in i['all_members']:
-            if(getUserFromToken(inputToken) == user):
+            stored_token = getUserFromToken(inputToken) 
+            if(stored_token['name_first'] == user[1]):
                 flag_2 = True
     if(flag_1 == False):
         raise ValueError('channel_id is invalid')
     if(flag_2 == False):
         raise AccessError('u_id is not in this channel')
-    return sendSuccess({
-        'name': channel_id,
-        'owner_members': display_channel['owner_members'],
-        'all_members': display_channel['all_members']
-    })
-    
+   
            
 @APP.route('/user/profile', methods=['GET'])
 def user_profile_server():
@@ -220,37 +266,29 @@ def user_profile_server():
     token = generateToken(request.args.get('token'))
     u_id = request.args.get('u_id')
     u_id_integer = int(u_id)
-    flag = False
-    user_display = {}
     for i in data['user_info']:
         if(u_id_integer == i['u_id']):
-            flag = True
-            user_display['email'] = i['email']
-            user_display['name_first'] = i['name_first']
-            user_display['name_last'] = i['name_last']
-            user_display['handle_str'] = 'win win win'
-    if(flag == False):
-        raise ValueError(description = "u_id is invalid")
-    return sendSuccess({
-        'email': user_display['email'],
-        'name_first': user_display['name_first'],
-        'name_last':  user_display['name_last'],
-        'handle_str': user_display['handle_str']
-    })
+            return sendSuccess({
+                'email': i['email'],
+                'name_first': i['name_first'],
+                'name_last':  i['name_last'],
+                'handle_str': 'win win win'
+            })
+    raise ValueError(description = "u_id is invalid")
     
     
 @APP.route('/channel/messages', methods=['GET'])
 def channel_messages_server():
     data = getData()
-    token = request.args.get('token')
-    channel_id = request.args.get('channel_id')
-    start = request.args.get('start')
+    token = generateToken(request.args.get('token'))
+    channel_id = int(request.args.get('channel_id'))
+    start = int(request.args.get('start'))
     flag_1 = False 
     flag_2 = False
     current_channel = {}
     # check if the channel_id doesn't exist        
-    for i in data['channel_id']:
-        if(channel_id == i['name']):
+    for i in data['channel_info']:
+        if(channel_id == i['channel_id']):
             flag_1 = True
             current_channel = i
             current_channel['messages'].append(i['messages'])
@@ -273,28 +311,29 @@ def channel_messages_server():
 @APP.route('/message/send', methods=['POST'])
 def send_message_server():
     data = getData()
-    inputToken = request.form.get('token')
-    channel_id = request.form.get('channel_id')
+    inputToken = generateToken(request.form.get('token'))
+    channel_id = int(request.form.get('channel_id'))
     message = request.form.get('message') 
     if(len(message) > 1000):
-        raise ValueError('message is exceed the maximum')
-    return_message_id = 0
-    flag = False
+        raise ValueError('message is exceeding the maximum')
     for user in data['channel_info']:
         for i in user['all_members']:
-            if(getUserFromToken(inputToken) == i):
+            basic_info = getUserFromToken(inputToken)
+            return_message_id = generateMessage_id(message_id)
+            if(basic_info['u_id'] == i['u_id']):
+                message_dict = {}
                 flag = True
-                # question here : can you tell me the originality of message_id ? ? ? ?
-                return_message_id = user['message_id']
-    if(flag == False):
-        raise AccessError('this user is not in this channel')
-    message_info['message_id'].append(return_message_id)
-    message_info['messages'].append(message)
-    return sendSuccess({
-        'message_id': return_message_id
-    })
+                message_dict['message_id'] = return_message_id
+                message_dict['message'] = message
+                data['message_info'].append(message_dict)
+                return sendSuccess({
+                    'message_id': return_message_id
+                })
+    raise AccessError(description = 'this user is not in this channel')
     
-@APP.route('/message/sendlater', methods=['POST'])
+   
+    
+@APP.route('/message/sendlater', methods=['POST']
 def sendlater_message_server():
     data = getData()
     inputToken = request.form.get('token')
@@ -325,8 +364,9 @@ def sendlater_message_server():
         'message_id': return_message_id
     })
     
-    
+   
+
 if __name__ == '__main__':
-    APP.run(debug = True, port=5051)
+    APP.run(debug = True, port=5000)
 
 
