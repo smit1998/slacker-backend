@@ -54,11 +54,11 @@ def channels_listall():
 @app.route('/channel/create', methods=['POST'])
 def channels_create():
     data = getData()
-    input_token = generateToken(request.args.get('token'))
-    channel_name = request.args.get('name')
+    input_token = generateToken(request.form.get('token'))
+    channel_name = request.form.get('name')
     if (len(channel_name) > 20):
         raise ValueError(description = "invalid channel name")
-    is_public = request.args.get('is_public')
+    is_public = request.form.get('is_public')
     data['channels'].append({
         'channel_id': generateChannel_id(),
         'owner_members': input_token,
@@ -73,8 +73,8 @@ def channels_create():
 @app.route('/message/remove', methods=['DELETE'])
 def message_remove():
     data = getData()
-    input_token = generateToken(request.args.get('token'))
-    input_message_id = request.args.get('message_id')
+    input_token = generateToken(request.form.get('token'))
+    input_message_id = request.form.get('message_id')
     for user in data['user_info']:
         if (user['permission'] == 'member'):
             raise AccessError('user is not admin or owner')
@@ -90,19 +90,49 @@ def message_remove():
     return sendSuccess({})
 
 @app.route('/message/react', methods=['POST']) 
-def message_react(token, message_id, react_id):
+def message_react():
     data = getData()
-    input_token = generateToken(request.args.get('token'))
-    input_message_id = request.args.get('message_id')
-    input_react_id = request.args.get('react_id')
+    input_token = generateToken(request.form.get('token'))
+    input_message_id = request.form.get('message_id')
+    input_react_id = request.form.get('react_id')
+    if (input_react_id != 1):
+        raise ValueError('invalid react')
+    flag_1 = False
+    for message in data['message_info']:
+        if (message['message_id'] == input_message_id):
+            if (message['react_id'] == input_react_id):
+                raise ValueError('message already has an active react')
+            flag_1 = True
+            message['react_id'] == input_react_id
+    if (flag_1 == False):
+        raise ValueError('message does not exist')
+    return sendSuccess({})
 
 @app.route('/message/unreact', methods=['POST'])
-def message_unreact(token, message_id, react_id):
-    pass
+def message_unreact():
+    data = getData()
+    input_token = generateToken(request.form.get('token'))
+    input_message_id = request.form.get('message_id')
+    input_react_id = request.form.get('react_id')
+    if (input_react_id != 0):
+        raise ValueError('invalid react')
+    flag_1 = False
+    for message in data['message_info']:
+        if (message['message_id'] == input_message_id):
+            if (message['react_id'] == input_react_id):
+                raise ValueError('message does not contain an active react')
+            flag_1 = True
+            message['react_id'] == input_react_id
+    if (flag_1 == False):
+        raise ValueError('message does not exist')
+    return sendSuccess({})
 
 @app.route('/message/pin', methods=['POST'])
 def message_pin(token, message_id):
-    pass
+    data = getData()
+    input_token = generateToken(request.form.get('token'))
+    input_message_id = request.form.get('message_id')
+    return sendSuccess({})
 
 @app.route('/message/unpin', methods=['POST'])
 def message_unpin(token, message_id):
