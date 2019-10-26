@@ -1,4 +1,3 @@
-from json import dumps
 from flask import Flask, request
 import re
 import jwt 
@@ -9,9 +8,8 @@ import dateutil
 from flask_cors import CORS
 from dummy_error import AccessError
 from datetime import timezone
+from datetime import datetime
 
-
-APP = Flask(__name__)
 
 SECRET = 'comp1531 project'
  
@@ -21,10 +19,18 @@ data = {
     'message_info': []
 }
 
-user_id = 0;
+messages_list = []
+user_id = 0
 channel_id = 0
 message_id = 0
+react_id = 0
 
+def generateReact_id(r_id):
+    global react_id 
+    react_id = react_id + 1
+    r_id = react_id 
+    return r_id
+    
 def generateMessage_id(m_id):
     global message_id 
     message_id = message_id + 1
@@ -40,9 +46,6 @@ def generateU_id(u_id):
 def getData():
     global data
     return data
-
-def sendSuccess(data):
-    return dumps(data)
 
 def defaultHandler(err):
     response = err.get_response()
@@ -89,34 +92,24 @@ def findUser(inputName):
         if u['name_first'] == inputName:
             return u
     return None
-
-timer = None 
-
-def timerStart():
-    global timer
-    timer = datetime.datetime.now()
-
-def timerGoing():
-    global timer
-    return datetime.datetime.now()
-
     
-@APP.route('/auth/register', methods=['POST'])
-def user_register_server():
+def user_register(email, password, name_first, name_last):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     data = getData()
-    email = request.form.get('email')
     if(not re.search(regex, email)):
         raise ValueError(description = "invalid email")
-    password = request.form.get('password')
     if(len(password) < 6):
         raise ValueError(description = "invalid password")
-    name_first = request.form.get('name_first')
     if(len(name_first) < 1 or len(name_first) > 50):
         raise ValueError(description = "invalid name_first")
-    name_last = request.form.get('name_last')
     if(len(name_last) < 1 or len(name_last) > 50):
         raise ValueError(description = "invalid name_last")
+    flag = False
+    for i in data['user_info']:
+        if(i['email'] == email):
+            flag = True
+    if(flag == True):
+        raise ValueError(description = 'email address is already been used')
     data['user_info'].append({
         'email': email,
         'password': hashPassword(password),
@@ -125,57 +118,59 @@ def user_register_server():
         'u_id': generateU_id(user_id),
         'token': generateToken(name_first)
     })
-    return sendSuccess({
+    return {
         'token': generateToken(name_first),
         'u_id': data['user_info'][-1]['u_id']
-    })
+    }
 
-# how to test email doesn't belong to user 
-@APP.route('/auth/login', methods=['POST'])
-def user_login_server():
+
+def user_login_server(email, password):
     data = getData()
-    email = request.form.get('email')
-    password = hashPassword(request.form.get('password'))
+    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    if(not re.search(regex, email)):
+        raise ValueError(description = "invalid email")
+    flag_1 = False 
+    flag_2 = False
     for user in data['user_info']:
-        if (user['email'] == email and hashPassword(password) == hashPassword(user['password'])):
+        if(user['email'] == email): 
+            flag_1 = True
+        if(hashPassword(password) == hashPassword(user['password'])):
+            flag_2 = True
+        if(flag_2 == True and flag_1 == True):
             newToken = generateToken(user['name_first'])
             user['token'] = newToken
-            return sendSuccess({
+            return {
                 'token': newToken,
                 'u_id': user['u_id']
-            })
-        else:
-            raise ValueError(description = "Can't login in because of error message")
+            }
+    if(flag_1 == False):
+        raise ValueError(description = "email entered is not belong to user")
+    if(flag_2 == False):
+        raise ValueError(description = "password is not correct")
 
 
-@APP.route('/auth/logout', methods=['POST'])
-def user_logout_server():
+def user_logout(token):
     data = getData()
-    inputToken = generateToken(request.form.get('name_first'))
-    user = getUserFromToken(inputToken)
+    user = getUserFromToken(token)
     if user['name_first'] is not None:
         del user['token']
-        return sendSuccess({
+        return {
             'is_success': True
-        })
-    return sendSuccess({
+        }
+    return {
         'is_success': False
-    })
+    }
     
-@APP.route('/channel/invite', methods=['POST'])
-def channel_invite():
+
+def channel_invite(token, channel_id, u_id):
     data = getData()
-    inputToken = generateToken(request.form.get('token'))
-    channel_id = request.form.get('channel_id')
-    basic_info = getUserFromToken(inputToken)
-    u_id = request.form.get('u_id')
+    basic_info = getUserFromToken(token)
     channel_id_integer = int(channel_id)
     u_id_integer = int(u_id)
     # consider the one AccessError
     flag_1 = False
     for channel in data['channel_info']:        
         if(basic_info['u_id'] == channel['token']):
-         
             flag_1 = True
     if(flag_1 == False):
         raise AccessError(description = 'this authorised user is not in this channel')
@@ -191,25 +186,21 @@ def channel_invite():
         if(channel_id_integer == channel['channel_id']):
             for user in data['user_info']:
                 if(user['u_id'] == u_id_integer):
-            # invite this user into this channel
+                    # invite this user into this channel
                     all_users = {}
                     all_users['u_id'] = u_id_integer
                     all_users['name_first'] = user['name_first']
                     all_users['name_last'] = user['name_last']
                     channel['all_members'].append(all_users)
-                    return sendSuccess({})
-    raise ValueError("channel_id is invalid")
+                    return {}
+    raise ValueError(description = "channel_id is invalid")
     
    
-@APP.route('/channels/create', methods=['POST'])
-def channels_create():
+def channels_create(token, name, is_public):
     data = getData()
-    inputToken = generateToken(request.form.get('token'))
-    channelName = request.form.get('name')
-    if (len(channelName) > 20):
+    if (len(name) > 20):
         raise ValueError(description = "invalid channel name")
-    is_public = request.form.get('is_public')
-    basic_info = getUserFromToken(inputToken)
+    basic_info = getUserFromToken(token)
     owner = {}
     all_users = {}
     owner['u_id'] = basic_info['u_id']
@@ -222,75 +213,65 @@ def channels_create():
         'channel_id': generateChannel_id(channel_id),
         'owner_members': [owner],
         'all_members': [all_users],
-        'name': channelName,
+        'name': name,
         'is_public': is_public,
         'token': basic_info['u_id']
     })
-    return sendSuccess({
+    return {
         'channel_id': data['channel_info'][-1]['channel_id']
-    })
+    }
 
 
-@APP.route('/channel/details', methods=['GET'])
-def channel_details_server():
+def channel_details(token, channel_id):
     data = getData()
-    inputToken = generateToken(request.args.get('token'))
-    channel_id = request.args.get('channel_id')
     channel_id_integer = int(channel_id)
     flag_1 = False
     # check if the channel ID is invalid
     for i in data['channel_info']:
         if(channel_id_integer == i['channel_id']):
             flag_1 = True
-            return sendSuccess({
+            return {
                 'name': i['name'],
                 'owner_members': i['owner_members'],
                 'all_members': i['all_members']
-             })
+            }
         # check if the user is not a member in this channel with channel_id
         for user in i['all_members']:
-            stored_token = getUserFromToken(inputToken) 
-            if(stored_token['u_id'] == user['u_id']):
+            basic_info = getUserFromToken(token) 
+            if(basic_info['u_id'] == user['u_id']):
                 flag_1 = True
-    raise ValueError('channel_id is invalid')
+    raise ValueError(description = 'channel_id is invalid')
     if(flag_1 == False):
-        raise AccessError('u_id is not in this channel')
+        raise AccessError(description = 'u_id is not in this channel')
    
            
-@APP.route('/user/profile', methods=['GET'])
-def user_profile_server():
+def user_profile(token, u_id):
     data = getData()
-    token = generateToken(request.args.get('token'))
-    u_id = request.args.get('u_id')
     u_id_integer = int(u_id)
     for i in data['user_info']:
         if(u_id_integer == i['u_id']):
-            return sendSuccess({
+            return {
                 'email': i['email'],
                 'name_first': i['name_first'],
                 'name_last':  i['name_last'],
                 'handle_str': 'win win win'
-            })
+            }
     raise ValueError(description = "u_id is invalid")
     
    
-# question: where is time_created and is_unread
-@APP.route('/channel/messages', methods=['GET'])
-def channel_messages_server():
+def channel_messages(token, channel_id, start):
     data = getData()
-    token = generateToken(request.args.get('token'))
-    channel_id = int(request.args.get('channel_id'))
-    start = int(request.args.get('start'))
+    channel_id_integer = int(channel_id)
+    start_integer = int(start)
     basic_info = getUserFromToken(token)
     flag_1 = False
     flag_2 = False
-    messages_list = []
     current_channel = {}
     # check if the channel_id doesn't exist        
     for i in data['channel_info']:
-        if(channel_id == i['channel_id']):
+        if(channel_id_integer == i['channel_id']):
             flag_1 = True
-             # check if the user is not a member in this channel with channel_id
+            # check if the user is not a member in this channel with channel_id
             for user in ['all_members']:
                 if(basic_info['u_id'] == user['u_id']):
                     flag_2 = True
@@ -300,77 +281,73 @@ def channel_messages_server():
     if(flag_2 == False):
         raise AccessError(description = 'u_id is not in this channel')    
     for mess in data['message_info']:
-        if(start > len(mess['message'])): 
-            raise ValueError('start is greater than the total number of messages') 
+        if(start_integer > len(mess['message'])): 
+            raise ValueError(description = 'start is greater than the total number of messages') 
         current_channel['message'] = mess['message']
-    
-    
-    
-     return sendSuccess({
-        'messages': message_list.append(current_channel)
+        current_channel['message_id'] = mess['message_id']
+        current_channel['react_id'] = mess['react_id']
+        current_channel['time_created'] = mess['time_created']
+        current_channel['is_pinned'] = mess['is_pinned']
+    return {
+        'messages': [current_channel],
         'start': start,
         'end' : start + 50
-    })
+    }
 
 
-@APP.route('/message/send', methods=['POST'])
-def send_message_server():
+def message_send(token, channel_id, message):
     data = getData()
-    inputToken = generateToken(request.form.get('token'))
-    channel_id = int(request.form.get('channel_id'))
-    message = request.form.get('message') 
+    channel_id_integer = int(channel_id)
     if(len(message) > 1000):
-        raise ValueError('message is exceeding the maximum')
+        raise ValueError(description = 'message is exceeding the maximum')
     for user in data['channel_info']:
-        for i in user['all_members']:
-            basic_info = getUserFromToken(inputToken)
-            return_message_id = generateMessage_id(message_id)
-            if(basic_info['u_id'] == i['u_id']):
-                message_dict = {}
-                flag = True
-                message_dict['message_id'] = return_message_id
-                message_dict['message'] = message
-                data['message_info'].append(message_dict)
-                return sendSuccess({
-                    'message_id': return_message_id
-                })
+        if(channel_id_integer == user['channel_id']):
+            for i in user['all_members']:
+                basic_info = getUserFromToken(token)
+                return_message_id = generateMessage_id(message_id)
+                if(basic_info['u_id'] == i['u_id']):
+                    message_dict = {}
+                    message_dict['message_id'] = return_message_id
+                    message_dict['messages'] = message
+                    message_dict['time_created'] = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
+                    message_dict['react_id'] = generateReact_id(react_id)
+                    message_dict['is_pinned'] = True
+                    data['message_info'].append(message_dict)
+                    return {
+                        'message_id': return_message_id
+                    }
     raise AccessError(description = 'this user is not in this channel')
-    
 
-@APP.route('/message/sendlater', methods=['POST'])
-def sendlater_message_server():
+
+def sendlater_message(token, channel_id, message, time_sent):
     data = getData()
-    inputToken = generateToken(request.form.get('token'))
-    channel_id = int(request.form.get('channel_id'))
-    message = request.form.get('message')
-    dt = datetime(2020, 01, 01)
-    timestamp = dt.replace(tzinfo=timezone.utc).timestamp()
-    # question here ! ! ! ! ! 
-    if((time_sent - timer).total_seconds() < 0):
+    channel_id_integer = int(channel_id)
+    time_sent_integer = int(time_sent)
+    time_now = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
+    return_message_id = generateMessage_id(message_id)
+    if(time_sent_integer < time_now):
         raise ValueError(description = 'the time sent is a time in the past')
     if(len(message) > 1000):
         raise ValueError(description = 'message is more than 1000')
     flag = False
     for i in data['channel_info']:
-        if(i['channel_id'] == channel_id):
+        if(i['channel_id'] == channel_id_integer):
             flag = True
     if(flag == False):
-        raise ValueError('the channel_id is invalid')
+        raise ValueError(description = 'the channel_id is invalid')
     for user in data['channel_info']:
         for i in user['all_members']:
-            basic_info = getUserFromToken(inputToken)
+            basic_info = getUserFromToken(token)
             if(basic_info['u_id'] == i['u_id']):
-                for mess in data['message_info']:
-                    if(mess['message'] = message):
-                        return sendSuccess({
-                            'message_id': mess['message_id']
-                        })  
-    raise AccessError('this user is not in this channel')
-    
-    
-   
-
-if __name__ == '__main__':
-    APP.run(debug = True, port=5000)
-
+                message_dict = {}
+                message_dict['message_id'] = return_message_id
+                message_dict['messages'] = message
+                message_dict['time_created'] = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
+                message_dict['react_id'] = generateReact_id(react_id)
+                message_dict['is_pinned'] = True
+                data['message_info'].append(message_dict)
+                return {
+                    'message_id': return_message_id
+                } 
+    raise AccessError(description = 'this user is not current in this channel')
 

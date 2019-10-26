@@ -1,12 +1,25 @@
 import pytest
-import dummy_error import AccessError
+from dummy_error import AccessError
+from auth import *
+
 
 # when both of email and password are valid, return the valid token
+
 def test_auth_login_both_valid01():
-    result = auth_login('andrewHu@qq.com', '224232r4')
+    authRegisterDic = user_register_server('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    assert authRegisterDic['email'] == '2199009762@qq.com'
+    assert authRegisterDic['password'] == '1234567'
+    assert authRegisterDic['name_first'] == 'Andy'
+    assert authRegisterDic['name_last'] == 'Wei'
+    
+    
+'''    
+    result = user_login_server('andrewHu@qq.com', '224232r4')
     assert result['token'] == 'easy easy easy'
     assert result['u_id'] == 23
-
+'''
+    
+'''
 # when the email is valid and password is invalid, print error message
 def test_auth_login_password_invalid():
     with pytest.raises(ValueError):
@@ -51,4 +64,4 @@ def test_auth_logout_token_invalid02():
     assert result['u_id'] == 66
     auth_logout('what should i do')
     assert result == {'u_id': 66, 'token': 'right user'}
-        
+'''        
