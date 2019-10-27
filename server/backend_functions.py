@@ -6,7 +6,6 @@ import copy
 import hashlib
 import dateutil 
 from flask_cors import CORS
-from dummy_error import *
 from datetime import timezone
 from datetime import datetime
 
@@ -35,7 +34,7 @@ def defaultHandler(err):
     response.content_type = 'application/json'
     return response
 
-
+APP = Flask(__name__)
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
 CORS(APP)
@@ -76,6 +75,11 @@ def resetChannel_id(c_id):
     c_id = 0
     channel_id = c_id 
 
+def resetMessage_id(m_id):
+    global message_id
+    m_id = 0
+    message_id = m_id
+    
 def getData():
     global data
     return data
@@ -130,7 +134,8 @@ def user_register(email, password, name_first, name_last):
         'name_first': name_first,
         'name_last': name_last,
         'u_id': generateU_id(user_id),
-        'token': generateToken(name_first)
+        'token': generateToken(name_first),
+        'handle_str': 'TEAM WORK'
     })
     return {
         'token': generateToken(name_first),
@@ -264,7 +269,7 @@ def user_profile(token, u_id):
                 'email': i['email'],
                 'name_first': i['name_first'],
                 'name_last':  i['name_last'],
-                'handle_str': 'win win win'
+                'handle_str': i['handle_str']
             }
     raise ValueError(description = "u_id is invalid")
     

@@ -1,32 +1,9 @@
-from auth import * 
+from  import * 
 from json import dumps
 from flask import Flask, request
 
 
 APP = Flask(__name__)
-
-def defaultHandler(err):
-    response = err.get_response()
-    response.data = dumps({
-        "code": err.code,
-        "name": "System Error",
-        "message": err.debadscription,
-    })
-    response.content_type = 'application/json'
-    return response
-
-
-APP.config['TRAP_HTTP_EXCEPTIONS'] = True
-APP.register_error_handler(Exception, defaultHandler)
-CORS(APP)
-
-class ValueError(HTTPException):
-    code = 400
-    message = 'No message specified'
-
-class AccessError(HTTPException):
-    code = 400 
-    message = 'No message specified'
 
 
 @APP.route('/auth/register', methods=['POST'])

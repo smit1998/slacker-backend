@@ -1,6 +1,5 @@
 import pytest
-from dummy_error import AccessError
-from auth import *
+from Andy_backend_functions import *
 
 # when both of email and password are valid, return the valid token
 def test_auth_register_both_valid01():
