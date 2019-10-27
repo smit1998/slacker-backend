@@ -76,17 +76,24 @@ def message_remove():
     data = getData()
     input_token = generateToken(request.form.get('token'))
     input_message_id = request.form.get('message_id')
-    for user in data['user_info']:
-        if (user['token'] == input_token and user['permission'] == 'member'):
-            raise AccessError('user is not admin or owner')
-    flag_1 = False
+    flag_1 = False # Checks for permission to pin.
+    for channel in data['channels']:
+        for user in channel['owner_members']:
+            if (user == input_token):
+                flag_1 = True
+        for user in channel['admin_members']:
+            if (user == input_token):
+                flag_1 = True
+    if (flag_1 = False):
+        raise AccessError('user is not admin or owner')
+    flag_2 = False
     for message in data['message_info']:
         if (message['message_id'] == input_message_id):
             if (message['sender'] != input_token):
                 raise AccessError('user is not sender')
-            flag_1 = True
+            flag_2 = True
             del message
-    if (flag_1 == False):
+    if (flag_2 == False):
         raise ValueError('message does not exist')
     return sendSuccess({})
 
@@ -129,7 +136,7 @@ def message_unreact():
     return sendSuccess({})
 
 @app.route('/message/pin', methods=['POST'])
-def message_pin(token, message_id):
+def message_pin():
     data = getData()
     input_token = generateToken(request.form.get('token'))
     flag_1 = False # Checks for permission to pin.
@@ -163,7 +170,7 @@ def message_pin(token, message_id):
     return sendSuccess({})
 
 @app.route('/message/unpin', methods=['POST'])
-def message_unpin(token, message_id):
+def message_unpin():
     data = getData()
     input_token = generateToken(request.form.get('token'))
     flag_1 = False # Checks for permission to unpin.
@@ -195,3 +202,26 @@ def message_unpin(token, message_id):
     if (flag_2 == False):
         raise ValueError('message does not exist')
     return sendSuccess({})
+
+@app.route('/message/edit', methods=['PUT'])
+def message_edit():
+    data = getData()
+    input_token = generateToken(request.form.get('token'))
+    input_message_id = request.form.get('message_id')
+    input_message = request.form.get('message')
+    flag_1 = False # Checks for permission to unpin.
+    for channel in data['channels']:
+        for user in channel['owner_members']:
+            if (user == input_token):
+                flag_1 = True
+        for user in channel['admin_members']:
+            if (user == input_token):
+                flag_1 = True
+    if (flag_1 = False):
+        raise ValueError('user is not admin or owner')
+    for i in data['message_info']:
+        if (i['message_id'] == input_message_id):
+            if (i['sender'] != input_token):
+                raise AccessError('user did not send the message')
+            i['message'] = input_message
+    return sendSuccess
