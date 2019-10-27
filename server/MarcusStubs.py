@@ -62,6 +62,7 @@ def channels_create():
     data['channels'].append({
         'channel_id': generateChannel_id(),
         'owner_members': input_token,
+        'admin_members': input_token,
         'all_members': input_token,
         'name': channel_name,
         'is_public': True
@@ -131,25 +132,66 @@ def message_unreact():
 def message_pin(token, message_id):
     data = getData()
     input_token = generateToken(request.form.get('token'))
-    for user in data['user_info']:
-        if (user['token'] == input_token and user['permission'] == 'member'):
-            raise ValueError('user is not admin or owner')
+    flag_1 = False # Checks for permission to pin.
+    for channel in data['channels']:
+        for user in channel['owner_members']:
+            if (user == input_token):
+                flag_1 = True
+        for user in channel['admin_members']:
+            if (user == input_token):
+                flag_1 = True
+    if (flag_1 = False):
+        raise ValueError('user is not admin or owner')
     input_message_id = request.form.get('message_id')
-
-    flag_1 = False
+    flag_2 = False # Checks if message exists.
+    flag_3 = False # Checks if the user is a member of the channel that the message is within.
     for message in data['message_info']:
         if (message['message_id'] == input_message_id):
             for channel in data['channels']:
-                for user in channel['all_members']:
-                    if 
+                if (channel['channel_id'] == message['channel_id']):
+                    for user in channel['all_members']:
+                        if (user == input_token):
+                            flag_3 = True
+            if (flag_3 == False):
+                raise AccessError('user is not a member of the channel that the message is within')
             if (message['is_pinned'] == True):
                 raise ValueError('message already pinned')
-            flag_1 = True
+            flag_2 = True
             message['is_pinned'] == True
-    if (flag_1 == False):
+    if (flag_2 == False):
         raise ValueError('message does not exist')
     return sendSuccess({})
 
 @app.route('/message/unpin', methods=['POST'])
 def message_unpin(token, message_id):
-    pass
+    data = getData()
+    input_token = generateToken(request.form.get('token'))
+    flag_1 = False # Checks for permission to unpin.
+    for channel in data['channels']:
+        for user in channel['owner_members']:
+            if (user == input_token):
+                flag_1 = True
+        for user in channel['admin_members']:
+            if (user == input_token):
+                flag_1 = True
+    if (flag_1 = False):
+        raise ValueError('user is not admin or owner')
+    input_message_id = request.form.get('message_id')
+    flag_2 = False # Checks if message exists.
+    flag_3 = False # Checks if the user is a member of the channel that the message is within.
+    for message in data['message_info']:
+        if (message['message_id'] == input_message_id):
+            for channel in data['channels']:
+                if (channel['channel_id'] == message['channel_id']):
+                    for user in channel['all_members']:
+                        if (user == input_token):
+                            flag_3 = True
+            if (flag_3 == False):
+                raise AccessError('user is not a member of the channel that the message is within')
+            if (message['is_pinned'] == False):
+                raise ValueError('message already unpinned')
+            flag_2 = True
+            message['is_pinned'] == False
+    if (flag_2 == False):
+        raise ValueError('message does not exist')
+    return sendSuccess({})
