@@ -54,37 +54,30 @@ def getData():
     global data
     return data
 
-def sendSuccess(data):
-    return dumps(data)
-
-@app.route('/channel/list', methods=['GET'])
-def channels_list():
+def channels_list(token):
     data = getData()
-    input_token = generateToken(request.args.get('token'))
+    input_token = generateToken(token)
     list_channels = {}
     for channel in data['channels']:
         for user in channel['all_members']:
             if (user == input_token):
                 list_channels.append(channel)
-    return sendSuccess(list_channels)
+    return list_channels
 
-@app.route('/channel/listall', methods=['GET'])
-def channels_listall():
+def channels_listall(token):
     data = getData()
-    input_token = generateToken(request.args.get('token'))
+    input_token = generateToken(token))
     list_all_channels = {}
     for channel in data['channels']:
         list_all_channels.append(channel)
-    return sendSuccess(list_all_channels)
+    return list_all_channels
 
-@app.route('/channel/create', methods=['POST'])
-def channels_create():
+def channels_create(token, name, is_public):
     data = getData()
-    input_token = generateToken(request.form.get('token'))
-    channel_name = request.form.get('name')
+    input_token = generateToken(token)
+    channel_name = name
     if (len(channel_name) > 20):
         raise ValueError(description = "invalid channel name")
-    is_public = request.form.get('is_public')
     basic_info = getUserFromToken(inputToken)
     owner = {}
     admin = {}
@@ -106,15 +99,14 @@ def channels_create():
         'name': channel_name,
         'is_public': is_public
     })
-    return sendSuccess({
+    return {
         'channel_id': data['channels'][-1]['channel_id']
-    })
+    }
 
-@app.route('/message/remove', methods=['DELETE'])
-def message_remove():
+def message_remove(token, message_id):
     data = getData()
-    input_token = generateToken(request.form.get('token'))
-    input_message_id = request.form.get('message_id')
+    input_token = token
+    input_message_id = message_id
     flag_1 = False # Checks for permission to pin.
     for channel in data['channels']:
         for user in channel['owner_members']:
@@ -134,14 +126,13 @@ def message_remove():
             del message
     if (flag_2 == False):
         raise ValueError('message does not exist')
-    return sendSuccess({})
+    return ({})
 
-@app.route('/message/edit', methods=['PUT'])
-def message_edit():
+def message_edit(token, message_id, message):
     data = getData()
-    input_token = generateToken(request.form.get('token'))
-    input_message_id = request.form.get('message_id')
-    input_message = request.form.get('message')
+    input_token = generateToken(token)
+    input_message_id = message_id
+    input_message = message
     flag_1 = False # Checks for permission to unpin.
     for channel in data['channels']:
         for user in channel['owner_members']:
@@ -157,14 +148,13 @@ def message_edit():
             if (i['sender'] != input_token):
                 raise AccessError('user did not send the message')
             i['message'] = input_message
-    return sendSuccess({})
+    return ({})
 
-@app.route('/message/react', methods=['POST']) 
-def message_react():
+def message_react(token, message_id, react_id):
     data = getData()
-    input_token = generateToken(request.form.get('token'))
-    input_message_id = request.form.get('message_id')
-    input_react_id = request.form.get('react_id')
+    input_token = generateToken(token)
+    input_message_id = message_id
+    input_react_id = react_id
     if (input_react_id != 1):
         raise ValueError('invalid react')
     flag_1 = False
@@ -176,14 +166,13 @@ def message_react():
             message['react_id'] == input_react_id
     if (flag_1 == False):
         raise ValueError('message does not exist')
-    return sendSuccess({})
+    return ({})
 
-@app.route('/message/unreact', methods=['POST'])
-def message_unreact():
+def message_unreact(token, message_id, react_id):
     data = getData()
-    input_token = generateToken(request.form.get('token'))
-    input_message_id = request.form.get('message_id')
-    input_react_id = request.form.get('react_id')
+    input_token = generateToken(token)
+    input_message_id = message_id
+    input_react_id = react_id
     if (input_react_id != 0):
         raise ValueError('invalid react')
     flag_1 = False
@@ -195,12 +184,11 @@ def message_unreact():
             message['react_id'] == input_react_id
     if (flag_1 == False):
         raise ValueError('message does not exist')
-    return sendSuccess({})
+    return ({})
 
-@app.route('/message/pin', methods=['POST'])
-def message_pin():
+def message_pin(token, message_id):
     data = getData()
-    input_token = generateToken(request.form.get('token'))
+    input_token = generateToken(token)
     flag_1 = False # Checks for permission to pin.
     for channel in data['channels']:
         for user in channel['owner_members']:
@@ -211,7 +199,7 @@ def message_pin():
                 flag_1 = True
     if (flag_1 = False):
         raise ValueError('user is not admin or owner')
-    input_message_id = request.form.get('message_id')
+    input_message_id = message_id
     flag_2 = False # Checks if message exists.
     flag_3 = False # Checks if the user is a member of the channel that the message is within.
     for message in data['message_info']:
@@ -229,12 +217,11 @@ def message_pin():
             message['is_pinned'] == True
     if (flag_2 == False):
         raise ValueError('message does not exist')
-    return sendSuccess({})
+    return ({})
 
-@app.route('/message/unpin', methods=['POST'])
-def message_unpin():
+def message_unpin(token, message_id):
     data = getData()
-    input_token = generateToken(request.form.get('token'))
+    input_token = generateToken(token)
     flag_1 = False # Checks for permission to unpin.
     for channel in data['channels']:
         for user in channel['owner_members']:
@@ -245,7 +232,7 @@ def message_unpin():
                 flag_1 = True
     if (flag_1 == False):
         raise ValueError('user is not admin or owner')
-    input_message_id = request.form.get('message_id')
+    input_message_id = message_id
     flag_2 = False # Checks if message exists.
     flag_3 = False # Checks if the user is a member of the channel that the message is within.
     for message in data['message_info']:
@@ -263,7 +250,7 @@ def message_unpin():
             message['is_pinned'] == False
     if (flag_2 == False):
         raise ValueError('message does not exist')
-    return sendSuccess({})
+    return ({})
 
 if __name__ == '__main__':
     APP.run(debug = True, port=4002)
