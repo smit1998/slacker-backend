@@ -5,22 +5,34 @@ from flask import Flask
 
 APP = Flask(__name__)
 
-#need to complete this funcition
-def get_U_id(token):    
-    return u_id
+def get_data():
+    global data
+    return data
+
+
+def get_U_id(token):
+    user_id = None
+    flag = 0
+    for u in data['user_info']:
+        if u['token'] == token:
+            user_id = u['u_id']
+            flag = 1
+    if flag == 0:
+        return None
+    
+    return user_id
 
 
 @APP.route('/user/profile/setname', methods = ['PUT'])
 def user_profile_setname():
-    
+    data = get_data
     token = request.form.get('token')
     first = request.form.get('name_first')
     last = request.form.get('name_last')
 
     if token == None:
         raise ValueError("NULL token")
-
-           
+         
     if len(first) > 50:
        raise ValueError("name_first greater than 50 characters.")
     if len(first) < 1:
@@ -31,8 +43,6 @@ def user_profile_setname():
         raise ValueError("name_last less than 1 character.")
     
     #change the first and last names
-    # how to get the u_id with the token
-    #need to change this
     
     user_id = get_U_id(token)
 
@@ -61,20 +71,18 @@ def check(email):
 
 @APP.route('/user/profile/setemail', methods = ['PUT'])
 def user_profile_setemail():
-
+    data = get_data
     token = request.form.get('token')
     new_email = request.form.get('email')
     
     if check(new_email) == False:
         raise ValueError("not a valid email address")
-    
-    #token stuff left to do
 
     for user in data['user_info']:
         if user['email'] == new_email:
             raise ValueError("Email address already being used")
 
-    user_id = get_U_id(token):
+    user_id = get_U_id(token)
     
     for users in data['user_info']:
             if users['u_id'] == user_id:
@@ -86,6 +94,7 @@ def user_profile_setemail():
 
 @APP.route('/user/profile/sethandle', methods = ['PUT'])
 def user_profile_sethandle(token, handle_str):
+    data = get_data
     token = request.form.get('token')
     new_handle_str = request.form.get('handle_str')
 
@@ -105,14 +114,25 @@ def user_profile_sethandle(token, handle_str):
     return dumps({ })         
 
 ##############################################################################################################################################
+@APP.route('/search', methods = ['GET'])
+def search():
+    token = request.from.get('token')
+    q_str = request.from.get('query_str')
+    messages_list = []
 
-def search(token, query_str):
-    
+    channel_list = channels_list(token)
+
+    for user in channel_list:
+        for messages in user:
+            if messages == q_str:
+                messages_list.append(messages)
+
+    return messages_list
 
 ##############################################################################################################################################
 @APP.route('/admin/userpermission/change', methods = ['POST'])
 def admin_userpermission_change():
-
+    data = get_data
     token = request.form.get('token')
     u_id = request.form.get('u_id')
     p_id = request.form.get('permission')
