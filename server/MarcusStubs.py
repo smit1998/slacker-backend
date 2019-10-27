@@ -97,6 +97,29 @@ def message_remove():
         raise ValueError('message does not exist')
     return sendSuccess({})
 
+@app.route('/message/edit', methods=['PUT'])
+def message_edit():
+    data = getData()
+    input_token = generateToken(request.form.get('token'))
+    input_message_id = request.form.get('message_id')
+    input_message = request.form.get('message')
+    flag_1 = False # Checks for permission to unpin.
+    for channel in data['channels']:
+        for user in channel['owner_members']:
+            if (user == input_token):
+                flag_1 = True
+        for user in channel['admin_members']:
+            if (user == input_token):
+                flag_1 = True
+    if (flag_1 = False):
+        raise ValueError('user is not admin or owner')
+    for i in data['message_info']:
+        if (i['message_id'] == input_message_id):
+            if (i['sender'] != input_token):
+                raise AccessError('user did not send the message')
+            i['message'] = input_message
+    return sendSuccess({})
+
 @app.route('/message/react', methods=['POST']) 
 def message_react():
     data = getData()
@@ -203,25 +226,3 @@ def message_unpin():
         raise ValueError('message does not exist')
     return sendSuccess({})
 
-@app.route('/message/edit', methods=['PUT'])
-def message_edit():
-    data = getData()
-    input_token = generateToken(request.form.get('token'))
-    input_message_id = request.form.get('message_id')
-    input_message = request.form.get('message')
-    flag_1 = False # Checks for permission to unpin.
-    for channel in data['channels']:
-        for user in channel['owner_members']:
-            if (user == input_token):
-                flag_1 = True
-        for user in channel['admin_members']:
-            if (user == input_token):
-                flag_1 = True
-    if (flag_1 = False):
-        raise ValueError('user is not admin or owner')
-    for i in data['message_info']:
-        if (i['message_id'] == input_message_id):
-            if (i['sender'] != input_token):
-                raise AccessError('user did not send the message')
-            i['message'] = input_message
-    return sendSuccess
