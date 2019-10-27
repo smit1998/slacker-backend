@@ -108,7 +108,7 @@ def user_profile_sethandle(token, handle_str):
             raise ValueError("Handle_str already in use")
 
     for u in data['user_info']:
-        if u['u_id'] == user_id::
+        if u['u_id'] == user_id:
             u['handle_str'] = new_handle_str
 
     return dumps({ })         
@@ -116,8 +116,8 @@ def user_profile_sethandle(token, handle_str):
 ##############################################################################################################################################
 @APP.route('/search', methods = ['GET'])
 def search():
-    token = request.from.get('token')
-    q_str = request.from.get('query_str')
+    token = request.form.get('token')
+    q_str = request.form.get('query_str')
     messages_list = []
 
     channel_list = channels_list(token)
@@ -137,18 +137,26 @@ def admin_userpermission_change():
     u_id = request.form.get('u_id')
     p_id = request.form.get('permission')
 
-    if p_id != 'owner':
-        if p_id != 'admin':
-            if p_id != 'member':
-                raise ValueError("permission_id is not a valid permission value")
+    if p_id != 'owner_members' or p_id != 'admin_members' or p_id != 'all_members':
+        raise ValueError("Not a valid permission")
             
-    for user in data['user_info']:
-        if u_id == user['u_id']:
-            user['permission'] = p_id
+    for channel in data['channels']:
+        for user in channel['owner_members']:
+            if user == token:
+                channel['owner_members'].remove(user)
+                if p_id == 'admin_members':
+                    channel['admin_members'].append(user)
+                else:
+                    channel['all_members'].append(user)
+        for user in channel['admin_members']:
+            if user == token and p_id != 'admin_members':
+                channel['admin_members'].remove(user)
+                if p_id == 'owner_members':
+                    channel['owner_mambers'].append(user)
+                else:
+                    channel['all_members'].append(user)
+
+
     
+
     return dumps({ })
-    
-    
-
-
-
