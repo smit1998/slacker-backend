@@ -1,5 +1,16 @@
 from json import dumps
-from flask import Flask
+from flask import Flask, request
+import re
+#import jwt 
+from werkzeug.exceptions import HTTPException
+import copy 
+import hashlib
+import dateutil 
+from flask_cors import CORS
+#from dummy_error import AccessError
+from datetime import timezone
+import random 
+import string
 
 app = Flask(__name__) 
 
@@ -12,6 +23,21 @@ data = {
 }
 
 ch_id = 0
+
+def defaultHandler(err):
+    response = err.get_response()
+    response.data = dumps({
+        "code": err.code,
+        "name": "System Error",
+        "message": err.description,
+    })
+    response.content_type = 'application/json'
+    return response
+
+APP = Flask(__name__)
+APP.config['TRAP_HTTP_EXCEPTIONS'] = True
+APP.register_error_handler(Exception, defaultHandler)
+CORS(APP)
 
 def generateChannel_id():
     global ch_id
@@ -217,7 +243,7 @@ def message_unpin():
         for user in channel['admin_members']:
             if (user == input_token):
                 flag_1 = True
-    if (flag_1 = False):
+    if (flag_1 == False):
         raise ValueError('user is not admin or owner')
     input_message_id = request.form.get('message_id')
     flag_2 = False # Checks if message exists.
@@ -239,3 +265,5 @@ def message_unpin():
         raise ValueError('message does not exist')
     return sendSuccess({})
 
+if __name__ == '__main__':
+    APP.run(debug = True, port=4002)
