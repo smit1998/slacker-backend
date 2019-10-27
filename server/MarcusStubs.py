@@ -59,13 +59,26 @@ def channels_create():
     if (len(channel_name) > 20):
         raise ValueError(description = "invalid channel name")
     is_public = request.form.get('is_public')
+    basic_info = getUserFromToken(inputToken)
+    owner = {}
+    admin = {}
+    all_users = {}
+    owner['u_id'] = basic_info['u_id']
+    owner['name_first'] = basic_info['name_first']
+    owner['name_last'] = basic_info['name_last']
+    admin['u_id'] = basic_info['u_id']
+    admin['name_first'] = basic_info['name_first']
+    admin['name_last'] = basic_info['name_last']
+    all_users['u_id'] = basic_info['u_id']
+    all_users['name_first'] = basic_info['name_first']
+    all_users['name_last'] = basic_info['name_last']
     data['channels'].append({
         'channel_id': generateChannel_id(),
-        'owner_members': input_token,
-        'admin_members': input_token,
-        'all_members': input_token,
+        'owner_members': [owner],
+        'admin_members': [admin],
+        'all_members': [all_users],
         'name': channel_name,
-        'is_public': True
+        'is_public': is_public
     })
     return sendSuccess({
         'channel_id': data['channels'][-1]['channel_id']
