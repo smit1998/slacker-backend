@@ -26,6 +26,7 @@ data = {
         'message':'',
         'react_id':'',
         'is_pinned':'',
+        'sender':'',
         'channel_id':'',
         'time_created':''
     }]
