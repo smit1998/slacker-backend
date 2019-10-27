@@ -1,54 +1,73 @@
 import pytest
+<<<<<<< HEAD
 from Andy_first_iteration_stub import auth_login, auth_logout
+=======
+from Andy_backend_functions import *
+>>>>>>> Andy
 
 # when both of email and password are valid, return the valid token
+def test_auth_register_both_valid01():
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    assert authRegisterDic['token'] == generateToken('Andy')
+    assert authRegisterDic['u_id'] == 1
+    
+# when the email is valid and password is invalid, print error message
+def test_auth_register_password_invalid():
+    with pytest.raises(ValueError):
+        user_register('andyWei326@gmail.com', '2242', 'Andy', 'Wei')
+        
+# when the password is valid and email is invalid, print error message
+def test_auth_register_email_invalid(): 
+    with pytest.raises(ValueError):
+        user_register('1337memesgmail.com', '123243223', 'Andy', 'Wei') 
+    
+# when both of email and password are invalid, print error message
+def test_auth_register_both_invalid(): 
+    with pytest.raises(ValueError):
+        user_register('tisisatest.comgamil', '66666', 'Andy', 'Wei') 
+
+# when both of email and password are valid
 def test_auth_login_both_valid01():
-    result = auth_login('andyWei326@gmail.com', '224232r4')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 23
+    data['user_info'] = []
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    result = user_login('2199009762@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
 
 # when the email is valid and password is invalid, print error message
 def test_auth_login_password_invalid():
+    data['user_info'] = []
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
     with pytest.raises(ValueError):
-        auth_login('andyWei326@gmail.com', '2242')
-        
+        user_login('2199009762@qq.com', '2242')
+      
 # when the password is valid and email is invalid, print error message
 def test_auth_login_email_invalid(): 
+    data['user_info'] = []
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
     with pytest.raises(ValueError):
-        auth_login('1337memesgmail.com', '123243223') 
-    
-# when both of email and password are invalid, print error message
-def test_auth_login_both_invalid(): 
+        user_login('1337memesgmail.com', '1234567') 
+   
+# when email you typed is not belonging to user
+def test_auth_login_email_is_not_user_invalid(): 
+    data['user_info'] = []
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
     with pytest.raises(ValueError):
-        auth_login('tisisatest.comgamil', '66666') 
-
-# when both of email and password are valid, return the valid token
-def test_auth_login_both_valid02():
-    result = auth_login('2199009762@qq.com', '123456q789')
-    assert result['token'] == 'right user'
-    assert result['u_id'] == 66
-
-# invalidating the authorized user 
-def test_auth_logout_invalidate_user():
-    result = auth_login('andyWei326@gmail.com', '224232r4')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 23
-    auth_logout('easy easy easy')
-    assert result == {}
-
-# the token is invalide, nothing should be changed
-def test_auth_logout_token_invalid01():
-    result = auth_login('andyWei326@gmail.com', '224232r4')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 23
-    auth_logout('really funny_123')
-    assert result == {"u_id": 23, "token": 'easy easy easy'}
-
-# the token is invalide, nothing should be changed
-def test_auth_logout_token_invalid02():
-    result = auth_login('2199009762@qq.com', '123456q789')
-    assert result['token'] == 'right user'
-    assert result['u_id'] == 66
-    auth_logout('what should i do')
-    assert result == {'u_id': 66, 'token': 'right user'}
+        user_login('yesyesyes@unsw.edu.au', '123456')
         
+# invalidating the authorized user, return True
+def test_auth_logout_validate_user():
+    data['user_info'] = []
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    return_flag = user_logout(authRegisterDic['token'])
+    assert return_flag['is_success'] == True
+   
+# the token is invalide, return False
+def test_auth_logout_token_invalid01():
+    data['user_info'] = []
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    authRegisterDic_02 = user_register('AndyWei@unsw.edu.au', '6666666', 'Andrew', 'Wei')
+    if(authRegisterDic['u_id'] == 1):
+        return_flag = user_logout(authRegisterDic_02['token'])
+        assert return_flag['is_success'] == False
+    
