@@ -1,42 +1,24 @@
 import pytest
 import re 
-def user_profile_setname(token, name_first, name_last):
+def user_profile_setname():
     pass
  
-def user_profile_setemail(token, email):
+def user_profile_setemail():
     pass
 
-def user_profile_sethandle(token, handle_str):
+def user_profile_sethandle():
     pass
-def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
-    pass
-
-def standup_start(token, channel_id):
+def user_profiles_uploadphoto():
     pass
 
-def standup_send(token, channel_id, message):
+def standup_start():
     pass
 
-def search(token, query_str):
+def standup_send():
     pass
 
-def admin_userpermission_change(token, u_id, permission_id):
+def search():
     pass
 
-#helper function for user_profile_setemail
-def checknames(email, password):
+def admin_userpermission_change():
     pass
-  
-# Make a regular expression 
-# for validating an Email 
-regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-def isValidEmail(email):  
-  
-    # pass the regualar expression 
-    # and the string in search() method 
-    if(re.search(regex,email)):  
-        return True 
-          
-    else:  
-        False  
-      
