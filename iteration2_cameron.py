@@ -71,11 +71,10 @@ APP.config.update(
     MAIL_PASSWORD = "Alltheboys"
 )
 
-@APP.route('/channel/leave', methods=['POST']) 
-def channel_leave(): 
+def channel_leave(token,channel_id): 
     data = getData()
-    token = generateToken(request.form.get('token'))
-    channelID = int(request.form.get('channel_id'))
+    token = generateToken(token)
+    channelID = int(channel_id)
     user = getUserFromToken(token) # returns a dictonary 
     flag_1 = False
     for channel in data['channel_info']:  
@@ -91,12 +90,11 @@ def channel_leave():
     if(flag_1 == False):
         raise ValueError(description = 'channel_id is invalid')
     return sendSuccess({})
-''' 
-@APP.route('/channel/join', methods=['POST'])
-    def channel_join():
+
+def channel_join(token, channel_id):
     data = getData()
-    token = request.form.get('token')
-    channelID = request.form.get('channel_id')
+    token = generateToken(token)
+    channelID = int(channel_id)
     user = getUserFromToken(token)
     flag_1 = False 
     flag_2 = False
@@ -105,27 +103,21 @@ def channel_leave():
             flag_1 = True 
             if channel['is_public'] == True: 
                 channel['all_members'].append(user)
-            else: 
-            
-           
                 for i in channel['owners']: 
                     if (user == channel[i]):
-                     channel['all_members'].append(user)
-            
-           #need channel permissions 
+                     channel['all_members'].append(user) 
     if (flag_1 == False): 
         raise ValueError('channel_id is invalid')
     if (flag_2 == False): 
         raise AccessError('cannot join channel as it is private') 
     return sendSucess({})
 
-@APP.route('/channel/addowner', methods=['POST'])
-def addowner(tken): 
+def addowner(token, channel_id, user_id): 
     data = getData()
-    token = generateToken(request.form.get('token'))
-    channelID = int(request.form.get('channel_id'))
+    token = generateToken(token)
+    channelID = int(channel_id)
     user_basic_info = getUserFromToken(token)
-    user_id = int(request.form.get('u_id'))
+    user_id = int(user_id)
     flag_1 = False 
     flag_2 = False 
     flag_3 = False  
@@ -148,13 +140,12 @@ def addowner(tken):
     # permission ned channel permissions function 
     return sendSuccess({})
 
-@APP.route('/channel/removeowner', methods=['POST']) 
-def removeowner(): 
+def removeowner(token, channel_id, user_id): 
     data = getData()
-    token = request.form.get('token')
-    channelID = request.form.get('channel_id')
+    token = generateToken(token)
+    channelID = int(channel_id)
     user = getUserFromToken(token)
-    user_id = request.form.get('u_id')
+    user_id = int(u_id)
     flag_1 = False 
     flag_2 = False 
     flag_3 = False  
@@ -162,26 +153,24 @@ def removeowner():
         if channel['channel_id'] == channelID: 
             flag_1 = True
             for i in channel['owners']:    
-                if user_id == channel[i]: 
+                if user_id == i['u_id']: 
                     flag_2 = True #user is an owner of the channel
-                if user == channel[i]:
+                if user['u_id'] == i['u_id']:
                     flag_3 = True # if false the person removing another person as an owner is not an owner themselves
                 if (flag_2 == True and flag_3 == True): 
-                    del channel[i] 
+                    del i['u_id'] 
     if(flag_1 == False): 
-        raise ValueError('channel id is not a valid channel) 
+        raise ValueError('channel id is not a valid channel') 
     if(flag_2 == False): 
         raise ValueError('user with the user id is not an owner of the channel')
     if (flag_3 == False): 
         raise AccessError('the authorsied user is not an owner of the channel') 
     # permission ned channel permissions function 
     return sendSuccess({})
-    '''
-@APP.route('/auth/passwordrest/request', methods=['POST']) 
-def passwordreset_request():
+    
+def passwordreset_request(email):
     data = getData() 
     mail = Mail(APP)
-    email = 'cameron.ha@hotmail.com'#request.form.get('email')
     flag = False
     code = int(random_code_generator(10))
     for user in data['user_info']: 
@@ -190,27 +179,18 @@ def passwordreset_request():
             flag = True
             user['reset_code'] = code #added to the data structure 
             first_name = user['first_name'] 
-            try:
+            try:            
                 msg = Message("Reset, Password Request Slackr",
-                    sender="HASCdevteam@gmail.com",
-                    recipients=email)
-                msg.body = 'Hi' + first_name + 'You have requested for a change in your password, please use the code provided below to reset your account.\n' + code + '\n regards the slackr development, team.'
+                sender="HASCdevteam@gmail.com",
+                recipients=email)
+                msg.body = 'Hi' + first_name + 'You have requested for a change in your password, please use the code provided below to reset your account.\n' + code + 'regards the slackr development, team.'
                 mail.send(msg)
-               # return 'Mail sent!'
-           # except Exception as e:
-               # return (str(e))
-def random_code_generator(stringLength=10):
-    """Generate a random string of fixed length """
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(stringLength))
-
-    
-'''
-@APP.route('/auth/passwordreset/reset', methods=['POST'])
-def passwordreset_reset():
+                return 'Mail sent!'
+            except Exception as e:
+                return (str(e))
+                
+def passwordreset_reset(reset_code, new_password):
     data = getData()
-    reset_code = request.form.get('reset_code')
-    newpassword = request.form.get('password')
     flag = False 
     for user in data['user_info']: 
         if user['reset_code'] == reset_code: 
@@ -222,22 +202,11 @@ def passwordreset_reset():
     if (flag == False): 
         raise ValueError('invalid reset code entered')
     return sendSuccess({})
-    
-def message_edit(token, message_id, message): 
-    data = getData()
-    token = generateToken(request.form.get('token'))
-    user = getUserFromToken(token)
-    message = request.form.get('message')
-    message_id = int(request.form.get('message_id'))
-    
-    
-    basic_info = getUserFromToken(token)
-    message_id = generate
-    for message in data['message_info']: 
-        if(message[message_id] == input_message_id): 
-            if
-            message[message] = input_message
 
-'''
+
+def random_code_generator(stringLength=10):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+    
 if __name__ == '__main__':
     APP.run(debug = True, port=4002)
