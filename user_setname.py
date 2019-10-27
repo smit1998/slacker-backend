@@ -156,7 +156,4 @@ def admin_userpermission_change():
                 else:
                     channel['all_members'].append(user)
 
-
-    
-
     return dumps({ })
