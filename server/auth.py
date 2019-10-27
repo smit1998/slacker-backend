@@ -6,7 +6,7 @@ import copy
 import hashlib
 import dateutil 
 from flask_cors import CORS
-from dummy_error import AccessError
+from dummy_error import *
 from datetime import timezone
 from datetime import datetime
 
@@ -24,6 +24,29 @@ user_id = 0
 channel_id = 0
 message_id = 0
 react_id = 0
+
+def defaultHandler(err):
+    response = err.get_response()
+    response.data = dumps({
+        "code": err.code,
+        "name": "System Error",
+        "message": err.debadscription,
+    })
+    response.content_type = 'application/json'
+    return response
+
+APP = Flask(__name__)
+APP.config['TRAP_HTTP_EXCEPTIONS'] = True
+APP.register_error_handler(Exception, defaultHandler)
+CORS(APP)
+
+class ValueError(HTTPException):
+    code = 400
+    message = 'No message specified'
+
+class AccessError(HTTPException):
+    code = 400 
+    message = 'No message specified'
 
 def generateReact_id(r_id):
     global react_id 
@@ -43,29 +66,20 @@ def generateU_id(u_id):
     u_id = user_id
     return u_id 
 
+def resetUser_id(u_id):
+    global user_id
+    u_id = 0 
+    user_id = u_id
+
+def resetChannel_id(c_id):
+    global channel_id 
+    c_id = 0
+    channel_id = c_id 
+
 def getData():
     global data
     return data
-
-def defaultHandler(err):
-    response = err.get_response()
-    response.data = dumps({
-        "code": err.code,
-        "name": "System Error",
-        "message": err.debadscription,
-    })
-    response.content_type = 'application/json'
-    return response
-
-app = Flask(__name__)
-app.config['TRAP_HTTP_EXCEPTIONS'] = True
-app.register_error_handler(Exception, defaultHandler)
-CORS(app)
-
-class ValueError(HTTPException):
-    code = 400
-    message = 'No message specified'
-
+    
 def generateChannel_id(c_id):
     global channel_id
     channel_id = channel_id + 1
@@ -124,7 +138,7 @@ def user_register(email, password, name_first, name_last):
     }
 
 
-def user_login_server(email, password):
+def user_login(email, password):
     data = getData()
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     if(not re.search(regex, email)):
@@ -134,7 +148,7 @@ def user_login_server(email, password):
     for user in data['user_info']:
         if(user['email'] == email): 
             flag_1 = True
-        if(hashPassword(password) == hashPassword(user['password'])):
+        if(hashPassword(password) == user['password']):
             flag_2 = True
         if(flag_2 == True and flag_1 == True):
             newToken = generateToken(user['name_first'])
@@ -152,6 +166,7 @@ def user_login_server(email, password):
 def user_logout(token):
     data = getData()
     user = getUserFromToken(token)
+    print(user)
     if user['name_first'] is not None:
         del user['token']
         return {
@@ -167,19 +182,12 @@ def channel_invite(token, channel_id, u_id):
     basic_info = getUserFromToken(token)
     channel_id_integer = int(channel_id)
     u_id_integer = int(u_id)
-    # consider the one AccessError
     flag_1 = False
-    for channel in data['channel_info']:        
-        if(basic_info['u_id'] == channel['token']):
-            flag_1 = True
-    if(flag_1 == False):
-        raise AccessError(description = 'this authorised user is not in this channel')
-    flag_2 = False
-    # consider the u_id ValueError
+    # u_id is invalid
     for user in data['user_info']:
         if(u_id_integer == user['u_id']):
-            flag_2 = True
-    if(flag_2 == False):
+            flag_1 = True
+    if(flag_1 == False):
         raise ValueError(description = "u_id we want to invite is invalid")
     # consider the channel_id ValueError
     for channel in data['channel_info']:
@@ -215,7 +223,7 @@ def channels_create(token, name, is_public):
         'all_members': [all_users],
         'name': name,
         'is_public': is_public,
-        'token': basic_info['u_id']
+        'token': basic_info['name_first']
     })
     return {
         'channel_id': data['channel_info'][-1]['channel_id']
@@ -226,6 +234,7 @@ def channel_details(token, channel_id):
     data = getData()
     channel_id_integer = int(channel_id)
     flag_1 = False
+    flag_2 = False
     # check if the channel ID is invalid
     for i in data['channel_info']:
         if(channel_id_integer == i['channel_id']):
@@ -239,10 +248,11 @@ def channel_details(token, channel_id):
         for user in i['all_members']:
             basic_info = getUserFromToken(token) 
             if(basic_info['u_id'] == user['u_id']):
-                flag_1 = True
-    raise ValueError(description = 'channel_id is invalid')
+                flag_2 = True
     if(flag_1 == False):
-        raise AccessError(description = 'u_id is not in this channel')
+        raise ValueError(description = 'channel_id is invalid')
+    if(flag_2 == False):
+        raise ValueError(description = 'u_id is not in this channel')
    
            
 def user_profile(token, u_id):

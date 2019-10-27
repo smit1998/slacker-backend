@@ -2,7 +2,9 @@ from auth import *
 from json import dumps
 from flask import Flask, request
 
+
 APP = Flask(__name__)
+
 
 @APP.route('/auth/register', methods=['POST'])
 def auth_register_server():
