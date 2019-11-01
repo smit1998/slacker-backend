@@ -5,7 +5,7 @@ from backend_functions import *
 # when both of email and password are valid, return the valid token
 def test_auth_register_both_valid01():
     authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
-    assert authRegisterDic['token'] == generateToken('Andy')
+    assert authRegisterDic['token'] == generateToken(1)
     assert authRegisterDic['u_id'] == 1
     
 # when the email is valid and password is invalid, print error message

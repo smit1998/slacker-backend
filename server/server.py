@@ -1,10 +1,23 @@
-from Andy_backend_functions import * 
+from backend_functions import * 
 from json import dumps
 from flask import Flask, request
 
 
 APP = Flask(__name__)
 
+def defaultHandler(err):
+    response = err.get_response()
+    response.data = dumps({
+        "code": err.code,
+        "name": "System Error",
+        "message": err.debadscription,
+    })
+    response.content_type = 'application/json'
+    return response
+
+APP.config['TRAP_HTTP_EXCEPTIONS'] = True
+APP.register_error_handler(Exception, defaultHandler)
+CORS(APP)
 
 @APP.route('/auth/register', methods=['POST'])
 def auth_register_server():
@@ -18,7 +31,7 @@ def auth_register_server():
 @APP.route('/auth/login', methods=['POST'])
 def auth_login_server():  
     email = request.form.get('email')
-    password = request.form.get('password'))
+    password = request.form.get('password')
     result = user_login(email, password)
     return dumps(result)
     
@@ -188,4 +201,4 @@ def unpin():
     return dumps({})
 
 if __name__ == '__main__':
-    APP.run(debug = True, port=4000) 
+    APP.run(debug = True, port=5000) 

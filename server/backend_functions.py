@@ -9,6 +9,14 @@ from flask_cors import CORS
 from datetime import timezone
 from datetime import datetime
 
+class AccessError(HTTPException):
+    code = 400 
+    message = 'No message specified'
+    
+
+class ValueError(HTTPException):
+    code = 400
+    message = 'No message specified'
 
 SECRET = 'comp1531 project'
  
@@ -24,20 +32,9 @@ channel_id = 0
 message_id = 0
 react_id = 0
 
-def defaultHandler(err):
-    response = err.get_response()
-    response.data = dumps({
-        "code": err.code,
-        "name": "System Error",
-        "message": err.debadscription,
-    })
-    response.content_type = 'application/json'
-    return response
-
-APP = Flask(__name__)
-APP.config['TRAP_HTTP_EXCEPTIONS'] = True
-APP.register_error_handler(Exception, defaultHandler)
-CORS(APP)
+#---------------------------------------------
+# question1: deal with the defaultHandler function
+#---------------------------------------------
 
 class ValueError(HTTPException):
     code = 400
@@ -47,6 +44,8 @@ class AccessError(HTTPException):
     code = 400 
     message = 'No message specified'
 
+#---------------------------------
+# dry dry dry
 def generateReact_id(r_id):
     global react_id 
     react_id = react_id + 1
@@ -63,8 +62,17 @@ def generateU_id(u_id):
     global user_id
     user_id = user_id + 1
     u_id = user_id
-    return u_id 
+    return u_id
 
+def generateChannel_id(c_id):
+    global channel_id
+    channel_id = channel_id + 1
+    c_id = channel_id
+    return c_id
+#-------------------------------- 
+
+#------------------------------
+#dry dry dry
 def resetUser_id(u_id):
     global user_id
     u_id = 0 
@@ -79,41 +87,37 @@ def resetMessage_id(m_id):
     global message_id
     m_id = 0
     message_id = m_id
+#-------------------------------   
     
 def getData():
     global data
     return data
-    
-def generateChannel_id(c_id):
-    global channel_id
-    channel_id = channel_id + 1
-    c_id = channel_id
-    return c_id
-    
+ 
 # transform this token from bytes into string
-def generateToken(name_first):
+def generateToken(u_id):
     global SECRET
-    encoded = jwt.encode({'name_first': name_first}, SECRET, algorithm='HS256')
+    encoded = jwt.encode({'u_id': u_id}, SECRET, algorithm='HS256')
     return encoded.decode('utf-8') # asdfasdfadsf
 
 # return a dictionary 
 def getUserFromToken(token):
     global SECRET
     decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
-    return findUser(decoded['name_first'])
+    return findUser(decoded['u_id'])
 
 def hashPassword(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def findUser(inputName):
     for u in data['user_info']:
-        if u['name_first'] == inputName:
+        if u['u_id'] == inputName:
             return u
     return None
     
 def user_register(email, password, name_first, name_last):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     data = getData()
+    global user_id
     # email is invalid 
     if(not re.search(regex, email)):
         raise ValueError(description = "invalid email")
@@ -140,13 +144,13 @@ def user_register(email, password, name_first, name_last):
         'name_first': name_first,
         'name_last': name_last,
         'u_id': generateU_id(user_id),
-        # question 3: what about we have two users' are both having same name_first, do they would create two different tokens ? ? ? 
+        # question 2: what about we have two users' are both having same name_first, do they would create two different tokens ? ? ? 
         'token': generateToken(name_first),
-        # question 1: the hand_str should be changed all the times, or just fixed. 
+        # question 3: the hand_str should be changed all the times, or just fixed. 
         'handle_str': 'TEAM WORK'
     })
     return {
-        'token': generateToken(name_first),
+        'token': generateToken(user_id),
         'u_id': data['user_info'][-1]['u_id']
     }
 
@@ -165,7 +169,7 @@ def user_login(email, password):
         if(hashPassword(password) == user['password']):
             flag_2 = True
         if(flag_2 == True and flag_1 == True):
-            newToken = generateToken(user['name_first'])
+            newToken = generateToken(user['u_id'])
             user['token'] = newToken
             return {
                 'token': newToken,
@@ -209,13 +213,13 @@ def channel_invite(token, channel_id, u_id):
         raise ValueError(description = "u_id we want to invite is invalid")
     # consider the channel_id ValueError
     #-----------------------------
-    # question2: is that reasonable ? ? ? ? ? ?
+    # question4: is that reasonable ? ? ? ? ? ?
     #------------------------------
     for channel in data['channel_info']:
         if(channel_id_integer == channel['channel_id']):
             flag_2 = True 
             for i in channel['all_members']:
-                if(i['u_id'] == u_id_integer):
+                if(i['u_id'] == basic_info['u_id']):
                     flag_3 = True
                     # invite this user into this channel
                     all_users = {}
@@ -223,11 +227,11 @@ def channel_invite(token, channel_id, u_id):
                     all_users['name_first'] = user['name_first']
                     all_users['name_last'] = user['name_last']
                     channel['all_members'].append(all_users)
-                    return {}
     if(flag_2 == False):
         raise ValueError(description = "the channel_id is invalid")
     if(flag_3 == False):
         raise AccessError(description = "the authorised user is not already a member of this channel")
+    return {}
     
    
 def channels_create(token, name, is_public):
@@ -261,25 +265,26 @@ def channel_details(token, channel_id):
     channel_id_integer = int(channel_id)
     flag_1 = False
     flag_2 = False
+    channel = None
     # check if the channel ID is invalid
     for i in data['channel_info']:
         if(channel_id_integer == i['channel_id']):
             flag_1 = True
-            return {
-                'name': i['name'],
-                'owner_members': i['owner_members'],
-                'all_members': i['all_members']
-            }
+            channel = i
         # check if the user is not a member in this channel with channel_id
-        for user in i['all_members']:
-            basic_info = getUserFromToken(token) 
-            if(basic_info['u_id'] == user['u_id']):
-                flag_2 = True
+            for user in i['all_members']:
+                basic_info = getUserFromToken(token) 
+                if(basic_info['u_id'] == user['u_id']):
+                    flag_2 = True
     if(flag_1 == False):
         raise ValueError(description = 'channel_id is invalid')
     if(flag_2 == False):
         raise AccessError(description = 'u_id is not in this channel')
-   
+    return {
+        'name': channel['name'],
+        'owner_members': channel['owner_members'],
+        'all_members': channel['all_members']
+     }
            
 def user_profile(token, u_id):
     data = getData()
@@ -298,40 +303,41 @@ def user_profile(token, u_id):
 
 def channel_messages(token, channel_id, start):
     data = getData()
-    channel_id_integer = int(channel_id)
-    start_integer = int(start)
+    channel_id = int(channel_id)
+    start = int(start)
     basic_info = getUserFromToken(token)
     flag_1 = False
     flag_2 = False
-    current_channel = {}
+    return_list = []
     # check if the channel_id doesn't exist        
     for i in data['channel_info']:
-        if(channel_id_integer == i['channel_id']):
+        if(channel_id == i['channel_id']):
             flag_1 = True
             # check if the user is not a member in this channel with channel_id
             for user in i['all_members']:
                 if(basic_info['u_id'] == user['u_id']):
                     flag_2 = True
-                    current_channel['u_id'] = basic_info['u_id']
     if(flag_1 == False):
         raise ValueError(description = 'channel_id is invalid')
     if(flag_2 == False):
         raise AccessError(description = 'u_id is not in this channel')    
-    for mess in data['message_info']:
+    if(start > len(data['message_info'])): 
+        raise ValueError(description = 'start is greater than the total number of messages') 
+    print(data['message_info'])
+    ch_msgs = [msg for msg in data['message_info'] if msg['channel_id'] == channel_id]
+    ch_msgs.sort(key=lambda msg: msg['time_created'])
+    for ix, msg in enumerate(ch_msgs):
+        
         # if the start is greater than the total length of messages
         #------------------------------
-        # question4: messages is the list of dictonary, so how to get the total length of it ? ? ? ?
+        # question5: messages is the list of dictonary, so how to get the total length of it ? ? ? ?
         # And btw, I just create a dictonary for each function, do we need to use recursion to store each infomation inside the outer list ? ? ? ?
         #------------------------------
-        if(start_integer > len(mess['message'])): 
-            raise ValueError(description = 'start is greater than the total number of messages') 
-        current_channel['message'] = mess['message']
-        current_channel['message_id'] = mess['message_id']
-        current_channel['react_id'] = mess['react_id']
-        current_channel['time_created'] = mess['time_created']
-        current_channel['is_pinned'] = mess['is_pinned']
+ 
+        if(ix+1 >= start):
+            return_list.append(msg)
     return {
-        'messages': [current_channel],
+        'messages': return_list,
         'start': start,
         'end' : start + 50
     }
@@ -355,6 +361,7 @@ def message_send(token, channel_id, message):
                     message_dict['time_created'] = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
                     message_dict['react_id'] = generateReact_id(react_id)
                     message_dict['is_pinned'] = True
+                    message_dict['channel_id'] = channel_id_integer
                     data['message_info'].append(message_dict)
                     return {
                         'message_id': return_message_id
