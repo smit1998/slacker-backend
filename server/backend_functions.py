@@ -288,18 +288,20 @@ def channel_details(token, channel_id):
            
 def user_profile(token, u_id):
     data = getData()
+    flag = False
     u_id_integer = int(u_id)
     for i in data['user_info']:
         if(u_id_integer == i['u_id']):
-            return {
-                'email': i['email'],
-                'name_first': i['name_first'],
-                'name_last':  i['name_last'],
-                'handle_str': i['handle_str']
-            }
+            flag = True
     # check the user is a invalid user
-    raise ValueError(description = "u_id is invalid")
-    
+    if(flag == False):
+        raise ValueError(description = "u_id is invalid")
+    return {
+        'email': i['email'],
+        'name_first': i['name_first'],
+        'name_last':  i['name_last'],
+        'handle_str': i['handle_str']
+    }
 
 def channel_messages(token, channel_id, start):
     data = getData()
