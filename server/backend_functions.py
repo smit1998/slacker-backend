@@ -114,27 +114,35 @@ def findUser(inputName):
 def user_register(email, password, name_first, name_last):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     data = getData()
+    # email is invalid 
     if(not re.search(regex, email)):
         raise ValueError(description = "invalid email")
+    # password is invalid 
     if(len(password) < 6):
         raise ValueError(description = "invalid password")
+    # name_first is invalid
     if(len(name_first) < 1 or len(name_first) > 50):
         raise ValueError(description = "invalid name_first")
+    # name_last is invalid
     if(len(name_last) < 1 or len(name_last) > 50):
         raise ValueError(description = "invalid name_last")
     flag = False
     for i in data['user_info']:
         if(i['email'] == email):
             flag = True
+    # email address is already been used by other users
     if(flag == True):
         raise ValueError(description = 'email address is already been used')
+    # store the baisc infomation of the each user
     data['user_info'].append({
         'email': email,
         'password': hashPassword(password),
         'name_first': name_first,
         'name_last': name_last,
         'u_id': generateU_id(user_id),
+        # question 3: what about we have two users' are both having same name_first, do they would create two different tokens ? ? ? 
         'token': generateToken(name_first),
+        # question 1: the hand_str should be changed all the times, or just fixed. 
         'handle_str': 'TEAM WORK'
     })
     return {
@@ -146,6 +154,7 @@ def user_register(email, password, name_first, name_last):
 def user_login(email, password):
     data = getData()
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    # email is invalid
     if(not re.search(regex, email)):
         raise ValueError(description = "invalid email")
     flag_1 = False 
@@ -162,8 +171,10 @@ def user_login(email, password):
                 'token': newToken,
                 'u_id': user['u_id']
             }
+    # email typed is not belonging to user
     if(flag_1 == False):
         raise ValueError(description = "email entered is not belong to user")
+    # password is invalid
     if(flag_2 == False):
         raise ValueError(description = "password is not correct")
 
@@ -171,7 +182,7 @@ def user_login(email, password):
 def user_logout(token):
     data = getData()
     user = getUserFromToken(token)
-    print(user)
+    # invalidate the aothorised user
     if user['name_first'] is not None:
         del user['token']
         return {
@@ -188,6 +199,8 @@ def channel_invite(token, channel_id, u_id):
     channel_id_integer = int(channel_id)
     u_id_integer = int(u_id)
     flag_1 = False
+    flag_2 = False
+    flag_3 = False
     # u_id is invalid
     for user in data['user_info']:
         if(u_id_integer == user['u_id']):
@@ -195,10 +208,15 @@ def channel_invite(token, channel_id, u_id):
     if(flag_1 == False):
         raise ValueError(description = "u_id we want to invite is invalid")
     # consider the channel_id ValueError
+    #-----------------------------
+    # question2: is that reasonable ? ? ? ? ? ?
+    #------------------------------
     for channel in data['channel_info']:
         if(channel_id_integer == channel['channel_id']):
-            for user in data['user_info']:
-                if(user['u_id'] == u_id_integer):
+            flag_2 = True 
+            for i in channel['all_members']:
+                if(i['u_id'] == u_id_integer):
+                    flag_3 = True
                     # invite this user into this channel
                     all_users = {}
                     all_users['u_id'] = u_id_integer
@@ -206,7 +224,10 @@ def channel_invite(token, channel_id, u_id):
                     all_users['name_last'] = user['name_last']
                     channel['all_members'].append(all_users)
                     return {}
-    raise ValueError(description = "channel_id is invalid")
+    if(flag_2 == False):
+        raise ValueError(description = "the channel_id is invalid")
+    if(flag_3 == False):
+        raise AccessError(description = "the authorised user is not already a member of this channel")
     
    
 def channels_create(token, name, is_public):
@@ -257,7 +278,7 @@ def channel_details(token, channel_id):
     if(flag_1 == False):
         raise ValueError(description = 'channel_id is invalid')
     if(flag_2 == False):
-        raise ValueError(description = 'u_id is not in this channel')
+        raise AccessError(description = 'u_id is not in this channel')
    
            
 def user_profile(token, u_id):
@@ -271,9 +292,10 @@ def user_profile(token, u_id):
                 'name_last':  i['name_last'],
                 'handle_str': i['handle_str']
             }
+    # check the user is a invalid user
     raise ValueError(description = "u_id is invalid")
     
-   
+
 def channel_messages(token, channel_id, start):
     data = getData()
     channel_id_integer = int(channel_id)
@@ -287,7 +309,7 @@ def channel_messages(token, channel_id, start):
         if(channel_id_integer == i['channel_id']):
             flag_1 = True
             # check if the user is not a member in this channel with channel_id
-            for user in ['all_members']:
+            for user in i['all_members']:
                 if(basic_info['u_id'] == user['u_id']):
                     flag_2 = True
                     current_channel['u_id'] = basic_info['u_id']
@@ -296,6 +318,11 @@ def channel_messages(token, channel_id, start):
     if(flag_2 == False):
         raise AccessError(description = 'u_id is not in this channel')    
     for mess in data['message_info']:
+        # if the start is greater than the total length of messages
+        #------------------------------
+        # question4: messages is the list of dictonary, so how to get the total length of it ? ? ? ?
+        # And btw, I just create a dictonary for each function, do we need to use recursion to store each infomation inside the outer list ? ? ? ?
+        #------------------------------
         if(start_integer > len(mess['message'])): 
             raise ValueError(description = 'start is greater than the total number of messages') 
         current_channel['message'] = mess['message']
@@ -313,6 +340,7 @@ def channel_messages(token, channel_id, start):
 def message_send(token, channel_id, message):
     data = getData()
     channel_id_integer = int(channel_id)
+    # message is more than 1000 characters
     if(len(message) > 1000):
         raise ValueError(description = 'message is exceeding the maximum')
     for user in data['channel_info']:
@@ -331,6 +359,7 @@ def message_send(token, channel_id, message):
                     return {
                         'message_id': return_message_id
                     }
+    # if user is not in this channel currently
     raise AccessError(description = 'this user is not in this channel')
 
 
@@ -340,14 +369,17 @@ def sendlater_message(token, channel_id, message, time_sent):
     time_sent_integer = int(time_sent)
     time_now = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
     return_message_id = generateMessage_id(message_id)
+    # if the time_sent is time in the past 
     if(time_sent_integer < time_now):
         raise ValueError(description = 'the time sent is a time in the past')
+    # if message's length is more than 1000 
     if(len(message) > 1000):
         raise ValueError(description = 'message is more than 1000')
     flag = False
     for i in data['channel_info']:
         if(i['channel_id'] == channel_id_integer):
             flag = True
+    # if the channel_id is invalid
     if(flag == False):
         raise ValueError(description = 'the channel_id is invalid')
     for user in data['channel_info']:
@@ -364,5 +396,6 @@ def sendlater_message(token, channel_id, message, time_sent):
                 return {
                     'message_id': return_message_id
                 } 
+    # the authorised user is not in this channel currently
     raise AccessError(description = 'this user is not current in this channel')
 

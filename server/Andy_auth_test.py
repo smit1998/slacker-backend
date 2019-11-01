@@ -1,9 +1,6 @@
 import pytest
-<<<<<<< HEAD
-from Andy_first_iteration_stub import auth_login, auth_logout
-=======
-from Andy_backend_functions import *
->>>>>>> Andy
+from backend_functions import *
+
 
 # when both of email and password are valid, return the valid token
 def test_auth_register_both_valid01():

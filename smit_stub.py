@@ -1,5 +1,7 @@
 import pytest
 import re 
+from backend_functions import *
+
 def user_profile_setname():
     pass
  
@@ -8,6 +10,7 @@ def user_profile_setemail():
 
 def user_profile_sethandle():
     pass
+    
 def user_profiles_uploadphoto():
     pass
 

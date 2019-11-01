@@ -1,9 +1,6 @@
 import pytest
-<<<<<<< HEAD
-from Andy_first_iteration_stub import *
-=======
-from Andy_backend_functions import *
->>>>>>> Andy
+from backend_functions import *
+
 
 # test user_profile function and return the valid user's information 
 def test_user_profile_valid_user():
