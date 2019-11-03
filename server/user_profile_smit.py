@@ -25,7 +25,7 @@ def get_U_id(token):
 
 @APP.route('/user/profile/setname', methods = ['PUT'])
 def user_profile_setname():
-    data = get_data
+    data = get_data()
     token = request.form.get('token')
     first = request.form.get('name_first')
     last = request.form.get('name_last')
