@@ -1,22 +1,22 @@
 import pytest
-from Andy_first_iteration_stub import *
+from backend_functions import *
 
-# test user_profile(....) function and return the valid user's information 
+
+# test user_profile function and return the valid user's information 
 def test_user_profile_valid_user():
-    result = auth_login('andyWei326@gmail.com', '224232r4')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 23
-    basic_info = user_profile('easy easy easy', 23)
-    # what's the handle_str ? ? ? ?
-    assert basic_info == {'email': 'andyWei326@gmail.com', 'name_first': 'Andy', 'name_last': 'Wei', 'handle_str': 'change'}
-    
-# when user is invalid, valueError would happen
-def test_user_profile_invalid_user():
-    result = auth_login('andyWei326@gmail.com', '224232r4')
-    assert result['token'] == 'easy easy easy'
-    assert result['u_id'] == 23
+    data['user_info'] = []
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    result = user_profile(authRegisterDic['token'], authRegisterDic['u_id'])
+    resetUser_id(authRegisterDic['u_id'])
+    assert result['email'] == '2199009762@qq.com'
+    assert result['name_first'] == 'Andy'
+    assert result['name_last'] == 'Wei'
+    assert result['handle_str'] == 'TEAM WORK'
+   
+# when user_id is invalid
+def test_user_profile_invalid_user_id():
+    data['user_info'] = []
+    authRegisterDic = user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
     with pytest.raises(ValueError):
-        user_profile('easy easy easy', 34)
-       
-
-    
+        user_profile(authRegisterDic['token'], 2)
+      

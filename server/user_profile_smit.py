@@ -25,10 +25,7 @@ def get_U_id(token):
 
 @APP.route('/user/profile/setname', methods = ['PUT'])
 def user_profile_setname():
-    data = get_data
-    token = request.form.get('token')
-    first = request.form.get('name_first')
-    last = request.form.get('name_last')
+    data = get_data()
 
     if token == None:
         raise ValueError("NULL token")
@@ -72,8 +69,6 @@ def check(email):
 @APP.route('/user/profile/setemail', methods = ['PUT'])
 def user_profile_setemail():
     data = get_data
-    token = request.form.get('token')
-    new_email = request.form.get('email')
     
     if check(new_email) == False:
         raise ValueError("not a valid email address")
@@ -95,8 +90,6 @@ def user_profile_setemail():
 @APP.route('/user/profile/sethandle', methods = ['PUT'])
 def user_profile_sethandle(token, handle_str):
     data = get_data
-    token = request.form.get('token')
-    new_handle_str = request.form.get('handle_str')
 
     user_id = get_U_id(token)
 
@@ -116,8 +109,6 @@ def user_profile_sethandle(token, handle_str):
 ##############################################################################################################################################
 @APP.route('/search', methods = ['GET'])
 def search():
-    token = request.form.get('token')
-    q_str = request.form.get('query_str')
     messages_list = []
 
     channel_list = channels_list(token)
@@ -133,9 +124,6 @@ def search():
 @APP.route('/admin/userpermission/change', methods = ['POST'])
 def admin_userpermission_change():
     data = get_data
-    token = request.form.get('token')
-    u_id = request.form.get('u_id')
-    p_id = request.form.get('permission')
 
     if p_id != 'owner_members' or p_id != 'admin_members' or p_id != 'all_members':
         raise ValueError("Not a valid permission")
