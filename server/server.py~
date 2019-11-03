@@ -2,7 +2,6 @@ from backend_functions import *
 from json import dumps
 from flask import Flask, request
 
-
 APP = Flask(__name__)
 
 def defaultHandler(err):
@@ -138,11 +137,6 @@ def removeowner_channel():
     removeowners(token, channel_id, user_id)
     return dumps({})
 
-@APP.route('/channels/list', methods=['GET'])
-def listChannels():
-    token = request.args.get('token')
-    return dumps(channellist(token))
-
 @APP.route('/channels/listall', methods=['GET'])
 def listallChannels():
     token = request.args.get('token')
@@ -199,6 +193,35 @@ def unpin():
     message_id = request.form.get('message_id')
     message_unpin(token, message_id)
     return dumps({})
+    
+@APP.route('/user/profile/setname', methods = ['PUT'])
+def user_profile_setname_server():
+    token = request.form.get('token')
+    name_first = request.form.get('name_first')
+    name_last = request.form.get('name_last')
+    result = user_profile_setname(token, name_first, name_last)
+    return dumps({})
+
+@APP.route('/user/profile/setemail', methods = ['PUT'])
+def user_profile_setemail_server():
+    token = request.form.get('token')
+    email = request.form.get('email')
+    store_results = user_profile_setemail(token, email)
+    return dumps({})
+
+@APP.route('/user/profile/sethandle', methods = ['PUT'])
+def user_profile_sethandle_server():
+    token = request.form.get('token')
+    new_handle_str = request.form.get('handle_str')
+    results = user_profile_sethandle(token, new_handle_str)
+    return dumps({})
+
+@APP.route('/channels/list', methods=['GET'])
+def list_channels_server():
+    token = request.args.get('token')
+    result = channels_list(token)
+    return dumps(result)
+
 
 if __name__ == '__main__':
-    APP.run(debug = True, port=4000) 
+    APP.run(debug = True, port=5000) 

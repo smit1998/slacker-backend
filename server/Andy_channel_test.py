@@ -86,7 +86,7 @@ def test_channel_invite_channel_id_invalid():
     BF.resetUser_id(authRegisterDic['u_id'])
     with pytest.raises(BF.ValueError):
         BF.channel_invite(authRegisterDic['token'], 2, authRegisterDic_02['u_id'])
- 
+
 # when the u_id is invalid 
 def test_channel_invite_u_id_invalid():
     BF.data['user_info'] = []
@@ -98,4 +98,19 @@ def test_channel_invite_u_id_invalid():
     BF.resetUser_id(authRegisterDic['u_id'])
     with pytest.raises(BF.ValueError):
         BF.channel_invite(authRegisterDic['token'], result['channel_id'], 3)
+               
+# when one authorised user send one message to channel
+def test_channel_messages():
+    BF.data['user_info'] = []
+    BF.data['channel_info'] = [] 
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei') 
+    result = BF.channels_create(authRegisterDic['token'], 'good team', True)
+    BF.resetChannel_id(result['channel_id'])
+    BF.resetUser_id(authRegisterDic['u_id'])
+    return_dic = BF.channel_messages(authRegisterDic['token'], 1, 0)
+    assert return_dic['end'] == 50
+    
+
+
+
   

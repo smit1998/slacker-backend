@@ -407,4 +407,87 @@ def sendlater_message(token, channel_id, message, time_sent):
                 } 
     # the authorised user is not in this channel currently
     raise AccessError(description = 'this user is not current in this channel')
+    
+
+def user_profile_setname(token, name_first, name_last):
+    data = getData()
+    if (len(name_first) > 50 or len(name_last) < 1):
+       raise ValueError("name_first is not between 1 and 50.")
+    if (len(name_last) > 50 or len(name_last) < 1):
+        raise ValueError("name_last is not between 1 and 50.")
+    #change the first and last names
+    basic_info = getUserFromToken(token)
+    
+    for user in data['user_info']:
+        if (user['u_id'] == basic_info['u_id']):
+            user['name_first'] = name_first
+            user['name_last'] = name_last
+    return {}
+
+
+def user_profile_setemail(token, email):
+    data = getData()
+    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    if(not re.search(regex, email)):
+        raise ValueError(description = "invalid email")
+    flag = False
+    for i in data['user_info']:
+        if(i['email'] == email):
+            flag = True
+    # email address is already been used by other users
+    if(flag == True):
+        raise ValueError(description = 'email address is already been used')
+    
+    basic_info = getUserFromToken(token)
+    
+    for users in data['user_info']:
+            if(users['u_id'] == basic_info['u_id']):
+                users['email'] = email
+    return {}
+
+def user_profile_sethandle(token, handle_str):
+    data = getData()
+    if (len(handle_str) < 3 or len(handle_str) > 20):
+        raise ValueError("handle_str is invalid")
+    for user in data['user_info']:
+        if user['handle_str'] == handle_str:
+            raise ValueError("Handle_str already in use")
+    basic_info = getUserFromToken(token)
+    for u in data['user_info']:
+        if u['u_id'] == basic_info['u_id']:
+            u['handle_str'] = handle_str
+
+    return {}      
+
+# return channels [channel_id, name]
+def channels_list(token):
+    data = getData()
+    channels = []
+    input_token = getUserFromToken(token)
+    for channel in data['channel_info']:
+        for user in channel['all_members']:
+            if (user['u_id'] == input_token['u_id']):
+                channels.append(int(channel['channel_id']))
+                channels.append(channel['name'])
+                print(channel['channel_id'])
+                print(channel['name'])
+    return {
+        'channels': channels     
+    }
+
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
