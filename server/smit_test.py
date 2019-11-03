@@ -1,7 +1,7 @@
 import pytest 
 import re
 
-def user_profile_setname_test_1():
+def setname_test1():
     user_setname = auth_login('smitdobaria@gmail.com','hey123')
     token = user_setname['token']
 # updating user first name and last name
