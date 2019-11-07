@@ -75,7 +75,6 @@ def channels_listall(token):
 def channels_create(token, name, is_public):
     data = getData()
     input_token = generateToken(token)
-    channel_name = name
     if (len(channel_name) > 20):
         raise ValueError(description = "invalid channel name")
     basic_info = getUserFromToken(inputToken)
@@ -85,18 +84,14 @@ def channels_create(token, name, is_public):
     owner['u_id'] = basic_info['u_id']
     owner['name_first'] = basic_info['name_first']
     owner['name_last'] = basic_info['name_last']
-    admin['u_id'] = basic_info['u_id']
-    admin['name_first'] = basic_info['name_first']
-    admin['name_last'] = basic_info['name_last']
     all_users['u_id'] = basic_info['u_id']
     all_users['name_first'] = basic_info['name_first']
     all_users['name_last'] = basic_info['name_last']
     data['channels'].append({
         'channel_id': generateChannel_id(),
         'owner_members': [owner],
-        'admin_members': [admin],
         'all_members': [all_users],
-        'name': channel_name,
+        'name': name,
         'is_public': is_public
     })
     return {
@@ -107,7 +102,7 @@ def message_remove(token, message_id):
     data = getData()
     input_token = token
     input_message_id = message_id
-    flag_1 = False # Checks for permission to pin.
+    flag_1 = False # Checks for permission.
     for channel in data['channels']:
         for user in channel['owner_members']:
             if (user == input_token):
@@ -133,7 +128,7 @@ def message_edit(token, message_id, message):
     input_token = generateToken(token)
     input_message_id = message_id
     input_message = message
-    flag_1 = False # Checks for permission to unpin.
+    flag_1 = False # Checks for permission.
     for channel in data['channels']:
         for user in channel['owner_members']:
             if (user == input_token):
@@ -141,7 +136,7 @@ def message_edit(token, message_id, message):
         for user in channel['admin_members']:
             if (user == input_token):
                 flag_1 = True
-    if (flag_1 = False):
+    if (flag_1 == False):
         raise ValueError('user is not admin or owner')
     for i in data['message_info']:
         if (i['message_id'] == input_message_id):

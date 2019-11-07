@@ -1,13 +1,15 @@
 data = {
     'user_info': [
     {
+        'u_id':'',
         'email':'',
         'password':'',
         'name_first':'',
         'name_last':'',
-        'u_id':'',
+        'token':'',
         'handle_str':'',
-        'token':''
+        'permission_id':'',
+        'reset_code':''
     }],
 
     'channels': [
@@ -15,7 +17,6 @@ data = {
         'name':'',
         'channel_id':'',
         'owner_members':[{''}],
-        'admin_members':[{''}],
         'all_members':[{''}],
         'is_public':''
     }],
