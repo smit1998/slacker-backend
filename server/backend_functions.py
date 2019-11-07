@@ -36,6 +36,21 @@ react_id = 0
 # question1: deal with the defaultHandler function
 #---------------------------------------------
 
+def defaultHandler(err):
+    response = err.get_response()
+    response.data = dumps({
+        "code": err.code,
+        "name": "System Error",
+        "message": err.debadscription,
+    })
+    response.content_type = 'application/json'
+    return response
+
+APP = Flask(__name__)
+APP.config['TRAP_HTTP_EXCEPTIONS'] = True
+APP.register_error_handler(Exception, defaultHandler)
+CORS(APP)
+
 class ValueError(HTTPException):
     code = 400
     message = 'No message specified'
@@ -46,6 +61,12 @@ class AccessError(HTTPException):
 
 #---------------------------------
 # dry dry dry  
+def generateReact_id(r_id):
+    global react_id 
+    react_id = react_id + 1
+    r_id = react_id 
+    return r_id
+    
 def generateMessage_id(m_id):
     global message_id 
     message_id = message_id + 1
@@ -67,6 +88,7 @@ def generateChannel_id(c_id):
 
 #------------------------------
 #dry dry dry
+
 def resetUser_id(u_id):
     global user_id
     u_id = 0 
@@ -81,6 +103,7 @@ def resetMessage_id(m_id):
     global message_id
     m_id = 0
     message_id = m_id
+
 #-------------------------------   
     
 def getData():
@@ -91,7 +114,13 @@ def getData():
 def generateToken(u_id):
     global SECRET
     encoded = jwt.encode({'u_id': u_id}, SECRET, algorithm='HS256')
-    return encoded.decode('utf-8') # asdfasdfadsf
+    
+def generateChannel_id(c_id):
+    global channel_id
+    channel_id = channel_id + 1
+    c_id = channel_id
+    return c_id
+    
 
 # return a dictionary 
 def getUserFromToken(token):

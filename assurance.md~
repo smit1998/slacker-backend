@@ -1,0 +1,5 @@
+To assure that our backend functions are working correctly and effeciently we took following seps.
+->First we wrote all the functions and individually tested it with the pytests which we had written in iteration 1. We made sure that our code passes all the tests and which told us that our verification test was prefect. We made sure to add some extra test in the test file to make sure that all the reamining cases which might have been left in iteration 1 were covered. This made sure that our backend was working.
+->Than comimg on to the validation part we used the postman to see that the right functions were built and tested them using the postman app which was very helpful to us in finding some small problems which were later fixed by us.
+
+Thus in this way we covered both the verification and validation steps in the process of building the backend.
