@@ -170,7 +170,8 @@ def user_register(email, password, name_first, name_last):
         # question 2: what about we have two users' are both having same name_first, do they would create two different tokens ? ? ? 
         'token': generateToken(name_first),
         # question 3: the hand_str should be changed all the times, or just fixed. 
-        'handle_str': 'TEAM WORK'
+        'handle_str': 'TEAM WORK',
+        'permission_id': 3
     })
     return {
         'token': generateToken(user_id),

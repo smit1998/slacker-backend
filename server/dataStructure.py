@@ -8,7 +8,7 @@ data = {
         'name_last':'',
         'token':'',
         'handle_str':'',
-        'permission_id':'',
+        'permission_id':'',  # 1: Slackr Owner, 2: Slackr Admin, 3: Member (Default)
         'reset_code':''
     }],
 
