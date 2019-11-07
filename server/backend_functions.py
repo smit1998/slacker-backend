@@ -580,7 +580,6 @@ def removeowners_channel(token, channel_id, u_id):
             for i in channel['owner_members']:
                 if (i['u_id'] == basic_info['u_id'] and flag_3 == True):
                     del i
-                
     if (flag_2 == False): 
         raise ValueError(description = "channel id is not a valid channel") 
     if (flag_3 == False): 
@@ -609,6 +608,7 @@ def passwordreset_request(email):
 def random_code_generator(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
+
 
 
 
