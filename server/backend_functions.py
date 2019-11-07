@@ -13,7 +13,6 @@ class AccessError(HTTPException):
     code = 400 
     message = 'No message specified'
     
-
 class ValueError(HTTPException):
     code = 400
     message = 'No message specified'
@@ -344,7 +343,6 @@ def channel_messages(token, channel_id, start):
         'end' : start + 50
     }
 
-
 def message_send(token, channel_id, message):
     data = getData()
     channel_id_integer = int(channel_id)
@@ -361,7 +359,7 @@ def message_send(token, channel_id, message):
                     message_dict['message_id'] = return_message_id
                     message_dict['messages'] = message
                     message_dict['time_created'] = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
-                    message_dict['react_id'] = generateReact_id(react_id)
+                    message_dict['react_id'] = 0
                     message_dict['is_pinned'] = True
                     message_dict['channel_id'] = channel_id_integer
                     data['message_info'].append(message_dict)
@@ -399,7 +397,7 @@ def sendlater_message(token, channel_id, message, time_sent):
                 message_dict['message_id'] = return_message_id
                 message_dict['messages'] = message
                 message_dict['time_created'] = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
-                message_dict['react_id'] = generateReact_id(react_id)
+                message_dict['react_id'] = 0
                 message_dict['is_pinned'] = True
                 data['message_info'].append(message_dict)
                 return {
@@ -469,25 +467,178 @@ def channels_list(token):
             if (user['u_id'] == input_token['u_id']):
                 channels.append(int(channel['channel_id']))
                 channels.append(channel['name'])
-                print(channel['channel_id'])
-                print(channel['name'])
     return {
         'channels': channels     
     }
 
 
+def channel_leave(token,channel_id): 
+    data = getData()
+    basic_info = getUserFromToken(token)
+    channel_id_integer = int(channel_id)
+    #u_id_integer = int(u_id) returns a dictonary 
+    flag_1 = False
+    for channel in data['channel_info']:  
+        if (channel_id_integer == channel['channel_id']): 
+            flag_1 = True 
+            for i in channel['all_members']:
+                if (basic_info['u_id'] == i['u_id']): 
+                    del i
+            for c in channel['owner_members']:
+                if (basic_info['u_id'] == i['u_id']):
+                    del c
+    if(flag_1 == False):
+        raise ValueError(description = 'channel_id that you are trying to leave from is invalid')
+    return {}
+
+def channel_join(token, channel_id):
+    data = getData()
+    basic_info = getUserFromToken(token)
+    channel_id_integer = int(channel_id)
+    flag_1 = False 
+    flag_2 = False
+    for channel in data['channel_info']: 
+        if (channel_id_integer == channel['channel_id']): 
+            flag_1 = True 
+            #if channel['is_public'] == True:
+             
+            all_users = {}
+            all_users['u_id'] = basic_info['u_id']
+            all_users['name_first'] = basic_info['name_first']
+            all_users['name_last'] = basic_info['name_last']
+            channel['all_members'].append(all_users)
+    if (flag_1 == False): 
+        raise ValueError(description = "channel_id is invalid")
+    #if (flag_2 == True): 
+        #raise AccessError(description = "cannot join channel as it is private") 
+    return {}
+
+def addowners_channel(token, channel_id, u_id):
+    data = getData()
+    basic_info = getUserFromToken(token)
+    channel_id_integer = int(channel_id)
+    u_id_integer = int(u_id)
+    flag_1 = False 
+    flag_2 = False 
+    flag_3 = False
+    flag_4 = False
+    for user in data['user_info']:
+        if(u_id_integer == user['u_id']):
+            flag_1 = True
+    if (flag_1 == False): 
+        raise ValueError(description = "u_id we want to make owner is invalid")
+        
+    for channel in data['channel_info']:
+        if (channel_id_integer == channel['channel_id']):
+            flag_2 = True 
+            for i in channel['owner_members']:
+                if (i['u_id'] == u_id_integer): 
+                    flag_3 = True
+            for i in channel['owner_members']: 
+                if (i['u_id'] == basic_info['u_id']): 
+                    flag_4 = True
+            for i in channel['owner_members']:
+                if (i['u_id'] == basic_info['u_id'] and flag_3 == False):
+                    owner = {} 
+                    owner['u_id'] = u_id_integer
+                    owner['name_first'] = user['name_first']
+                    owner['name_last'] = user['name_last']
+                    channel['owner_members'].append(owner)
+                
+    if (flag_2 == False): 
+        raise ValueError(description = "channel id is not a valid channel") 
+    if (flag_3 == True): 
+        raise ValueError(description = "user is already an owner of the channel")
+    if (flag_4 == False): 
+        raise AccessError(description = "the authorsied user is not an owner of the channel") 
+    return {}
+    
+def removeowners_channel(token, channel_id, u_id):
+    data = getData()
+    basic_info = getUserFromToken(token)
+    channel_id_integer = int(channel_id)
+    u_id_integer = int(u_id)
+    flag_1 = False 
+    flag_2 = False 
+    flag_3 = False
+    flag_4 = False
+    for user in data['user_info']:
+        if(u_id_integer == user['u_id']):
+            flag_1 = True
+    if (flag_1 == False): 
+        raise ValueError(description = "u_id we want to remove as owner is invalid")
+        
+    for channel in data['channel_info']:
+        if (channel_id_integer == channel['channel_id']):
+            flag_2 = True 
+            for i in channel['owner_members']:
+                if (i['u_id'] == u_id_integer): 
+                    flag_3 = True
+            for i in channel['owner_members']: 
+                if (i['u_id'] == basic_info['u_id']): 
+                    flag_4 = True
+            for i in channel['owner_members']:
+                if (i['u_id'] == basic_info['u_id'] and flag_3 == True):
+                    del i
+                
+    if (flag_2 == False): 
+        raise ValueError(description = "channel id is not a valid channel") 
+    if (flag_3 == False): 
+        raise ValueError(description = "user is not an owner of the channel")
+    if (flag_4 == False): 
+        raise AccessError(description = "the authorsied user is not an owner of the channel") 
+    return {}
+
+def passwordreset_request(email):
+    data = getData() 
+    mail = Mail(APP)
+    flag = False
+    code = 123
+    for user in data['user_info']:
+        if (user['email'] == email):
+            flag = True
+            #user['reset_code'] = code #added to the data structure 
+            first_name = user['name_first']            
+            msg = Message("Reset, Password Request Slackr",
+                sender= "HASCdevteam@gmail.com",
+                recipients = email)
+            msg.body = 'Hi' + first_name + 'You have requested for a change in your password, please use the code provided below to reset your account.\n' + code + 'regards the slackr development, team.'
+            mail.send(msg)
+    return {}
+
+def random_code_generator(stringLength=10):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
 
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 

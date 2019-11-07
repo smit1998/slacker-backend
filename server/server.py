@@ -222,6 +222,13 @@ def list_channels_server():
     result = channels_list(token)
     return dumps(result)
 
+@APP.route('/search', methods = ['GET'])
+def search_server():
+    token = request.args.get('token')
+    q_str = request.args.get('query_str')
+    search_results = search(token, q_str)
+    return dumps(search_results)
+
 
 if __name__ == '__main__':
     APP.run(debug = True, port=5000) 
