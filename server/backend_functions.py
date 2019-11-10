@@ -1,21 +1,12 @@
 from flask import Flask, request
 import re
 import jwt 
-from werkzeug.exceptions import HTTPException
 import copy 
 import hashlib
 import dateutil 
-from flask_cors import CORS
 from datetime import timezone
 from datetime import datetime
 
-class AccessError(HTTPException):
-    code = 400 
-    message = 'No message specified'
-    
-class ValueError(HTTPException):
-    code = 400
-    message = 'No message specified'
 
 SECRET = 'comp1531 project'
  
@@ -31,25 +22,13 @@ channel_id = 0
 message_id = 0
 react_id = 0
 
+
 #---------------------------------------------
 # question1: deal with the defaultHandler function
 #---------------------------------------------
 
-class ValueError(HTTPException):
-    code = 400
-    message = 'No message specified'
-
-class AccessError(HTTPException):
-    code = 400 
-    message = 'No message specified'
-
 #---------------------------------
 # dry dry dry
-def generateReact_id(r_id):
-    global react_id 
-    react_id = react_id + 1
-    r_id = react_id 
-    return r_id
     
 def generateMessage_id(m_id):
     global message_id 
@@ -100,16 +79,26 @@ def generateToken(u_id):
 
 # return a dictionary 
 def getUserFromToken(token):
+    data = getData()
     global SECRET
     decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
-    return findUser(decoded['u_id'])
+    print('the decoded value: ')
+    print(decoded['u_id'])
+    result = findUser(decoded['u_id'])
+    print('the basic info: ')
+    print(result)
+    return result
 
 def hashPassword(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def findUser(inputName):
+def findUser(u_id):
+    print('the inputName: ')
+   
+    data = getData()
     for u in data['user_info']:
-        if u['u_id'] == inputName:
+        if u['u_id'] == u_id:
+            print(u)
             return u
     return None
     
@@ -143,10 +132,9 @@ def user_register(email, password, name_first, name_last):
         'name_first': name_first,
         'name_last': name_last,
         'u_id': generateU_id(user_id),
-        # question 2: what about we have two users' are both having same name_first, do they would create two different tokens ? ? ? 
         'token': generateToken(name_first),
-        # question 3: the hand_str should be changed all the times, or just fixed. 
-        'handle_str': 'TEAM WORK'
+        'handle_str': 'TEAM WORK',
+        'permission_id': 3
     })
     return {
         'token': generateToken(user_id),
@@ -210,10 +198,7 @@ def channel_invite(token, channel_id, u_id):
             flag_1 = True
     if(flag_1 == False):
         raise ValueError(description = "u_id we want to invite is invalid")
-    # consider the channel_id ValueError
-    #-----------------------------
-    # question4: is that reasonable ? ? ? ? ? ?
-    #------------------------------
+
     for channel in data['channel_info']:
         if(channel_id_integer == channel['channel_id']):
             flag_2 = True 
@@ -238,18 +223,25 @@ def channels_create(token, name, is_public):
     if (len(name) > 20):
         raise ValueError(description = "invalid channel name")
     basic_info = getUserFromToken(token)
-    owner = {}
-    all_users = {}
-    owner['u_id'] = basic_info['u_id']
-    owner['name_first'] = basic_info['name_first']
-    owner['name_last'] = basic_info['name_last']
-    all_users['u_id'] = basic_info['u_id']
-    all_users['name_first'] = basic_info['name_first']
-    all_users['name_last'] = basic_info['name_last']
+    owner = []
+    all_users = []
+    
+    print('SEEEEEEE ! ! ! ! !: ')
+    print(basic_info['u_id'])
+    owner.append({
+        'u_id': basic_info['u_id'],
+        'name_first': basic_info['name_first'],
+        'name_last': basic_info['name_last']
+    })
+    all_users.append({
+        'u_id': basic_info['u_id'],
+        'name_first': basic_info['name_first'],
+        'name_last': basic_info['name_last']
+    })
     data['channel_info'].append({
         'channel_id': generateChannel_id(channel_id),
-        'owner_members': [owner],
-        'all_members': [all_users],
+        'owner_members': owner,
+        'all_members': all_users,
         'name': name,
         'is_public': is_public,
         'token': basic_info['name_first']
@@ -328,13 +320,6 @@ def channel_messages(token, channel_id, start):
     ch_msgs = [msg for msg in data['message_info'] if msg['channel_id'] == channel_id]
     ch_msgs.sort(key=lambda msg: msg['time_created'])
     for ix, msg in enumerate(ch_msgs):
-        
-        # if the start is greater than the total length of messages
-        #------------------------------
-        # question5: messages is the list of dictonary, so how to get the total length of it ? ? ? ?
-        # And btw, I just create a dictonary for each function, do we need to use recursion to store each infomation inside the outer list ? ? ? ?
-        #------------------------------
- 
         if(ix+1 >= start):
             return_list.append(msg)
     return {
@@ -360,15 +345,15 @@ def message_send(token, channel_id, message):
                     message_dict['messages'] = message
                     message_dict['time_created'] = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
                     message_dict['react_id'] = 0
-                    message_dict['is_pinned'] = True
+                    message_dict['is_pinned'] = False
                     message_dict['channel_id'] = channel_id_integer
+                    message_dict['sender'] = token
                     data['message_info'].append(message_dict)
                     return {
                         'message_id': return_message_id
                     }
     # if user is not in this channel currently
     raise AccessError(description = 'this user is not in this channel')
-
 
 def sendlater_message(token, channel_id, message, time_sent):
     data = getData()
@@ -471,6 +456,17 @@ def channels_list(token):
         'channels': channels     
     }
 
+# return all channels
+def channels_listall(token):
+    data = getData()
+    list_all_channels = []
+    input_token = getUserFromToken(token)
+    for channel in data['channel_info']:
+        list_all_channels.append(int(channel['channel_id']))
+        list_all_channels.append(channel['name'])
+    return {
+        'channels': list_all_channels     
+    }
 
 def channel_leave(token,channel_id): 
     data = getData()
@@ -588,7 +584,7 @@ def removeowners_channel(token, channel_id, u_id):
         raise AccessError(description = "the authorsied user is not an owner of the channel") 
     return {}
 
-def passwordreset_request(email):
+def passwordreset_request(email,APP):
     data = getData() 
     mail = Mail(APP)
     flag = False
@@ -609,36 +605,152 @@ def random_code_generator(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
+def message_remove(token, message_id):
+    data = getData()
+    input_message_id = int(message_id)
+    basic_info = getUserFromToken(token)
+    flag_1 = False # Checks for owner permission.
+    flag_2 = False # Checks if message exists
+    for msg in data['message_info']:
+        if (msg['message_id'] == input_message_id): # Issue here
+            for channel in data['channel_info']:
+                if (channel['channel_id']) == msg['channel_id']:  
+                    for owner in channel['owner_members']:
+                        if (owner['u_id'] == basic_info['u_id']):
+                            flag_1 = True
+            if (basic_info['permission_id'] != 3):
+                flag_1 = True
+            if (msg['sender'] == token):
+                flag_1 = True
+            if (flag_1 == False):
+                raise AccessError('user has insufficient permissions')
+            flag_2 = True
+            del msg
+    if (flag_2 == False):
+        raise ValueError('message does not exist')
+    return {}
 
+def message_edit(token, message_id, message):
+    data = getData()
+    input_message_id = int(message_id)
+    basic_info = getUserFromToken(token)
+    flag_1 = False # Checks for permission.
+    for i in data['message_info']:
+        if (i['message_id'] == input_message_id):
+            if (message == ""):
+                del i
+                return {}
+            for channel in data['channel_info']:
+                if (channel['channel_id']) == i['channel_id']:  
+                    for owner in channel['owner_members']:
+                        if (owner['u_id'] == basic_info['u_id']):
+                            flag_1 = True
+            if (basic_info['permission_id'] != 3):
+                flag_1 = True
+            if (i['sender'] == token):
+                flag_1 = True
+            if (flag_1 == False):
+                raise AccessError('user has insufficient permissions')
+            i['message'] = message
+    return {}
 
+def message_react(token, message_id, react_id):
+    data = getData()
+    input_message_id = int(message_id)
+    input_react_id = int(react_id)
+    if (input_react_id != 1):
+        ValueError('invalid react')
+    flag_1 = False # Checks if the message exists.
+    for message in data['message_info']:
+        if (message['message_id'] == input_message_id):
+            if (message['react_id'] == input_react_id):
+                raise ValueError('message already has an active react')
+            flag_1 = True
+            message['react_id'] = input_react_id
+    if (flag_1 == False):
+        raise ValueError('message does not exist')
+    return {}
 
+def message_unreact(token, message_id, react_id):
+    data = getData()
+    input_message_id = int(message_id)
+    input_react_id = int(react_id)
+    if (input_react_id != 0):
+        raise ValueError('invalid react')
+    flag_1 = False # Checks if the message exists.
+    for message in data['message_info']:
+        if (message['message_id'] == input_message_id):
+            if (message['react_id'] == input_react_id):
+                raise ValueError('message does not contain an active react')
+            flag_1 = True
+            message['react_id'] = input_react_id
+    if (flag_1 == False):
+        raise ValueError('message does not exist')
+    return {}
 
+def message_pin(token, message_id):
+    data = getData()
+    input_message_id = int(message_id)
+    basic_info = getUserFromToken(token)
+    flag_1 = False # Checks for permission to pin.
+    flag_2 = False # Checks if message exists.
+    flag_3 = False # Checks if the user is a member of the channel that the message is within.
+    for message in data['message_info']:
+        print(message)
+        if (message['message_id'] == input_message_id):
+            for channel in data['channel_info']:
+                if (channel['channel_id']) == message['channel_id']:  
+                    for owner in channel['owner_members']:
+                        if (owner['u_id'] == basic_info['u_id']):
+                            flag_1 = True
+                    for member in channel['all_members']:
+                        if (member['u_id'] == basic_info['u_id']):
+                            flag_3 = True
+            if (basic_info['permission_id'] != 3):
+                flag_1 = True
+            if (flag_1 == False):
+                raise ValueError('user has insufficient permissions')
+            if (flag_3 == False):
+                raise AccessError('user is not a member of the channel that the message is within')
+            print(message['is_pinned'])
+            if (message['is_pinned'] == True):
+                raise ValueError('message already pinned')
+            flag_2 = True
+            message['is_pinned'] = True
+            print(message['is_pinned'])
+            print('Message Has Been Pinned')
+    if (flag_2 == False):
+        raise ValueError('message does not exist')
+    return {}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+def message_unpin(token, message_id):
+    data = getData()
+    input_message_id = int(message_id)
+    basic_info = getUserFromToken(token)
+    flag_1 = False # Checks for permission to unpin.
+    flag_2 = False # Checks if message exists.
+    flag_3 = False # Checks if the user is a member of the channel that the message is within.
+    for message in data['message_info']:
+        if (message['message_id'] == input_message_id):
+            for channel in data['channel_info']:
+                if (channel['channel_id']) == message['channel_id']:  
+                    for owner in channel['owner_members']:
+                        if (owner['u_id'] == basic_info['u_id']):
+                            flag_1 = True
+                    for member in channel['all_members']:
+                        if (member['u_id'] == basic_info['u_id']):
+                            flag_3 = True
+            if (basic_info['permission_id'] != 3):
+                flag_1 = True
+            if (flag_1 == False):
+                raise ValueError('user has insufficient permissions')
+            if (flag_3 == False):
+                raise AccessError('user is not a member of the channel that the message is within')
+            if (message['is_pinned'] == False):
+                raise ValueError('message already unpinned')
+            flag_2 = True
+            message['is_pinned'] = False
+    if (flag_2 == False):
+        raise ValueError('message does not exist')
+    return {}
 
