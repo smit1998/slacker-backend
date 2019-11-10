@@ -112,7 +112,8 @@ def passwordreset_reset():
 def leave_channel():
     token = request.form.get('token')
     channel_id = request.form.get('channel_id')
-    return dumps(channel_leave(token, channel_id))
+    result = channel_leave(token, channel_id)
+    return dumps(result)
     
 @APP.route('/channel/join', methods=['POST'])
 def join_channel():
@@ -137,22 +138,30 @@ def removeowner_channel():
     removeowners(token, channel_id, user_id)
     return dumps({})
 
+@APP.route('/channels/list', methods=['GET'])
+def list_channels_server():
+    token = request.args.get('token')
+    result = channels_list(token)
+    return dumps(result)
+
 @APP.route('/channels/listall', methods=['GET'])
 def listallChannels():
     token = request.args.get('token')
-    return dumps(channellistall(token))
+    result = channels_listall(token)
+    return dumps(result)
   
 @APP.route('/channels/create', methods=['POST'])
 def create():
     token = request.form.get('token')
     name = request.form.get('name')
     is_public = request.form.get('is_public')
-    return dumps(channelcreate(token, name, is_public))
+    result = channelcreate(token, name, is_public)
+    return dumps(result)
 
 @APP.route('/message/remove', methods=['DELETE'])
 def removeMessage():
-    token = request.args.get('token')
-    message_id = request.args.get('message_id')
+    token = request.form.get('token')
+    message_id = request.form.get('message_id')
     message_remove(token, message_id)
     return dumps({})
 
@@ -215,13 +224,6 @@ def user_profile_sethandle_server():
     new_handle_str = request.form.get('handle_str')
     results = user_profile_sethandle(token, new_handle_str)
     return dumps({})
-
-@APP.route('/channels/list', methods=['GET'])
-def list_channels_server():
-    token = request.args.get('token')
-    result = channels_list(token)
-    return dumps(result)
-
 
 if __name__ == '__main__':
     APP.run(debug = True, port=5000)
