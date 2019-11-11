@@ -1,54 +1,65 @@
 import pytest 
 import re
+#everything is valid
+def setname_test1():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('2199009762@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    user_profile_setname('1234567', 'smit', 'dobaria')
+    assert BF.user_profile(authRegisterDic['token'], authRegisterDic['u_id']) == ('2199009762@qq.com', '1234567', 'smit', 'dobaria')
 
-def user_profile_setname_test_1():
-    user_setname = auth_login('smitdobaria@gmail.com','hey123')
-    token = user_setname['token']
-# updating user first name and last name
-    user_profile_setname(token,'taraj','naga')
-    #returns fist name and last name of given email and password
-    assert check_names('smitdobaria@gmail.com','hey123') == 'taraj naga'
-
-#user first name is more than 50 words and last name is less than 50
-
+#first name is not valid
 def user_profile_setname_test_2():
-    user_setname = auth_login('smitdobaria@gmail.com','hey123')
-    token = user_setname['token']
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('2199009762@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    with pytest.raises(BF.ValueError):
+        BF.user_profile_setname('1234567', 'abcdefghijklmnopqrstuvwxyz123456789012345678901234567890', 'wei')
 
-    with pytest.raises(ValueError):
-        user_profile_setname(token,'ansjdhaahahahahahahahahahahabdvdsvsgsdgsdgsdbxchgsdbseghdsbsdgsdbdsgsdbsdsd','dobaria')
-
+# last name is not valid 
 def user_profile_setname_test_3():
-    user_setname = auth_login('smitdobaria@gmail.com','hey123')
-    token = user_setname['token']
-
-    with pytest.raises(ValueError):
-        user_profile_setname(token,'mike','nasdfkbjdakjdfakjlbfalsbfbasfbalsfjlasbfbjsadflafdsafsfasdfasfaafa')
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('2199009762@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    with pytest.raises(BF.ValueError):
+        BF.user_profile_setname('1234567', 'smit', 'wei12345678901234567890qwertyuiopasdfghjklzxcvbnm,.;n;kjscbdcsmcibcsdcnn')        
 
 #both are invalid
 def user_profile_setname_test_4():
-    user_setname = auth_login('smitdob@gmail.com','pass1234')
-    token = user_setname['token']
-
-    with pytest.raises(ValueError):
-        user_profile_setname(token,'askjjbvdansjdhaahahahahahahahahahahabdvdsvsgsdgsdgsdbxchgsdbseghdsbsdgsdbdsgsdbsdsd','saljdchalsvchvakchvaskcvkasvcksvckvckavkcvadskhcvakhscvkhavckhgackavkcacvasvgc')
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('2199009762@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    with pytest.raises(BF.ValueError):
+        BF.user_profile_setname('1234567', 'abcdefghijklmnopqrstuvwxyz123456789012345678901234567890', 'jlbdlhdhalsdvavqwvefyqweywgiuuiuggggggdgdggdgwygdiygwdwgdsbxjsxvvhsqwhjvdvwldw12345678901234567890')
 
 def user_profile_setname_test_5():
-    user_setname = auth_login('smitdob@gmail.com','pass1234')
-    token = user_setname['token']
-    # first and last names cant be null
-    assert user_profile_setname('123@gmail.com','heythere12345','','') == True
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('2199009762@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    with pytest.raises(BF.ValueError):
+        BF.user_profile_setname('1234567', '', 'wei')
     
 #############################################################################################
 
 # email is valid and not used already
-def user_profile_setemail_test_1():
-    result = auth_login('smitdob@gmail.com', '22abcd23')
-    token = result['token']
-
-    with pytest.raises(ValueError):
-            user_profile_setemail(token, 'smit@gmail.com')
-
+def user_profile_setemail_test1():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('smitdob@qq.com', '123', 'smit', 'dob')
+    result = BF.user_login('smitdob@qq.com', '123')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    user_profile_setemail('123', 'smitdobaria123@hotmail.com')
+    assert BF.user_profile(authRegisterDic['token'], authRegisterDic['u_id']) == ('smitdobaria123@hotmail.com', '123', 'smit', 'dob')
 # email is valid but not available
 def user_profile_setemail_test_2():
     result = auth_login('smitdob@gmail.com', '22abcd23')

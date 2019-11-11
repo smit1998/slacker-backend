@@ -120,7 +120,7 @@ def search():
     q_str = request.form.get('query_str')
     messages_list = []
 
-    channel_list = channels_list(token)
+    channel_list = list(channels_list(token))
 
     for user in channel_list:
         for messages in user:
@@ -137,23 +137,22 @@ def admin_userpermission_change():
     u_id = request.form.get('u_id')
     p_id = request.form.get('permission')
 
-    if p_id != 'owner_members' or p_id != 'admin_members' or p_id != 'all_members':
-        raise ValueError("Not a valid permission")
-            
-    for channel in data['channels']:
-        for user in channel['owner_members']:
-            if user == token:
-                channel['owner_members'].remove(user)
-                if p_id == 'admin_members':
-                    channel['admin_members'].append(user)
-                else:
-                    channel['all_members'].append(user)
-        for user in channel['admin_members']:
-            if user == token and p_id != 'admin_members':
-                channel['admin_members'].remove(user)
-                if p_id == 'owner_members':
-                    channel['owner_mambers'].append(user)
-                else:
-                    channel['all_members'].append(user)
+    if p_id != '1':
+        if p_id != '2':
+            if p_id != '3':
+                raise ValueError('Not a valid permission')
+
+    check_id = get_U_id(token)
+
+    if u_id != check_id:
+        raise ValueError('Not the correct user')
+    
+    for user in data['user_info']:
+        if u_id == user['u_id']:
+            if user['permission_id'] == '1' or user['permission_id'] == '2':
+                user['permission_id'] = p_id
+            else:
+                raise ValueError('User is not an authorised person to change permission')
+
 
     return dumps({ })
