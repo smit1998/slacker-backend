@@ -18,7 +18,7 @@ def auth_register_server():
 @APP.route('/auth/login', methods=['POST'])
 def auth_login_server():  
     email = request.form.get('email')
-    password = request.form.get('password'))
+    password = request.form.get('password')
     result = user_login(email, password)
     return dumps(result)
     
