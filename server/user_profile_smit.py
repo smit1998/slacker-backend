@@ -786,7 +786,7 @@ def search():
 
     return messages_list
 
-def admin_userpermission_change():
+def admin_userpermission_change(token, u_id, p_id):
     data = get_data()
 
     if p_id != '1':
@@ -794,15 +794,20 @@ def admin_userpermission_change():
             if p_id != '3':
                 raise ValueError('Not a valid permission')
 
-    check_id = get_U_id(token)
+    basic_info = getUserFromToken(token)
 
-    if u_id != check_id:
-        raise ValueError('Not the correct user')
+    flag = 0
+    for user in data['user_info']:
+        if user['u_id'] == basic_info['u_id'] and flag == 1: 
+            raise ValueError
+        elif user['u_id'] == basic_info['u_id'] and flag == 0:
+            flag = 1       
+
     
     for user in data['user_info']:
-        if u_id == user['u_id']:
+        if basic_info['u_id'] == user['u_id']:
             if user['permission_id'] == '1' or user['permission_id'] == '2':
-                user['permission_id'] = p_id
+                basic_info['permission_id'] = p_id
             else:
                 raise ValueError('User is not an authorised person to change permission')
 
