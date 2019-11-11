@@ -2,7 +2,7 @@ import pytest
 import re
 from user_profile_smit import * 
 #everything is valid
-'''def setname_test1():
+def setname_test1():
     BF.data['user_info'] = []
     authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
     result = BF.user_login('2199009762@qq.com', '1234567')
@@ -208,7 +208,7 @@ def standup_send_test_3():
     message = 'NO!!!!'
     with pytest.raises(ValueError):
         standup_send('1', ch_id, message)
- 
+
 #search test cases
 # worng token
 def search_test_1():
@@ -232,10 +232,11 @@ def search_test_2():
 
     with pytest.raises(ValueError):
         search('123', ' ')
-'''
+
+
 # tests for admin userpermission changes
 # not a valid user id
-def admin_userpermission_change_test_1():
+def admin_userpermission_change_1_test():
     result = auth_login('smitdob@gmail.com', '22abcd23')
     assert result['token'] == '123'
     assert result['u_id'] == '20'
@@ -271,5 +272,3 @@ def admin_userpermission_change_test_3():
     
     with pytest.raises(AccessError):
         admin_userpermission_change('123','20','3')
-
-
