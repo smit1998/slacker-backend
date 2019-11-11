@@ -774,7 +774,7 @@ def get_U_id(token):
     
     return user_id
 
-def search():
+def search(token,q_str):
     messages_list = []
 
     channel_list = list(channels_list(token))
