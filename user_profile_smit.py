@@ -154,5 +154,4 @@ def admin_userpermission_change():
             else:
                 raise ValueError('User is not an authorised person to change permission')
 
-
     return dumps({ })
