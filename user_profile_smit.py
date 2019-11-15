@@ -6,7 +6,7 @@ import hashlib
 import dateutil 
 from datetime import timezone
 from datetime import datetime
-
+from PIL import Image
 
 SECRET = 'comp1531 project'
  
@@ -815,5 +815,38 @@ def admin_userpermission_change(token, u_id, permission_id):
     return dumps({ })
 
 def standup_start(token, channel_id, length):
+    data = getData()
+    basic_info = getUserFromToken(token)
+    channel_list = channels_list(token)
+
+    found = 0
+    for user in channel_list:
+        if user['channel_id'] == int(channel_id):
+            found = 1
+
+    if found == 0:
+        raise ValueError('Not a valid channel_id for this user')
+
+    if length < 0:
+        raise ValueError('Not a valid length for standUp')
+
+def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
+    data = getData()
+    img = Image.open("img_url")
+    height, width = img.size
     
+    if (x_end - x_start) < width or (y_end - y_start) < height:
+        raise ValueError('dimensions are within the boundries')
+
+    user_info = getUserFromToken(token)
     
+    for user in data['user_info']:
+        if user['handle_str'] == user_info['handle_str']:
+            if len(user['handle_str']) > 20:
+                raise ValueError('user handle is more than 20 characters long')
+
+    area = (x_start, y_start, x_end, y_end)
+    img = img.crop(area)
+    img.save("img_url")
+    
+    return dumps({})

@@ -126,7 +126,7 @@ def user_profile_sethandle_test_1():
 def user_profiles_uploadphoto_test_1():
     result = auth_login('smitdob@gmail.com', '22abcd23')
     assert result['token'] == '123'
-    result['img_url'] = '100'
+    result['img_url'] = 'https://commons.wikimedia.org/wiki/File:Sunflower_from_Silesia2.jpg'
     result['x_start'] = '0'
     result['y_start'] = '0'
     result['x_end'] = '10'
@@ -139,7 +139,7 @@ def user_profiles_uploadphoto_test_1():
 def user_profiles_uploadphoto_test_2():
     result = auth_login('smitdob@gmail.com', '22abcd23')
     assert result['token'] == '123'
-    result['img_url'] = '200'
+    result['img_url'] = 'https://commons.wikimedia.org/wiki/File:Sunflower_from_Silesia2.jpg'
     result['x_start'] = '-100'
     result['y_start'] = '-100'
     result['x_end'] = '10000000'
@@ -152,7 +152,7 @@ def user_profiles_uploadphoto_test_2():
 def user_profiles_uploadphoto_test_3():
     result = auth_login('smitdob@gmail.com', '22abcd23')
     assert result['token'] == '123'
-    result['img_url'] = '100'
+    result['img_url'] = 'https://commons.wikimedia.org/wiki/File:Sunflower_from_Silesia2.jpg'
     result['x_start'] = '-100'
     result['y_start'] = '-100'
     result['x_end'] = '10000000'
