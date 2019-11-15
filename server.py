@@ -252,5 +252,18 @@ def admin_userpermission_change():
     permission_results = admin_userpermission_change(token, u_id, permission_id)
 
     return dumps(permission_results)
+@APP.route('/user/profiles/uploadphoto', methods = ['POST'])
+def user_profiles_uploadphoto():
+
+    token = request.form.get('token')
+    img_url = request.form.get('img_url')
+    x_start = request.form.get('x_start')
+    x_end = request.form.get('x_end')
+    y_start = request.form.get('y_start')
+    y_end = request.form.get('y_end')
+
+    results = user_profiles_uploadphoto(token, x_start, y_start, x_end, y_end)
+
+    return dumps(results)
 if __name__ == '__main__':
     APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
