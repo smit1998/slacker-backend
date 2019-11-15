@@ -17,8 +17,9 @@ def defaultHandler(err):
     
 APP = Flask(__name__)
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
-APP.register_error_handler(Exception, defaultHandler)
+#APP.register_error_handler(Exception, defaultHandler)
 CORS(APP)
+
 
 
 class ValueError(HTTPException):
@@ -262,8 +263,6 @@ def user_profiles_uploadphoto():
     y_start = request.form.get('y_start')
     y_end = request.form.get('y_end')
 
-    results = user_profiles_uploadphoto(token, x_start, y_start, x_end, y_end)
-
-    return dumps(results)
+    return dumps({})
 if __name__ == '__main__':
     APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))

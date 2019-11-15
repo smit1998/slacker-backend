@@ -487,7 +487,7 @@ def channel_leave(token,channel_id):
         raise ValueError(description = 'channel_id that you are trying to leave from is invalid')
     return {}
 
-def channel_join(token, channel_id):
+'''def channel_join(token, channel_id):
     data = getData()
     basic_info = getUserFromToken(token)
     channel_id_integer = int(channel_id)
@@ -508,7 +508,7 @@ def channel_join(token, channel_id):
     #if (flag_2 == True): 
         #raise AccessError(description = "cannot join channel as it is private") 
     return {}
-
+'''
 def addowners_channel(token, channel_id, u_id):
     data = getData()
     basic_info = getUserFromToken(token)
@@ -830,7 +830,7 @@ def standup_start(token, channel_id, length):
     if length < 0:
         raise ValueError('Not a valid length for standUp')
 
-def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
+def user_profiles_uploadphoto  (token, img_url, x_start, y_start, x_end, y_end):
     data = getData()
     img = Image.open("img_url")
     height, width = img.size
