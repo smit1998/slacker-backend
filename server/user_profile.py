@@ -4,7 +4,7 @@ import jwt
 import copy 
 import hashlib
 import dateutil 
-from datetime import timezoe
+from datetime import timezone
 from datetime import datetime
 from PIL import Image
 

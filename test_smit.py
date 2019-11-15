@@ -1,6 +1,5 @@
 import pytest 
-import re
-from user_profile_smit import * 
+import project.user_profile_smit as BF
 #everything is valid
 def setname_test1():
     BF.data['user_info'] = []
