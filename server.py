@@ -247,10 +247,10 @@ def admin_userpermission_change():
     
     token = request.form.get('token')
     u_id = request.form.get('u_id')
-    p_id = request.form.get('permission')
+    permission_id = request.form.get('permission')
 
-    permission_results = admin_userpermission_change(token, u_id, p_id)
+    permission_results = admin_userpermission_change(token, u_id, permission_id)
 
-    return dumps({})
+    return dumps(permission_results)
 if __name__ == '__main__':
     APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
