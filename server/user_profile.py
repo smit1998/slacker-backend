@@ -862,7 +862,7 @@ def standup_active(token, channel_id):
     active = False
     for channel in channel_list['channel_info']:
         if channel['channel_id'] == channel_id:
-            if channel['is_active'] == True
+            if channel['is_active'] == True:
                 active = True
     
     return active
