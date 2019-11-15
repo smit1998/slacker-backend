@@ -786,30 +786,34 @@ def search(token,q_str):
 
     return messages_list
 
-def admin_userpermission_change(token, u_id, p_id):
-    data = get_data()
+def admin_userpermission_change(token, u_id, permission_id):
+    data = getData()
 
-    if p_id != '1':
-        if p_id != '2':
-            if p_id != '3':
-                raise ValueError(description = 'Not a valid permission')
+    if permission_id != '1':
+        if permission_id != '2':
+            if permission_id != '3':
+                raise ValueError('Not a valid permission')
 
     owner_info = getUserFromToken(token)
 
     flag = 0
     for user in data['user_info']:
-        if user['u_id'] == u_id and flag == 1: 
+        if user['u_id'] == int(u_id) and flag == 1: 
             raise ValueError
-        elif user['u_id'] == u_id and flag == 0:
+        elif user['u_id'] == int(u_id) and flag == 0:
             flag = 1       
     if flag == 0:
-        raise ValueError(description = 'Not a valid u_id')
+        raise ValueError('Not a valid u_id')
     
     for user in data['user_info']:
-        if user['u_id'] == u_id:
+        if user['u_id'] == int(u_id):
             if owner_info['permission_id'] == '1' or owner_info['permission_id'] == '2':
-                user['permission_id'] = p_id
+                user['permission_id'] = permission_id
             else:
-                raise ValueError(description = 'User is not an authorised person to change permission')
+                raise ValueError('User is not an authorised person to change permission')
 
     return dumps({ })
+
+def standup_start(token, channel_id, length):
+    
+    
