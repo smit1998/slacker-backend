@@ -361,10 +361,14 @@ def message_send(token, channel_id, message):
                     message_dict['message_id'] = return_message_id
                     message_dict['message'] = message
                     message_dict['time_created'] = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
-                    message_dict['react_id'] = 0
+                    message_dict['reacts'] = [{
+                        'react_id': 1,
+                        'u_ids': [],
+                        'is_this_user_reacted': False
+                    }]
                     message_dict['is_pinned'] = False
                     message_dict['channel_id'] = channel_id_integer
-                    message_dict['sender'] = token
+                    message_dict['u_id'] = basic_info['u_id']
                     data['message_info'].append(message_dict)
                     return {
                         'message_id': return_message_id
@@ -639,7 +643,7 @@ def message_remove(token, message_id):
                             flag_1 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
-            if (msg['sender'] == token):
+            if (msg['u_id'] == basic_info['u_id']):
                 flag_1 = True
             if (flag_1 == False):
                 raise AccessError('user has insufficient permissions')
@@ -666,7 +670,7 @@ def message_edit(token, message_id, message):
                             flag_1 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
-            if (i['sender'] == token):
+            if (i['u_id'] == basic_info['u_id']):
                 flag_1 = True
             if (flag_1 == False):
                 raise AccessError('user has insufficient permissions')
@@ -675,22 +679,50 @@ def message_edit(token, message_id, message):
 
 def message_react(token, message_id, react_id):
     data = getData()
+    basic_info = getUserFromToken(token)
     input_message_id = int(message_id)
     input_react_id = int(react_id)
-    if (input_react_id != 1):
+    if (input_react_id == 0):
         ValueError('invalid react')
     flag_1 = False # Checks if the message exists.
-    for message in data['message_info']:
-        if (message['message_id'] == input_message_id):
-            if (message['react_id'] == input_react_id):
-                raise ValueError('message already has an active react')
-            flag_1 = True
-            message['react_id'] = input_react_id
+    for msg in data['message_info']:
+        for react in msg['reacts']:
+            if (react['react_id'] == input_react_id):
+                for u in react['u_ids']:
+                    if (u == basic_info['u_id']):
+                        raise ValueError('message has already been reacted to')
+                react['u_ids'].append(basic_info['u_id'])
+                if (msg['u_id'] == basic_info['u_id']):
+                    react['is_this_user_reacted'] = True
+                flag_1 = True
     if (flag_1 == False):
         raise ValueError('message does not exist')
     return {}
 
 def message_unreact(token, message_id, react_id):
+    data = getData()
+    basic_info = getUserFromToken(token)
+    input_message_id = int(message_id)
+    input_react_id = int(react_id)
+    if (input_react_id != 0):
+        ValueError('invalid react')
+    flag_1 = False # Checks if the message exists.
+    flag_2 = False # Checks if the message contains an active react.
+    for msg in data['message_info']:
+        for react in msg['reacts']:
+            if (react['react_id'] == input_react_id):
+                if (msg['u_id'] == basic_info['u_id']):
+                    react['is_this_user_reacted'] = False
+                for u in react['u_ids']:
+                    if (u == basic_info['u_id']):
+                        react['u_ids'].remove(basic_info['u_id'])
+                flag_2 = True
+                flag_1 = True
+    if (flag_1 == False):
+        raise ValueError('message does not exist')
+    return {}
+    
+    
     data = getData()
     input_message_id = int(message_id)
     input_react_id = int(react_id)

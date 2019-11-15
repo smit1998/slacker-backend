@@ -26,10 +26,15 @@ data = {
     {
         'message_id':'',
         'message':'',
-        'react_id':'', # 0: No react, 1: Reacted
+        'reacts': [
+        {
+            'react_id':'', # 0: No react, 1: Reacted
+            'u_ids':[''], # List of user id's of people who've reacted for that react.
+            'is_this_user_reacted':'' # Whether or not the sender reacted to this post.
+        }]       
         'is_pinned':'', # 0: Not pinned, 1: Pinned
-        'sender':'', # The person that sends the message
-        'channel_id':'', # The channel that the message is in
+        'u_id':'', # The person that sent the message.
+        'channel_id':'', # The channel that the message is in.
         'time_created':''
     }]
 }
