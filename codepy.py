@@ -246,10 +246,16 @@ def channels_create(token, name, is_public):
     owner['u_id'] = basic_info['u_id']
     owner['name_first'] = basic_info['name_first']
     owner['name_last'] = basic_info['name_last']
+    flag = False
     if is_public == 'True':      
-        owner['is_public'] = True
+        is_public = True
+        flag = True
     if is_public == 'False':
-        owner['is_public'] = False
+        is_public = False
+        flag = True
+    
+    if (flag == False): 
+        raise ValueError(description = 'please set is_public to True or False with capital T/F')
     all_users = {}
     all_users['u_id'] = basic_info['u_id']
     all_users['name_first'] = basic_info['name_first']
@@ -259,7 +265,7 @@ def channels_create(token, name, is_public):
         'owner_members': [owner],
         'all_members': [all_users],
         'name': name,
-        'is_public': owner[is_public],
+        'is_public': is_public,
         'token': basic_info['name_first']
     })
     return {
@@ -496,13 +502,7 @@ def channel_leave(token,channel_id):
             found1 = None
             for i in channel['all_members']:
                 if (basic_info['u_id'] == i['u_id']): 
-                    found1 = i 
-            found2 = None
-            for c in channel['owner_members']:
-                if (basic_info['u_id'] == i['u_id']):
-                    found2 = i
-            if found2 != None:
-                channel['owner_members'].remove(c)
+                    found1 = i
             if found1 != None:
                 channel['all_members'].remove(i)
     if(flag_1 == False):
@@ -517,14 +517,13 @@ def channel_join(token, channel_id):
     flag_2 = False
     for channel in data['channel_info']: 
         if (channel_id_integer == channel['channel_id']): 
-            flag_1 = True 
-            #if channel['is_public'] == True:
-             
-            all_users = {}
-            all_users['u_id'] = basic_info['u_id']
-            all_users['name_first'] = basic_info['name_first']
-            all_users['name_last'] = basic_info['name_last']
-            channel['all_members'].append(all_users)
+            flag_1 = True
+            if (channel['is_public'] == True):
+                all_users = {}
+                all_users['u_id'] = basic_info['u_id']
+                all_users['name_first'] = basic_info['name_first']
+                all_users['name_last'] = basic_info['name_last']
+                channel['all_members'].append(all_users)
     if (flag_1 == False): 
         raise ValueError(description = "channel_id is invalid")
     #if (flag_2 == True): 
