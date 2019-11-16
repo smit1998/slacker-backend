@@ -847,11 +847,11 @@ def standup_start(token, channel_id, length):
     if found == 0:
         raise ValueError('Not a valid channel_id for this user')
 
-    if length < 0:
+    if int(length) < 0:
         raise ValueError('Not a valid length for standUp')
 
     time_now = datetime.now()
-    finish_time = time_now + int(length)
+    finish_time = time_now + datetime.strptime(length)
 
     return finish_time
 

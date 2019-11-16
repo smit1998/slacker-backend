@@ -182,6 +182,7 @@ def standup_start_test_3():
     ch_id = channels_create('123','easy',true)
     with pytest.raises(ValueError):
         standup_start('12', ch_id)
+
 # everything is correct    
 def standup_send_test_1():
     start = auth_login('smitdobaria@gmail.com','22abcd23')

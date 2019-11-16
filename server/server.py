@@ -244,7 +244,7 @@ def search():
     return dumps({})
 
 @APP.route('/admin/userpermission/change', methods = ['POST'])
-def admin_userpermission_change():
+def admin_userpermission_change_server():
     
     token = request.form.get('token')
     u_id = request.form.get('u_id')
@@ -254,15 +254,25 @@ def admin_userpermission_change():
 
     return dumps(permission_results)
 @APP.route('/user/profiles/uploadphoto', methods = ['POST'])
-def user_profiles_uploadphoto():
+def user_profiles_uploadphoto_server():
 
     token = request.form.get('token')
     img_url = request.form.get('img_url')
     x_start = request.form.get('x_start')
-    x_end = request.form.get('x_end')
+    x_end = request.form.get('x_end') 
     y_start = request.form.get('y_start')
     y_end = request.form.get('y_end')
 
     return dumps({})
+
+@APP.route('/standup/start', methods = ['POST'])
+def standup_start_server():
+    token = request.form.get('token')
+    channel_id = request.form.get('channel_id')
+    length = request.form.get('length')
+
+    finish = standup_start(token, channel_id, length)
+    return dumps(finish)
+
 if __name__ == '__main__':
     APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
