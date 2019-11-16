@@ -28,7 +28,7 @@ data = {
         'message':'',
         'reacts': [
         {
-            'react_id':'', # 0: No react, 1: Reacted
+            'react_id':'', # Only valid react is 1.
             'u_ids':[''], # List of user id's of people who've reacted for that react.
             'is_this_user_reacted':'' # Whether or not the sender reacted to this post.
         }]       

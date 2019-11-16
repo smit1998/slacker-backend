@@ -9,14 +9,6 @@ from flask_cors import CORS
 from datetime import timezone
 from datetime import datetime
 
-class AccessError(HTTPException):
-    code = 400 
-    message = 'No message specified'
-    
-class ValueError(HTTPException):
-    code = 400
-    message = 'No message specified'
-
 SECRET = 'comp1531 project'
  
 data = {
@@ -45,11 +37,6 @@ class AccessError(HTTPException):
 
 #---------------------------------
 # dry dry dry
-def generateReact_id(r_id):
-    global react_id 
-    react_id = react_id + 1
-    r_id = react_id 
-    return r_id
     
 def generateMessage_id(m_id):
     global message_id 
@@ -72,20 +59,17 @@ def generateChannel_id(c_id):
 
 #------------------------------
 #dry dry dry
-def resetUser_id(u_id):
+def resetUser_id():
     global user_id
-    u_id = 0 
-    user_id = u_id
+    user_id = 0
 
-def resetChannel_id(c_id):
-    global channel_id 
-    c_id = 0
-    channel_id = c_id 
+def resetChannel_id():
+    global channel_id
+    channel_id = 0
 
-def resetMessage_id(m_id):
+def resetMessage_id():
     global message_id
-    m_id = 0
-    message_id = m_id
+    message_id = 0
 #-------------------------------   
     
 def getData():
@@ -144,7 +128,7 @@ def user_register(email, password, name_first, name_last):
         'name_last': name_last,
         'u_id': generateU_id(user_id),
         # question 2: what about we have two users' are both having same name_first, do they would create two different tokens ? ? ? 
-        'token': generateToken(name_first),
+        'token': generateToken(user_id),
         # question 3: the hand_str should be changed all the times, or just fixed. 
         'handle_str': 'TEAM WORK',
         'permission_id': 3
@@ -635,7 +619,7 @@ def message_remove(token, message_id):
     flag_1 = False # Checks for owner permission.
     flag_2 = False # Checks if message exists
     for msg in data['message_info']:
-        if (msg['message_id'] == input_message_id): # Issue here
+        if (msg['message_id'] == input_message_id):
             for channel in data['channel_info']:
                 if (channel['channel_id']) == msg['channel_id']:  
                     for owner in channel['owner_members']:
@@ -648,7 +632,7 @@ def message_remove(token, message_id):
             if (flag_1 == False):
                 raise AccessError('user has insufficient permissions')
             flag_2 = True
-            del msg
+            data['message_info'].remove(msg)
     if (flag_2 == False):
         raise ValueError('message does not exist')
     return {}
@@ -682,7 +666,7 @@ def message_react(token, message_id, react_id):
     basic_info = getUserFromToken(token)
     input_message_id = int(message_id)
     input_react_id = int(react_id)
-    if (input_react_id == 0):
+    if (input_react_id != 1):
         ValueError('invalid react')
     flag_1 = False # Checks if the message exists.
     for msg in data['message_info']:
@@ -704,10 +688,10 @@ def message_unreact(token, message_id, react_id):
     basic_info = getUserFromToken(token)
     input_message_id = int(message_id)
     input_react_id = int(react_id)
-    if (input_react_id != 0):
+    if (input_react_id != 1):
         ValueError('invalid react')
-    flag_1 = False # Checks if the message exists.
-    flag_2 = False # Checks if the message contains an active react.
+    flag_1 = False # Checks if the message exists and has a react.
+    flag_2 = False # Checks if the message has an active react.
     for msg in data['message_info']:
         for react in msg['reacts']:
             if (react['react_id'] == input_react_id):
@@ -716,25 +700,10 @@ def message_unreact(token, message_id, react_id):
                 for u in react['u_ids']:
                     if (u == basic_info['u_id']):
                         react['u_ids'].remove(basic_info['u_id'])
-                flag_2 = True
+                        flag_2 = True
                 flag_1 = True
-    if (flag_1 == False):
-        raise ValueError('message does not exist')
-    return {}
-    
-    
-    data = getData()
-    input_message_id = int(message_id)
-    input_react_id = int(react_id)
-    if (input_react_id != 0):
-        raise ValueError('invalid react')
-    flag_1 = False # Checks if the message exists.
-    for message in data['message_info']:
-        if (message['message_id'] == input_message_id):
-            if (message['react_id'] == input_react_id):
-                raise ValueError('message does not contain an active react')
-            flag_1 = True
-            message['react_id'] = input_react_id
+    if (flag_2 == False):
+        raise ValueError('message does not have an active react')
     if (flag_1 == False):
         raise ValueError('message does not exist')
     return {}
@@ -743,33 +712,32 @@ def message_pin(token, message_id):
     data = getData()
     input_message_id = int(message_id)
     basic_info = getUserFromToken(token)
+
+    print(token)
+    print(basic_info)
+
     flag_1 = False # Checks for permission to pin.
     flag_2 = False # Checks if message exists.
     flag_3 = False # Checks if the user is a member of the channel that the message is within.
     for message in data['message_info']:
-        print(message)
         if (message['message_id'] == input_message_id):
             for channel in data['channel_info']:
                 if (channel['channel_id']) == message['channel_id']:  
-                    for owner in channel['owner_members']:
-                        if (owner['u_id'] == basic_info['u_id']):
-                            flag_1 = True
                     for member in channel['all_members']:
                         if (member['u_id'] == basic_info['u_id']):
+                            print(member['u_id'])
+                            print(basic_info['u_id'])
                             flag_3 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
-            if (flag_1 == False):
-                raise ValueError('user has insufficient permissions')
             if (flag_3 == False):
                 raise AccessError('user is not a member of the channel that the message is within')
-            print(message['is_pinned'])
+            if (flag_1 == False):
+                raise ValueError('user is not admin')
             if (message['is_pinned'] == True):
                 raise ValueError('message already pinned')
             flag_2 = True
             message['is_pinned'] = True
-            print(message['is_pinned'])
-            print('Message Has Been Pinned')
     if (flag_2 == False):
         raise ValueError('message does not exist')
     return {}
