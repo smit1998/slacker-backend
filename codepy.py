@@ -9,6 +9,8 @@ from flask_cors import CORS
 from datetime import timezone
 from datetime import datetime
 from flask_mail import Mail, Message
+import string 
+import random
 
 class AccessError(HTTPException):
     code = 400 
@@ -247,15 +249,15 @@ def channels_create(token, name, is_public):
     owner['name_first'] = basic_info['name_first']
     owner['name_last'] = basic_info['name_last']
     flag = False
-    if is_public == 'True':      
+    if is_public == 'True' or is_public == 'true' or is_public == 'TRUE':      
         is_public = True
         flag = True
-    if is_public == 'False':
+    if is_public == 'False' or is_public == 'false' or is_public == 'FALSE':
         is_public = False
         flag = True
     
     if (flag == False): 
-        raise ValueError(description = 'please set is_public to True or False with capital T/F')
+        raise ValueError(description = 'please set is_public to True or False')
     all_users = {}
     all_users['u_id'] = basic_info['u_id']
     all_users['name_first'] = basic_info['name_first']
@@ -614,7 +616,7 @@ def passwordreset_request(email, APP):
     data = getData() 
     mail = Mail(APP)
     flag = False
-    code = '123'
+    code = int(code_generator())
     for user in data['user_info']:
         if (user['email'] == email):
             flag = True
@@ -627,6 +629,5 @@ def passwordreset_request(email, APP):
             mail.send(msg)
     return {}
 
-def random_code_generator(stringLength=10):
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(stringLength))
+def code_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return (random.choice(chars) for _ in range(size))
