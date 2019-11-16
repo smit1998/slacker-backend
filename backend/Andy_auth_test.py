@@ -1,7 +1,6 @@
 import pytest
 import backend.backend_functions as BF
 
-
 # when both of email and password are valid, return the valid token
 def test_auth_register_both_valid01():
     authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')

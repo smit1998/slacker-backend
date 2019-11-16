@@ -193,16 +193,18 @@ def channels_create(token, name, is_public):
         'name_last': basic_info['name_last']
     })
     basic_info['permission_id'] = '2'
+   
     flag = False
-    if is_public == 'True':
+    if is_public == 'True' or is_public == 'true' or is_public == 'TRUE':      
         is_public = True
         flag = True
-    if is_public == 'False':
-        is_public = False 
+    if is_public == 'False' or is_public == 'false' or is_public == 'FALSE':
+        is_public = False
         flag = True
-        
+    
     if (flag == False): 
-        raise ValueError( description = 'please change is_public to True/False with captial F/T')
+        raise ValueError(description = 'please set is_public to True or False')
+    
     all_users.append({
         'u_id': basic_info['u_id'],
         'name_first': basic_info['name_first'],
@@ -214,8 +216,9 @@ def channels_create(token, name, is_public):
         'all_members': all_users,
         'name': name,
         'is_public': is_public,
-        'token': basic_info['name_first']
-        
+        'token': basic_info['name_first'],
+        'is_active': False,
+        'time_finish': datetime.timestamp(datetime.now())
     })
     return {
         'channel_id': data['channel_info'][-1]['channel_id']
@@ -264,7 +267,6 @@ def channel_details(token, channel_id):
     channel_id_integer = int(channel_id)
     flag_1 = False
     flag_2 = False
-    channel = None
     # check if the channel ID is invalid
     for i in data['channel_info']:
         if(channel_id_integer == i['channel_id']):
@@ -273,6 +275,7 @@ def channel_details(token, channel_id):
         # check if the user is not a member in this channel with channel_id
             for user in i['all_members']:
                 basic_info = getUserFromToken(token) 
+                print(user)
                 if(basic_info['u_id'] == user['u_id']):
                     flag_2 = True
     if(flag_1 == False):
@@ -497,11 +500,12 @@ def channels_listall(token):
     }
     
 
+
 def channel_leave(token,channel_id): 
     data = getData()
     basic_info = getUserFromToken(token)
     channel_id_integer = int(channel_id)
-    #u_id_integer = int(u_id) returns a dictonary 
+    print(channel_id_integer)
     flag_1 = False
     for channel in data['channel_info']:  
         if (channel_id_integer == channel['channel_id']): 
@@ -512,9 +516,18 @@ def channel_leave(token,channel_id):
                     found1 = i
             if found1 != None:
                 channel['all_members'].remove(i)
+            found2 = None
+            for c in channel['owner_memebers']:
+                if (basic_info['u_id'] == i['u_id']): 
+                    found2 = i
+            if found2 != None:
+                channel['owner_members'].remove(c)
     if(flag_1 == False):
         raise ValueError(description = 'channel_id that you are trying to leave from is invalid')
     return {}
+
+
+
 
 def channel_join(token, channel_id):
     data = getData()
