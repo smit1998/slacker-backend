@@ -507,6 +507,12 @@ def channel_leave(token,channel_id):
                     found1 = i
             if found1 != None:
                 channel['all_members'].remove(i)
+            found2 = None
+            for c in channel['owner_owners']:
+                if (basic_info['u_id'] == i['u_id']): 
+                    found2 = i
+            if found2 != None:
+                channel['owner_members'].remove(c)
     if(flag_1 == False):
         raise ValueError(description = 'channel_id that you are trying to leave from is invalid')
     return {}
