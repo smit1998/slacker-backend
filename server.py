@@ -202,15 +202,15 @@ def unreact():
     result = message_unreact(token, message_id, react_id)
     return dumps(result)
 
-@APP.route('/message/pinn', methods=['POST'])
-def pin():
+@APP.route('/message/pin', methods=['POST'])
+def pin_server():
     token = request.form.get('token')
     message_id = request.form.get('message_id')
     message_pin(token, message_id)
     return dumps({})
 
 @APP.route('/message/unpin', methods=['POST'])
-def unpin():
+def unpin_server():
     token = request.form.get('token')
     message_id = request.form.get('message_id')
     message_unpin(token, message_id)
@@ -272,6 +272,34 @@ def all_users_server():
     result = all_users(token)
     return dumps(result)
    
+@APP.route('/user/profiles/uploadphoto', methods = ['POST'])
+def user_profiles_uploadphoto_server():
+
+    token = request.form.get('token')
+    img_url = request.form.get('img_url')
+    x_start = request.form.get('x_start')
+    x_end = request.form.get('x_end') 
+    y_start = request.form.get('y_start')
+    y_end = request.form.get('y_end')
+
+    return dumps({})
+
+@APP.route('/standup/start', methods = ['POST'])
+def standup_start_server():
+    token = request.form.get('token')
+    channel_id = request.form.get('channel_id')
+    length = request.form.get('length')
+
+    finish = standup_start(token, channel_id, length)
+    return dumps(finish)
+
+@APP.route('/standup/active', methods = ['POST'])
+def standup_active_server():
+    token = request.form.get('token')
+    channel_id = request.form.get('channel_id')
+
+    result = standup_active(token, channel_id)
+    return dumps(result)
 
 
 if __name__ == '__main__':
