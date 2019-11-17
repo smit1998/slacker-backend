@@ -1,15 +1,7 @@
 import pytest 
 import user_profile as BF
 #everything is valid
-'''def test_setname_1():
-    BF.data['user_info'] = []
-    authRegisterDic = BF.user_register('abc@qq.com', '1234567', 'Andy', 'Wei')
-    result = BF.user_login('abc@qq.com', '1234567')
-    assert result['token'] == authRegisterDic['token']
-    assert result['u_id'] == authRegisterDic['u_id']
-    user_profile_setname('1234567', 'smit', 'dobaria')
-    assert BF.user_profile(authRegisterDic['token'], authRegisterDic['u_id']) == ('abc.com', '1234567', 'smit', 'dobaria')
-'''
+
 #first name is not valid
 def test_user_profile_setname_2():
     BF.data['user_info'] = []
@@ -53,18 +45,16 @@ def test_user_profile_setemail_1():
     
 # email is valid but not available
 def test_user_profile_setemail_2():
-    result = BF.user_login('smitdobaria@qq.com', '12345678')
-    token = result['token']
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('smit@qq.com', '12345678', 'smit', 'dob')
+    result = BF.user_login('smit@qq.com', '12345678')
+    authRegisterDic_2 = BF.user_register('1234566@qq.com', '1234567', 'smit1', 'dob2')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
 
     with pytest.raises(ValueError):
-            BF.user_profile_setemail(token, 'smitdobaria@qq.com')
-# not valid but available
-def test_user_profile_setemail_3():
-    result = BF.user_login('smitdob@qq.com', '12345678')
-    token = result['token']
-
-    with pytest.raises(ValueError):
-            BF.user_profile_setemail(token, 'smitdob@qq.com')           
+            BF.user_profile_setemail(result['token'], '1234566@qq.com')
+           
 
 # for the case of both not valid and not available is not possible because if it is not valid is not used also
 

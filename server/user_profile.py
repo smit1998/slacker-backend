@@ -7,8 +7,8 @@ import dateutil
 from datetime import timezone
 from datetime import datetime
 from PIL import Image
-#from server import ValueError
-#from server import AccessError
+from server import ValueError
+from server import AccessError
 SECRET = 'comp1531 project'
  
 data = {
@@ -396,9 +396,9 @@ def sendlater_message(token, channel_id, message, time_sent):
 def user_profile_setname(token, name_first, name_last):
     data = getData()
     if (len(name_first) > 50 or len(name_last) < 1):
-       raise ValueError(description = "name_first is not between 1 and 50.")
+       raise ValueError("name_first is not between 1 and 50.")
     if (len(name_last) > 50 or len(name_last) < 1):
-        raise ValueError(description = "name_last is not between 1 and 50.")
+        raise ValueError("name_last is not between 1 and 50.")
     #change the first and last names
     basic_info = getUserFromToken(token)
     
@@ -413,14 +413,14 @@ def user_profile_setemail(token, email):
     data = getData()
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     if(not re.search(regex, email)):
-        raise ValueError(description = "invalid email")
+        raise ValueError("invalid email")
     flag = False
     for i in data['user_info']:
         if(i['email'] == email):
             flag = True
     # email address is already been used by other users
     if(flag == True):
-        raise ValueError(description = 'email address is already been used')
+        raise ValueError('email address is already been used')
     
     basic_info = getUserFromToken(token)
     
@@ -432,10 +432,10 @@ def user_profile_setemail(token, email):
 def user_profile_sethandle(token, handle_str):
     data = getData()
     if (len(handle_str) < 3 or len(handle_str) > 20):
-        raise ValueError(description = "handle_str is invalid")
+        raise ValueError("handle_str is invalid")
     for user in data['user_info']:
         if user['handle_str'] == handle_str:
-            raise ValueError(description = "Handle_str already in use")
+            raise ValueError("Handle_str already in use")
     basic_info = getUserFromToken(token)
     for u in data['user_info']:
         if u['u_id'] == basic_info['u_id']:
@@ -488,7 +488,7 @@ def channel_leave(token,channel_id):
         raise ValueError(description = 'channel_id that you are trying to leave from is invalid')
     return {}
 
-'''def channel_join(token, channel_id):
+def channel_join(token, channel_id):
     data = getData()
     basic_info = getUserFromToken(token)
     channel_id_integer = int(channel_id)
@@ -509,7 +509,7 @@ def channel_leave(token,channel_id):
     #if (flag_2 == True): 
         #raise AccessError(description = "cannot join channel as it is private") 
     return {}
-'''
+
 def addowners_channel(token, channel_id, u_id):
     data = getData()
     basic_info = getUserFromToken(token)
