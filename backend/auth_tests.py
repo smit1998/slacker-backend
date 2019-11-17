@@ -1,50 +1,69 @@
-import pytest  
-from Error import AccessError 
+import pytest
+import backend.backend_functions as BF
 
-def test_auth_register_valid_token():  
-    register_details = auth_register('memes@gmail.com', 'dankpassword121', 'Cameron', 'Burrell')
-    token = register_details['token']
-    assert validToken(token) == True
-   
-def test_auth_register_correctemail(): 
-    with pytest.raises(ValueError):
-        auth_register('hello.com', 'stronkpassword123', 'John', 'Super')
-       
-def test_auth_register_emailused():
-    auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei')
-    with pytest.raises(ValueError):
-        auth_register('ankitrai326@gmail.com', '224232r4', 'Andy', 'Wei')
-   
-def test_auth_register_password_length():
-    with pytest.raises(ValueError):
-        auth_register('correctemail@gmail.com', '123', 'ShortN', 'Sweet')
-       
-def test_auth_register_first_name(): 
-    with pytest.raises(ValueError):
-        auth_register('doyourfingershurt@hotmail.com', '324sf223', 'sdfsvsdbgsdvsvbnsdvnsdovosdnvodsnvosdnvodsvnsdvnsdvfwj', 'LongAssFirstName')
+# when both of email and password are valid, return the valid token
+def test_auth_register_both_valid01():
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    assert authRegisterDic['token'] == BF.generateToken(1)
+    assert authRegisterDic['u_id'] == 1
     
-def test_auth_register_last_name(): 
-    with pytest.raises(ValueError):
-        auth_register('donthateme@gmail.com', 'ihavegivenup232e', 'Joe', 'tehrhdbfsmohteojfblkdnfgojdvfjgbfgodbdljhpobfhfdjhpdrsdsvr') 
+# when the email is valid and password is inva lid, print error message
+def test_auth_register_password_invalid():
+    with pytest.raises(BF.ValueError):
+        BF.user_register('andyWei326@gmail.com', '2242', 'Andy', 'Wei')
         
-def test_auth_passwordrest_request_registered_user():
-    token = auth_register('human@gmail.com', '12323452', 'legit', 'human')
-    assert validToken(token) == True
-    auth_passwordreset_request('human@gmail.com') 
-    with pytest.raises(ValueError):
-        auth_passwordreset_request('nonhumanperson@gmail.com')
+# when the password is valid and email is invalid, print error message
+def test_auth_register_email_invalid(): 
+    with pytest.raises(BF.ValueError):
+        BF.user_register('1337memesgmail.com', '123243223', 'Andy', 'Wei') 
+    
+# when both of email and password are invalid, print error message
+def test_auth_register_both_invalid(): 
+    with pytest.raises(BF.ValueError):
+        BF.user_register('tisisatest.comgamil', '66666', 'Andy', 'Wei') 
+
+# when both of email and password are valid
+def test_auth_login_both_valid01():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('2199009762@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+
+# when the email is valid and password is invalid, print error message
+def test_auth_login_password_invalid():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    with pytest.raises(BF.ValueError):
+        BF.user_login('2199009762@qq.com', '2242')
+      
+# when the password is valid and email is invalid, print error message
+def test_auth_login_email_invalid(): 
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    with pytest.raises(BF.ValueError):
+        BF.user_login('1337memesgmail.com', '1234567') 
+   
+# when email you typed is not belonging to user
+def test_auth_login_email_is_not_user_invalid(): 
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    with pytest.raises(BF.ValueError):
+        BF.user_login('yesyesyes@unsw.edu.au', '123456')
         
-def test_auth_passwordreset_reset_works(): 
-    assert validCode(reset_code) == True 
-    assert (len(new_password) >= 5)
-
-def test_auth_passwordreset_reset_invalid_code(): 
-    assert validCode(reset_code) == False
-    with pytest.raises(ValueError)
-        auth_passwordreset_reset(reset_code, new_password)
-
-def test_auth_passwordreset_reset_invalid_password(): 
-    assert (len(new_password) < 5) 
-    with pytest.raises(ValueError)
-        auth_passwordreset_reset(reset_code, new_password)
-
+# invalidating the authorized user, return True
+def test_auth_logout_validate_user():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    return_flag = BF.user_logout(authRegisterDic['token'])
+    assert return_flag['is_success'] == True
+   
+# the token is invalide, return False
+def test_auth_logout_token_invalid01():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    authRegisterDic_02 = BF.user_register('AndyWei@unsw.edu.au', '6666666', 'Andrew', 'Wei')
+    if(authRegisterDic['u_id'] == 1):
+        return_flag = BF.user_logout(authRegisterDic_02['token'])
+        assert return_flag['is_success'] == False
+    

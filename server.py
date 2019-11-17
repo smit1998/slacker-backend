@@ -266,6 +266,12 @@ def admin_userpermission_change_server():
     result = admin_userpermission_change(token, u_id, permission_id)
     return dumps(result)
 
+@APP.route('/users/all', methods=['GET'])
+def all_users_server():
+    token = request.args.get('token')
+    result = all_users(token)
+    return dumps(result)
+   
 
 
 if __name__ == '__main__':

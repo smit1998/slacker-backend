@@ -52,20 +52,17 @@ def generateChannel_id(c_id):
 
 #------------------------------
 #dry dry dry
-def resetUser_id(u_id):
+def resetUser_id():
     global user_id
-    u_id = 0 
-    user_id = u_id
+    user_id = 0
 
-def resetChannel_id(c_id):
+def resetChannel_id():
     global channel_id 
-    c_id = 0
-    channel_id = c_id 
+    channel_id = 0
 
-def resetMessage_id(m_id):
+def resetMessage_id():
     global message_id
-    m_id = 0
-    message_id = m_id
+    message_id = 0
 #-------------------------------   
  
   
@@ -133,8 +130,8 @@ def user_register(email, password, name_first, name_last):
     })
     print("Registering", user_id , "in with token", generateToken(user_id))
     return {
-        'token': generateToken(user_id),
-        'u_id': data['user_info'][-1]['u_id']
+        'u_id': data['user_info'][-1]['u_id'],
+        'token': generateToken(user_id)
     }
 
 
@@ -186,26 +183,24 @@ def channels_create(token, name, is_public):
         raise ValueError(description = "invalid channel name")
     basic_info = getUserFromToken(token)
     owner = []
-    all_users = []
+    all_user = []
     owner.append({
         'u_id': basic_info['u_id'],
         'name_first': basic_info['name_first'],
         'name_last': basic_info['name_last']
     })
-    basic_info['permission_id'] = '2'
-   
     flag = False
-    if is_public == 'True' or is_public == 'true' or is_public == 'TRUE':      
+    if is_public == 'True' or is_public == 'true' or is_public == 'TRUE' or is_public == True:
         is_public = True
         flag = True
-    if is_public == 'False' or is_public == 'false' or is_public == 'FALSE':
+    if is_public == 'False' or is_public == 'false' or is_public == 'FALSE' or is_public == False:
         is_public = False
         flag = True
-    
+    data['user_info'][0]['permission_id'] = '1'
     if (flag == False): 
         raise ValueError(description = 'please set is_public to True or False')
     
-    all_users.append({
+    all_user.append({
         'u_id': basic_info['u_id'],
         'name_first': basic_info['name_first'],
         'name_last': basic_info['name_last']
@@ -213,7 +208,7 @@ def channels_create(token, name, is_public):
     data['channel_info'].append({
         'channel_id': generateChannel_id(channel_id),
         'owner_members': owner,
-        'all_members': all_users,
+        'all_members': all_user,
         'name': name,
         'is_public': is_public,
         'token': basic_info['name_first'],
@@ -248,11 +243,11 @@ def channel_invite(token, channel_id, u_id):
                 if(i['u_id'] == basic_info['u_id']):
                     flag_3 = True
                     # invite this user into this channel
-                    all_users = {}
-                    all_users['u_id'] = u_id_integer
-                    all_users['name_first'] = user['name_first']
-                    all_users['name_last'] = user['name_last']
-                    channel['all_members'].append(all_users)
+                    users_all = {}
+                    users_all['u_id'] = u_id_integer
+                    users_all['name_first'] = user['name_first']
+                    users_all['name_last'] = user['name_last']
+                    channel['all_members'].append(users_all)
     if(flag_2 == False):
         raise ValueError(description = "the channel_id is invalid")
     if(flag_3 == False):
@@ -299,11 +294,30 @@ def user_profile(token, u_id):
     if(flag == False):
         raise ValueError(description = "u_id is invalid")
     return {
+        'u_id': i['u_id'],
         'email': i['email'],
         'name_first': i['name_first'],
         'name_last':  i['name_last'],
-        'handle_str': i['handle_str']
+        'handle_str': i['handle_str'],
+        'profile_img_url': 'https://marvelcinematicuniverse.fandom.com/wiki/Iron_Man?file=IronMan-EndgameProfile.jpg'
     }
+
+def all_users(token):
+    data = getData()
+    basic_info = getUserFromToken(token)
+    users = []
+    users.append({
+        'u_id': basic_info['u_id'],
+        'email': basic_info['email'],
+        'name_first': basic_info['name_first'],
+        'name_last': basic_info['name_last'],
+        'handle_str': basic_info['handle_str'],
+        'profile_img_url': 'https://marvelcinematicuniverse.fandom.com/wiki/Iron_Man?file=IronMan-EndgameProfile.jpg'
+    })
+    return {
+        'users': users
+    }
+        
 
 def channel_messages(token, channel_id, start):
     data = getData()
@@ -499,13 +513,11 @@ def channels_listall(token):
         'channels': list_all_channels
     }
     
-
-
 def channel_leave(token,channel_id): 
     data = getData()
     basic_info = getUserFromToken(token)
     channel_id_integer = int(channel_id)
-    print(channel_id_integer)
+    #u_id_integer = int(u_id) returns a dictonary 
     flag_1 = False
     for channel in data['channel_info']:  
         if (channel_id_integer == channel['channel_id']): 
@@ -516,18 +528,13 @@ def channel_leave(token,channel_id):
                     found1 = i
             if found1 != None:
                 channel['all_members'].remove(i)
-            found2 = None
-            for c in channel['owner_memebers']:
+            
+            for c in channel['owner_members']:
                 if (basic_info['u_id'] == i['u_id']): 
-                    found2 = i
-            if found2 != None:
-                channel['owner_members'].remove(c)
+                    found2 = c
     if(flag_1 == False):
         raise ValueError(description = 'channel_id that you are trying to leave from is invalid')
     return {}
-
-
-
 
 def channel_join(token, channel_id):
     data = getData()
@@ -539,30 +546,29 @@ def channel_join(token, channel_id):
         if (channel_id_integer == channel['channel_id']): 
             flag_1 = True
             if (channel['is_public'] == True):
+                flag_2 = True
                 all_users = {}
                 all_users['u_id'] = basic_info['u_id']
                 all_users['name_first'] = basic_info['name_first']
                 all_users['name_last'] = basic_info['name_last']
                 channel['all_members'].append(all_users)
+            else:
+                for user in data['user_info']:
+                    if user['u_id'] == basic_info['u_id']:
+                        if user['permission_id'] != 3:
+                            flag_2 = True
+                            all_users = {}
+                            all_users['u_id'] = basic_info['u_id']
+                            all_users['name_first'] = basic_info['name_first']
+                            all_users['name_last'] = basic_info['name_last']
+                            channel['all_members'].append(all_users)
     if (flag_1 == False): 
         raise ValueError(description = "channel_id is invalid")
-    #if (flag_2 == True): 
-        #raise AccessError(description = "cannot join channel as it is private") 
+    if (flag_2 == False): 
+        raise AccessError(description = "cannot join channel as it is private") 
     return {}
 
-'''
- for c in channel['owner_members']: 
-                if (basic_info['u_id'] != c['u_id'] and channel['is_public'] == False):
-                    flag_3 == True
-            for i in channel['owner_members']: 
-                if (basic_info['u_id'] == i['u_id'] flag_3 == False):
-                    all_users = {}
-                    all_users['u_id'] = basic_info['u_id']
-                    all_users['name_first'] = basic_info['name_first']
-                    all_users['name_last'] = basic_info['name_last']
-                    channel['all_members'].append(all_users)
-            if channel['is_public'] == True and flag_3 == False:
-'''
+
 def addowners_channel(token, channel_id, u_id):
     data = getData()
     basic_info = getUserFromToken(token)
@@ -665,7 +671,6 @@ def random_code_generator(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
-
 def message_remove(token, message_id):
     data = getData()
     input_message_id = int(message_id)
@@ -673,7 +678,7 @@ def message_remove(token, message_id):
     flag_1 = False # Checks for owner permission.
     flag_2 = False # Checks if message exists
     for msg in data['message_info']:
-        if (msg['message_id'] == input_message_id): # Issue here
+        if (msg['message_id'] == input_message_id):
             for channel in data['channel_info']:
                 if (channel['channel_id']) == msg['channel_id']:  
                     for owner in channel['owner_members']:
@@ -681,12 +686,12 @@ def message_remove(token, message_id):
                             flag_1 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
-            if (msg['sender'] == token):
+            if (msg['u_id'] == basic_info['u_id']):
                 flag_1 = True
             if (flag_1 == False):
                 raise AccessError('user has insufficient permissions')
             flag_2 = True
-            del msg
+            data['message_info'].remove(msg)
     if (flag_2 == False):
         raise ValueError('message does not exist')
     return {}
@@ -696,10 +701,11 @@ def message_edit(token, message_id, message):
     input_message_id = int(message_id)
     basic_info = getUserFromToken(token)
     flag_1 = False # Checks for permission.
+    flag_2 = False # Checks if its the authorized user.
     for i in data['message_info']:
         if (i['message_id'] == input_message_id):
             if (message == ""):
-                del i
+                data['message_info'].remove(i)
                 return {}
             for channel in data['channel_info']:
                 if (channel['channel_id']) == i['channel_id']:  
@@ -708,20 +714,22 @@ def message_edit(token, message_id, message):
                             flag_1 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
-            if (i['sender'] == token):
-                flag_1 = True
+            if (i['u_id'] == basic_info['u_id']):
+                flag_2 = True
             if (flag_1 == False):
                 raise AccessError('user has insufficient permissions')
+            if (flag_2 == False):
+                raise AccessError('user is not authorized')    
             i['message'] = message
     return {}
+
 
 def message_react(token, message_id, react_id):
     data = getData()
     basic_info = getUserFromToken(token)
     input_message_id = int(message_id)
-    
     input_react_id = int(react_id)
-    if (input_react_id == 0):
+    if (input_react_id != 1):
         ValueError('invalid react')
     flag_1 = False # Checks if the message exists.
     for msg in data['message_info']:
@@ -743,10 +751,10 @@ def message_unreact(token, message_id, react_id):
     basic_info = getUserFromToken(token)
     input_message_id = int(message_id)
     input_react_id = int(react_id)
-    if (input_react_id != 0):
+    if (input_react_id != 1):
         ValueError('invalid react')
-    flag_1 = False # Checks if the message exists.
-    flag_2 = False # Checks if the message contains an active react.
+    flag_1 = False # Checks if the message exists and has a react.
+    flag_2 = False # Checks if the message has an active react.
     for msg in data['message_info']:
         for react in msg['reacts']:
             if (react['react_id'] == input_react_id):
@@ -755,17 +763,19 @@ def message_unreact(token, message_id, react_id):
                 for u in react['u_ids']:
                     if (u == basic_info['u_id']):
                         react['u_ids'].remove(basic_info['u_id'])
-                flag_2 = True
+                        flag_2 = True
                 flag_1 = True
     if (flag_1 == False):
         raise ValueError('message does not exist')
+    if (flag_2 == False):
+        raise ValueError('message does not have an active react')
     return {}
-
 
 def message_pin(token, message_id):
     data = getData()
     input_message_id = int(message_id)
     basic_info = getUserFromToken(token)
+    print(basic_info['u_id'])
     flag_1 = False # Checks for permission to pin.
     flag_2 = False # Checks if message exists.
     flag_3 = False # Checks if the user is a member of the channel that the message is within.
@@ -773,18 +783,16 @@ def message_pin(token, message_id):
         if (message['message_id'] == input_message_id):
             for channel in data['channel_info']:
                 if (channel['channel_id']) == message['channel_id']:  
-                    for owner in channel['owner_members']:
-                        if (owner['u_id'] == basic_info['u_id']):
-                            flag_1 = True
                     for member in channel['all_members']:
+                        print(member)
                         if (member['u_id'] == basic_info['u_id']):
                             flag_3 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
-            if (flag_1 == False):
-                raise ValueError('user has insufficient permissions')
             if (flag_3 == False):
                 raise AccessError('user is not a member of the channel that the message is within')
+            if (flag_1 == False):
+                raise ValueError('user is not admin')
             if (message['is_pinned'] == True):
                 raise ValueError('message already pinned')
             flag_2 = True
@@ -823,6 +831,7 @@ def message_unpin(token, message_id):
     if (flag_2 == False):
         raise ValueError('message does not exist')
     return {}
+
     
 def search(token, q_str):
     messages_list = []
@@ -859,29 +868,25 @@ def admin_userpermission_change(token, u_id, p_id):
 
 def admin_userpermission_change(token, u_id, permission_id):
     data = getData()
-
-    if permission_id != '1':
-        if permission_id != '2':
-            if permission_id != '3':
-                raise ValueError('Not a valid permission')
-
     owner_info = getUserFromToken(token)
-
     flag = 0
     for user in data['user_info']:
-        if user['u_id'] == int(u_id) and flag == 0:
+        if user['u_id'] == int(u_id) and flag == 1: 
+            raise ValueError
+        elif user['u_id'] == int(u_id) and flag == 0:
             flag = 1       
     if flag == 0:
         raise ValueError('Not a valid u_id')
     
     for user in data['user_info']:
-        if user['u_id'] == u_id:
+        if user['u_id'] == int(u_id):
             if owner_info['permission_id'] == '1' or owner_info['permission_id'] == '2':
                 user['permission_id'] = permission_id
             else:
                 raise ValueError('User is not an authorised person to change permission')
 
     return {}
+
 
 def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
     data = getData()
