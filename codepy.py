@@ -251,10 +251,9 @@ def channels_create(token, name, is_public):
     if is_public == 'False' or is_public == 'false' or is_public == 'FALSE' or is_public == False:
         is_public = False
         flag = True
-    
+    data['user_info'][0]['permission_id'] = '1'
     if (flag == False): 
         raise ValueError(description = 'please set is_public to True or False')
-    data['user_info'][0]['permission_id'] = '1'
     all_users = {}
     all_users['u_id'] = basic_info['u_id']
     all_users['name_first'] = basic_info['name_first']
@@ -525,12 +524,20 @@ def channel_join(token, channel_id):
         if (channel_id_integer == channel['channel_id']): 
             flag_1 = True
             if (channel['is_public'] == True):
-                flag_2 = True
                 all_users = {}
                 all_users['u_id'] = basic_info['u_id']
                 all_users['name_first'] = basic_info['name_first']
                 all_users['name_last'] = basic_info['name_last']
                 channel['all_members'].append(all_users)
+            if (channel['is_public'] == False): 
+                flag_2 == True
+            if basic_info['permission_id'] == '1' or basic_info['permission_id'] == '2':
+                if (channel['is_public'] == False):
+                    all_users = {}
+                    all_users['u_id'] = basic_info['u_id']
+                    all_users['name_first'] = basic_info['name_first']
+                    all_users['name_last'] = basic_info['name_last']
+                    channel['all_members'].append(all_users)
     if (flag_1 == False): 
         raise ValueError(description = "channel_id is invalid")
     if (flag_2 == False): 
