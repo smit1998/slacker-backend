@@ -1,6 +1,5 @@
 import pytest
-import backend_functions as BF
-
+import backend.backend_functions as BF
 
 # when both of email and password are valid, return the valid token
 def test_auth_register_both_valid01():
@@ -8,7 +7,7 @@ def test_auth_register_both_valid01():
     assert authRegisterDic['token'] == BF.generateToken(1)
     assert authRegisterDic['u_id'] == 1
     
-# when the email is valid and password is invalid, print error message
+# when the email is valid and password is inva lid, print error message
 def test_auth_register_password_invalid():
     with pytest.raises(BF.ValueError):
         BF.user_register('andyWei326@gmail.com', '2242', 'Andy', 'Wei')
@@ -67,4 +66,4 @@ def test_auth_logout_token_invalid01():
     if(authRegisterDic['u_id'] == 1):
         return_flag = BF.user_logout(authRegisterDic_02['token'])
         assert return_flag['is_success'] == False
-    
+        
