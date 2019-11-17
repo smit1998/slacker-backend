@@ -371,6 +371,17 @@ def test_message_pin_already_pinned():
     with pytest.raises(BF.ValueError):
         BF.message_pin(token1, messageDict['message_id'])
 
+def test_channel_invite_u_id_invalid():
+    BF.data['user_info'] = []
+    BF.data['channel_info'] = []
+    BF.resetChannel_id()
+    BF.resetUser_id()
+    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
+    authRegisterDic_02 = BF.user_register('AndrewYeh@unsw.edu.au', '66666666', 'Andrew', 'Yeh') 
+    result = BF.channels_create(authRegisterDic['token'], 'good team', True)
+    with pytest.raises(BF.ValueError):
+        BF.channel_invite(authRegisterDic['token'], result['channel_id'], 3)
+
 def test_message_pin_not_member():
     BF.data['user_info'] = []
     BF.data['channel_info'] = []
@@ -378,10 +389,14 @@ def test_message_pin_not_member():
     BF.resetUser_id()
     BF.resetChannel_id()
     BF.resetMessage_id()
+
     authRegisterDict1 = BF.user_register('bot@gmail.com', '123456', 'real', 'bot')
     token1 = authRegisterDict1['token']
-    authRegisterDict2 = BF.user_register('bot2@gmail.com', '123456', 'real2', 'bot2')
+
+    authRegisterDict2 = BF.user_register('bot2@gmail.com', '1234567', 'real2', 'bot2')
     token2 = authRegisterDict2['token']
+
+    assert token1 != token2
 
     channelsCreateDict = BF.channels_create(token1, 'Channel 1', False)
     channelID = channelsCreateDict['channel_id']
@@ -389,7 +404,7 @@ def test_message_pin_not_member():
     messageDict = BF.message_send(token1, channelID, "Hello World")
 
     with pytest.raises(BF.AccessError):
-        BF.message_pin(authRegisterDict2['token'], messageDict['message_id'])
+        BF.message_pin(token2, messageDict['message_id'])
 '''
 def test_message_unpin_invalid_message():
     BF.data['user_info'] = []

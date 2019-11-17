@@ -21,7 +21,6 @@ messages_list = []
 user_id = 0
 channel_id = 0
 message_id = 0
-react_id = 0
 
 #---------------------------------------------
 # question1: deal with the defaultHandler function
@@ -133,6 +132,7 @@ def user_register(email, password, name_first, name_last):
         'handle_str': 'TEAM WORK',
         'permission_id': 3
     })
+    #print(generateToken(user_id))
     return {
         'token': generateToken(user_id),
         'u_id': data['user_info'][-1]['u_id']
@@ -702,20 +702,17 @@ def message_unreact(token, message_id, react_id):
                         react['u_ids'].remove(basic_info['u_id'])
                         flag_2 = True
                 flag_1 = True
-    if (flag_2 == False):
-        raise ValueError('message does not have an active react')
     if (flag_1 == False):
         raise ValueError('message does not exist')
+    if (flag_2 == False):
+        raise ValueError('message does not have an active react')
     return {}
 
 def message_pin(token, message_id):
     data = getData()
     input_message_id = int(message_id)
     basic_info = getUserFromToken(token)
-
-    print(token)
-    print(basic_info)
-
+    print(basic_info['u_id'])
     flag_1 = False # Checks for permission to pin.
     flag_2 = False # Checks if message exists.
     flag_3 = False # Checks if the user is a member of the channel that the message is within.
@@ -724,9 +721,8 @@ def message_pin(token, message_id):
             for channel in data['channel_info']:
                 if (channel['channel_id']) == message['channel_id']:  
                     for member in channel['all_members']:
+                        print(member)
                         if (member['u_id'] == basic_info['u_id']):
-                            print(member['u_id'])
-                            print(basic_info['u_id'])
                             flag_3 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
