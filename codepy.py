@@ -503,12 +503,10 @@ def channel_leave(token,channel_id):
                     found1 = i
             if found1 != None:
                 channel['all_members'].remove(i)
-            found2 = None
+            
             for c in channel['owner_members']:
                 if (basic_info['u_id'] == i['u_id']): 
                     found2 = c
-            if found2 != None:
-                channel['owner_members'].remove(c)
     if(flag_1 == False):
         raise ValueError(description = 'channel_id that you are trying to leave from is invalid')
     return {}
@@ -519,25 +517,26 @@ def channel_join(token, channel_id):
     channel_id_integer = int(channel_id)
     flag_1 = False 
     flag_2 = False
-    flag_3 = False
     for channel in data['channel_info']: 
         if (channel_id_integer == channel['channel_id']): 
             flag_1 = True
             if (channel['is_public'] == True):
+                flag_2 = True
                 all_users = {}
                 all_users['u_id'] = basic_info['u_id']
                 all_users['name_first'] = basic_info['name_first']
                 all_users['name_last'] = basic_info['name_last']
                 channel['all_members'].append(all_users)
-            if (channel['is_public'] == False): 
-                flag_2 == True
-            if basic_info['permission_id'] == '1' or basic_info['permission_id'] == '2':
-                if (channel['is_public'] == False):
-                    all_users = {}
-                    all_users['u_id'] = basic_info['u_id']
-                    all_users['name_first'] = basic_info['name_first']
-                    all_users['name_last'] = basic_info['name_last']
-                    channel['all_members'].append(all_users)
+            else:
+                for user in data['user_info']:
+                    if user['u_id'] == basic_info['u_id']:
+                        if user['permission_id'] != 3:
+                            flag_2 = True
+                            all_users = {}
+                            all_users['u_id'] = basic_info['u_id']
+                            all_users['name_first'] = basic_info['name_first']
+                            all_users['name_last'] = basic_info['name_last']
+                            channel['all_members'].append(all_users)
     if (flag_1 == False): 
         raise ValueError(description = "channel_id is invalid")
     if (flag_2 == False): 
@@ -575,7 +574,9 @@ def addowners_channel(token, channel_id, u_id):
                     owner['name_first'] = user['name_first']
                     owner['name_last'] = user['name_last']
                     channel['owner_members'].append(owner)
-                
+            for user in data['user_info']:
+                if user['u_id'] == basic_info['u_id']:
+                    if user['permission_id'] != 3: 
     if (flag_2 == False): 
         raise ValueError(description = "channel id is not a valid channel") 
     if (flag_3 == True): 
@@ -675,23 +676,4 @@ def admin_userpermission_change(token, u_id, permission_id):
                 raise ValueError('User is not an authorised person to change permission')
 
     return {}
-'''
- for channel in data['channel_info']: 
-        if (channel_id_integer == channel['channel_id']): 
-            flag_1 = True
-            if (channel['is_public'] == True):
-                all_users = {}
-                all_users['u_id'] = basic_info['u_id']
-                all_users['name_first'] = basic_info['name_first']
-                all_users['name_last'] = basic_info['name_last']
-                channel['all_members'].append(all_users)
-            if (channel['is_public'] == False): 
-                flag_2 == True
-            if basic_info['permission_id'] == '1' or basic_info['permission_id'] == '2':
-                if (channel['is_public'] == False):
-                    all_users = {}
-                    all_users['u_id'] = basic_info['u_id']
-                    all_users['name_first'] = basic_info['name_first']
-                    all_users['name_last'] = basic_info['name_last']
-                    channel['all_members'].append(all_users)
-'''
+
