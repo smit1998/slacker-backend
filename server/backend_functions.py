@@ -830,6 +830,7 @@ def message_unpin(token, message_id):
             message['is_pinned'] = False
     if (flag_2 == False):
         raise ValueError('message does not exist')
+
     return {}
 
     
@@ -843,7 +844,9 @@ def search(token, q_str):
             if messages == q_str:
                 messages_list.append(messages)
 
-    return messages_list
+    return {
+        'messages_list': message_list
+    }
 
 def admin_userpermission_change(token, u_id, p_id):
     data = getData()
@@ -907,7 +910,7 @@ def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
     img = img.crop(area)
     img.save("img_url")
     
-    return dumps({})
+    return {}
 
 def standup_start(token, channel_id, length):
     data = getData()
@@ -921,7 +924,6 @@ def standup_start(token, channel_id, length):
                 raise ValueError ('There is an on going standup in this channel')
             else:
                 found = 1
-
     if found == 0:
         raise ValueError('Not a valid channel_id for this user')
 
@@ -935,26 +937,20 @@ def standup_start(token, channel_id, length):
         if ch['channel_id'] == channel_id:
             ch['is_active'] = True
             ch['time_finish'] = finish_time
-
+            
     return {
         'finish_time': finish_time
     }
 
 def standup_active(token, channel_id):
     data = getData()
-    #channel_list = channels_list(token)
-
     active = False
     for channel in data['channel_info']:
         if channel['channel_id'] == channel_id:
             finish = channel['time_finish'] 
             if channel['is_active'] == True:
                 active = True
-    
     return {
         'active': active,
         'finish': channel['time_finish']
     }
-
-
-
