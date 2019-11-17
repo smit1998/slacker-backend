@@ -1,8 +1,8 @@
-import echo
+from echo import echo
 
 def test_echo():
-    assert echo.echo("1") == "1", "1 == 1"
-    assert echo.echo("abc") == "abc", "abc == abc"
-    assert echo.echo("trump") == "trump", "trump == trump"
+    assert echo("1") == "1", "1 == 1"
+    assert echo("abc") == "abc", "abc == abc"
+    assert echo("trump") == "trump", "trump == trump"
 
 
