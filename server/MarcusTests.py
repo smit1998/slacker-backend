@@ -371,17 +371,6 @@ def test_message_pin_already_pinned():
     with pytest.raises(BF.ValueError):
         BF.message_pin(token1, messageDict['message_id'])
 
-def test_channel_invite_u_id_invalid():
-    BF.data['user_info'] = []
-    BF.data['channel_info'] = []
-    BF.resetChannel_id()
-    BF.resetUser_id()
-    authRegisterDic = BF.user_register('2199009762@qq.com', '1234567', 'Andy', 'Wei')
-    authRegisterDic_02 = BF.user_register('AndrewYeh@unsw.edu.au', '66666666', 'Andrew', 'Yeh') 
-    result = BF.channels_create(authRegisterDic['token'], 'good team', True)
-    with pytest.raises(BF.ValueError):
-        BF.channel_invite(authRegisterDic['token'], result['channel_id'], 3)
-
 def test_message_pin_not_member():
     BF.data['user_info'] = []
     BF.data['channel_info'] = []
