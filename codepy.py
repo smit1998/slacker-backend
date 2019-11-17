@@ -34,18 +34,12 @@ user_id = 0
 channel_id = 0
 message_id = 0
 react_id = 0
+reset_code_value = ''.join(random.sample((string.ascii_uppercase + string.digits)*6, 6))
 
 #---------------------------------------------
 # question1: deal with the defaultHandler function
 #---------------------------------------------
 
-class ValueError(HTTPException):
-    code = 400
-    message = 'No message specified'
-
-class AccessError(HTTPException):
-    code = 400 
-    message = 'No message specified'
 
 #---------------------------------
 # dry dry dry
@@ -121,6 +115,7 @@ def user_register(email, password, name_first, name_last):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     data = getData()
     global user_id
+    global reset_code_value
     # email is invalid 
     if(not re.search(regex, email)):
         raise ValueError(description = "invalid email")
@@ -147,9 +142,10 @@ def user_register(email, password, name_first, name_last):
         'name_first': name_first,
         'name_last': name_last,
         'u_id': generateU_id(user_id),
-        #'reset_code': reset_code,
+        'reset_code': reset_code_value,
         # question 2: what about we have two users' are both having same name_first, do they would create two different tokens ? ? ? 
         'token': generateToken(name_first),
+        'permission_id': 3,
         # question 3: the hand_str should be changed all the times, or just fixed. 
         'handle_str': 'TEAM WORK'
     })
@@ -249,15 +245,16 @@ def channels_create(token, name, is_public):
     owner['name_first'] = basic_info['name_first']
     owner['name_last'] = basic_info['name_last']
     flag = False
-    if is_public == 'True' or is_public == 'true' or is_public == 'TRUE':      
+    if is_public == 'True' or is_public == 'true' or is_public == 'TRUE' or is_public == True:      
         is_public = True
         flag = True
-    if is_public == 'False' or is_public == 'false' or is_public == 'FALSE':
+    if is_public == 'False' or is_public == 'false' or is_public == 'FALSE' or is_public == False:
         is_public = False
         flag = True
     
     if (flag == False): 
         raise ValueError(description = 'please set is_public to True or False')
+    data['user_info'][0]['permission_id'] = '1'
     all_users = {}
     all_users['u_id'] = basic_info['u_id']
     all_users['name_first'] = basic_info['name_first']
@@ -508,9 +505,9 @@ def channel_leave(token,channel_id):
             if found1 != None:
                 channel['all_members'].remove(i)
             found2 = None
-            for c in channel['owner_owners']:
+            for c in channel['owner_members']:
                 if (basic_info['u_id'] == i['u_id']): 
-                    found2 = i
+                    found2 = c
             if found2 != None:
                 channel['owner_members'].remove(c)
     if(flag_1 == False):
@@ -523,10 +520,12 @@ def channel_join(token, channel_id):
     channel_id_integer = int(channel_id)
     flag_1 = False 
     flag_2 = False
+    flag_3 = False
     for channel in data['channel_info']: 
         if (channel_id_integer == channel['channel_id']): 
             flag_1 = True
             if (channel['is_public'] == True):
+                flag_2 = True
                 all_users = {}
                 all_users['u_id'] = basic_info['u_id']
                 all_users['name_first'] = basic_info['name_first']
@@ -534,8 +533,8 @@ def channel_join(token, channel_id):
                 channel['all_members'].append(all_users)
     if (flag_1 == False): 
         raise ValueError(description = "channel_id is invalid")
-    #if (flag_2 == True): 
-        #raise AccessError(description = "cannot join channel as it is private") 
+    if (flag_2 == False): 
+        raise AccessError(description = "cannot join channel as it is private") 
     return {}
 
 def addowners_channel(token, channel_id, u_id):
@@ -621,19 +620,71 @@ def removeowners_channel(token, channel_id, u_id):
 def passwordreset_request(email, APP):
     data = getData() 
     mail = Mail(APP)
+    global reset_code_value
     flag = False
-    code = int(code_generator())
     for user in data['user_info']:
         if (user['email'] == email):
             flag = True
-            #user['reset_code'] = code #added to the data structure 
+            user['reset_code'] = reset_code_value #added to the data structure 
             first_name = user['name_first']            
             msg = Message("Reset, Password Request Slackr",
                 sender= "HASCdevteam@gmail.com",
                 recipients = [email])
-            msg.body = 'Hi ' + first_name + '\n \n You have requested for a change in your password, please use the code provided below to reset your account.\n \n \n' + code + ' \n \n regards the slackr development, team.'
+            msg.body = ' Hi ' + first_name + '\n \n You have requested for a change in your password, please use the code provided below to reset your account.\n \n \n ' + reset_code_value + ' \n regards the slackr development, team.'
             mail.send(msg)
     return {}
 
-def code_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return (random.choice(chars) for _ in range(size))
+def passwordreset_reset(reset_code, new_password):
+    data = getData()
+    flag = False 
+    for user in data['user_info']: 
+        if user['reset_code'] == reset_code: 
+            flag = True 
+            if (len(newpassword) < 6): 
+                raise ValueError('password entered is less than 6 characters and not a valid password')
+            else: 
+                user['password'] = hashPassword(newpassword) 
+    if (flag == False): 
+        raise ValueError('invalid reset code entered')
+    return {}
+
+def admin_userpermission_change(token, u_id, permission_id):
+    data = getData()
+    owner_info = getUserFromToken(token)
+    flag = 0
+    for user in data['user_info']:
+        if user['u_id'] == int(u_id) and flag == 1: 
+            raise ValueError
+        elif user['u_id'] == int(u_id) and flag == 0:
+            flag = 1       
+    if flag == 0:
+        raise ValueError('Not a valid u_id')
+    
+    for user in data['user_info']:
+        if user['u_id'] == int(u_id):
+            if owner_info['permission_id'] == '1' or owner_info['permission_id'] == '2':
+                user['permission_id'] = permission_id
+            else:
+                raise ValueError('User is not an authorised person to change permission')
+
+    return {}
+'''
+ for channel in data['channel_info']: 
+        if (channel_id_integer == channel['channel_id']): 
+            flag_1 = True
+            if (channel['is_public'] == True):
+                all_users = {}
+                all_users['u_id'] = basic_info['u_id']
+                all_users['name_first'] = basic_info['name_first']
+                all_users['name_last'] = basic_info['name_last']
+                channel['all_members'].append(all_users)
+            if (channel['is_public'] == False): 
+                flag_2 == True
+            if basic_info['permission_id'] == '1' or basic_info['permission_id'] == '2':
+                if (channel['is_public'] == False):
+                    all_users = {}
+                    all_users['u_id'] = basic_info['u_id']
+                    all_users['name_first'] = basic_info['name_first']
+                    all_users['name_last'] = basic_info['name_last']
+                    channel['all_members'].append(all_users)
+'''
