@@ -67,3 +67,49 @@ def test_auth_logout_token_invalid01():
         return_flag = BF.user_logout(authRegisterDic_02['token'])
         assert return_flag['is_success'] == False
 
+#first name is not valid
+def test_user_profile_setname_2():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('abc@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('abc@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    with pytest.raises(BF.ValueError):
+        BF.user_profile_setname('1234567', 'abcdefghijklmnopqrstuvwxyz123456789012345678901234567890', 'wei')
+
+# last name is not valid 
+def test_user_profile_setname_3():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('abc@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('abc@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    with pytest.raises(BF.ValueError):
+        BF.user_profile_setname('1234567', 'smit', 'wei12345678901234567890qwertyuiopasdfghjklzxcvbnm,.;n;kjscbdcsmcibcsdcnn')        
+
+#both are invalid
+def test_user_profile_setname_4():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('abc@qq.com', '1234567', 'Andy', 'Wei')
+    result = BF.user_login('abc@qq.com', '1234567')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    with pytest.raises(BF.ValueError):
+        BF.user_profile_setname('1234567', 'abcdefghijklmnopqrstuvwxyz123456789012345678901234567890', 'jlbdlhdhalsdvavqwvefyqweywgiuuiuggggggdgdggdgwygdiygwdwgdsbxjsxvvhsqwhjvdvwldw12345678901234567890')
+  
+  
+# email is valid and not used already
+def test_user_profile_setemail_1():
+    BF.data['user_info'] = []
+    authRegisterDic = BF.user_register('smitdob@qq.com', '12345678', 'smit', 'dob')
+    result = BF.user_login('smitdob@qq.com', '12345678')
+    assert result['token'] == authRegisterDic['token']
+    assert result['u_id'] == authRegisterDic['u_id']
+    BF.user_profile_setemail(result['token'], 'smitdobaria@qq.com')
+    
+
+
+
+
+
+

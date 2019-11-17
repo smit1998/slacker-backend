@@ -909,7 +909,52 @@ def user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
     
     return dumps({})
 
+def standup_start(token, channel_id, length):
+    data = getData()
+    basic_info = getUserFromToken(token)
 
+    found = 0
+    for channel in data['channel_info']:
+        if channel['channel_id'] == (channel_id):
+            if channel['is_active'] == True:
+                found = 1
+                raise ValueError ('There is an on going standup in this channel')
+            else:
+                found = 1
+
+    if found == 0:
+        raise ValueError('Not a valid channel_id for this user')
+
+    if int(length) < 0:
+        raise ValueError('Not a valid length for standUp')
+
+    time_now = datetime.timestamp(datetime.now())
+    finish_time = time_now + datetime.datetime.strptime(length)
+
+    for ch in data['channel_info']:
+        if ch['channel_id'] == channel_id:
+            ch['is_active'] = True
+            ch['time_finish'] = finish_time
+
+    return {
+        'finish_time': finish_time
+    }
+
+def standup_active(token, channel_id):
+    data = getData()
+    #channel_list = channels_list(token)
+
+    active = False
+    for channel in data['channel_info']:
+        if channel['channel_id'] == channel_id:
+            finish = channel['time_finish'] 
+            if channel['is_active'] == True:
+                active = True
+    
+    return {
+        'active': active,
+        'finish': channel['time_finish']
+    }
 
 
 
