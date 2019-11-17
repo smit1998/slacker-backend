@@ -6,8 +6,8 @@ import hashlib
 import dateutil 
 from datetime import timezone
 from datetime import datetime
-from server import ValueError
-from server import AccessError 
+from server.server import ValueError
+from server.server import AccessError 
 
 SECRET = 'comp1531 project'
  

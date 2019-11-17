@@ -1,5 +1,5 @@
 import pytest 
-import backend.backend_functions as BF
+import server.backend_functions as BF
 
 # when channel is created successfully
 def test_channels_create_valid():
