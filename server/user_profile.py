@@ -851,7 +851,7 @@ def standup_start(token, channel_id, length):
         raise ValueError('Not a valid length for standUp')
 
     time_now = datetime.timestamp(datetime.now())
-    finish_time = time_now + datetime.datetime.strptime(length,)
+    finish_time = time_now + datetime.datetime.strptime(length)
 
     for ch in data['channel_info']:
         if ch['channel_id'] == channel_id:

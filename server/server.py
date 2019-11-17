@@ -274,5 +274,13 @@ def standup_start_server():
     finish = standup_start(token, channel_id, length)
     return dumps(finish)
 
+@APP.route('/standup/active', methods = [POST])
+def standup_active_server():
+    token = request.form.get('token')
+    channel_id = request.form.get('channel_id')
+
+    result = standup_active(token, channel_id)
+    return result
+
 if __name__ == '__main__':
     APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
