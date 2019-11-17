@@ -83,7 +83,7 @@ def test_user_profile_setname_4():
     assert result['token'] == authRegisterDic['token']
     assert result['u_id'] == authRegisterDic['u_id']
     with pytest.raises(BF.ValueError):
-        BF.user_profile_setname('1234567', 'a'*1000)
+        BF.user_profile_setname('1234567', 'a'*1000, "andy")
 # email is valid and not used already
 def test_user_profile_setemail_1():
     BF.data['user_info'] = []
