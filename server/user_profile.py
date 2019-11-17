@@ -7,8 +7,8 @@ import dateutil
 from datetime import timezone
 from datetime import datetime
 from PIL import Image
-from server import ValueError
-from server import AccessError
+#from server import ValueError
+#from server import AccessError
 SECRET = 'comp1531 project'
  
 data = {
@@ -806,7 +806,7 @@ def admin_userpermission_change(token, u_id, permission_id):
             if owner_info['permission_id'] == '1' or owner_info['permission_id'] == '2':
                 user['permission_id'] = permission_id
             else:
-                raise ValueError('User is not an authorised person to change permission')
+               raise ValueError('User is not an authorised person to change permission')
 
     return dumps({ })
 
@@ -834,7 +834,6 @@ def user_profiles_uploadphoto  (token, img_url, x_start, y_start, x_end, y_end):
 def standup_start(token, channel_id, length):
     data = getData()
     basic_info = getUserFromToken(token)
-    #channel_list = channels_list(token)
 
     found = 0
     for channel in data['channel_info']:
