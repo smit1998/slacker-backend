@@ -47,13 +47,13 @@ def test_user_profile_setemail_1():
 def test_user_profile_setemail_2():
     BF.data['user_info'] = []
     authRegisterDic = BF.user_register('smit@qq.com', '12345678', 'smit', 'dob')
-    result = BF.user_login('smit@qq.com', '12345678')
-    authRegisterDic_2 = BF.user_register('1234566@qq.com', '1234567', 'smit1', 'dob2')
-    assert result['token'] == authRegisterDic['token']
-    assert result['u_id'] == authRegisterDic['u_id']
+    #result = BF.user_login('smit@qq.com', '12345678')
+    #authRegisterDic_2 = BF.user_register('1234566@qq.com', '1234567', 'smit1', 'dob2')
+    #assert result['token'] == authRegisterDic['token']
+    #assert result['u_id'] == authRegisterDic['u_id']
 
     with pytest.raises(ValueError):
-            BF.user_profile_setemail(result['token'], '1234566@qq.com')
+            BF.user_profile_setemail(authRegisterDic['token'], 'smtdobaria@qq.com')
            
 
 # for the case of both not valid and not available is not possible because if it is not valid is not used also
