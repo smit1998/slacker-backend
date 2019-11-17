@@ -239,7 +239,7 @@ def channels_create(token, name, is_public):
         'is_public': is_public,
         'token': basic_info['name_first']
     })
-    print
+    data['user_info'][0]['permission_id'] = '1'
     return {
         'channel_id': data['channel_info'][-1]['channel_id']
     }
@@ -395,8 +395,7 @@ def sendlater_message(token, channel_id, message, time_sent):
                     'message_id': return_message_id
                 } 
     # the authorised user is not in this channel currently
-    raise AccessError(description = 'this user is not current in this channel')
-    
+    raise AccessError(description = 'this user is not current in this channel') 
 
 def user_profile_setname(token, name_first, name_last):
     data = getData()
@@ -412,7 +411,6 @@ def user_profile_setname(token, name_first, name_last):
             user['name_first'] = name_first
             user['name_last'] = name_last
     return {}
-
 
 def user_profile_setemail(token, email):
     data = getData()
@@ -642,10 +640,11 @@ def message_edit(token, message_id, message):
     input_message_id = int(message_id)
     basic_info = getUserFromToken(token)
     flag_1 = False # Checks for permission.
+    flag_2 = False # Checks if its the authorized user.
     for i in data['message_info']:
         if (i['message_id'] == input_message_id):
             if (message == ""):
-                del i
+                data['message_info'].remove(i)
                 return {}
             for channel in data['channel_info']:
                 if (channel['channel_id']) == i['channel_id']:  
@@ -655,9 +654,11 @@ def message_edit(token, message_id, message):
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
             if (i['u_id'] == basic_info['u_id']):
-                flag_1 = True
+                flag_2 = True
             if (flag_1 == False):
                 raise AccessError('user has insufficient permissions')
+            if (flag_2 == False):
+                raise AccessError('user is not authorized')    
             i['message'] = message
     return {}
 
@@ -712,7 +713,6 @@ def message_pin(token, message_id):
     data = getData()
     input_message_id = int(message_id)
     basic_info = getUserFromToken(token)
-    print(basic_info['u_id'])
     flag_1 = False # Checks for permission to pin.
     flag_2 = False # Checks if message exists.
     flag_3 = False # Checks if the user is a member of the channel that the message is within.
@@ -721,17 +721,16 @@ def message_pin(token, message_id):
             for channel in data['channel_info']:
                 if (channel['channel_id']) == message['channel_id']:  
                     for member in channel['all_members']:
-                        print(member)
                         if (member['u_id'] == basic_info['u_id']):
                             flag_3 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
             if (flag_3 == False):
                 raise AccessError('user is not a member of the channel that the message is within')
-            if (flag_1 == False):
-                raise ValueError('user is not admin')
             if (message['is_pinned'] == True):
                 raise ValueError('message already pinned')
+            if (flag_1 == False):
+                raise ValueError('user is not admin')
             flag_2 = True
             message['is_pinned'] = True
     if (flag_2 == False):
@@ -757,12 +756,12 @@ def message_unpin(token, message_id):
                             flag_3 = True
             if (basic_info['permission_id'] != 3):
                 flag_1 = True
-            if (flag_1 == False):
-                raise ValueError('user has insufficient permissions')
             if (flag_3 == False):
                 raise AccessError('user is not a member of the channel that the message is within')
             if (message['is_pinned'] == False):
                 raise ValueError('message already unpinned')
+            if (flag_1 == False):
+                raise ValueError('user is not admin')
             flag_2 = True
             message['is_pinned'] = False
     if (flag_2 == False):

@@ -211,6 +211,69 @@ def test_message_remove_no_permission():
     with pytest.raises(BF.AccessError):
         BF.message_remove(token2, messageDict['message_id'])
 
+def test_messages_edit_not_poster_of_message():
+    BF.data['user_info'] = []
+    BF.data['channel_info'] = []
+    BF.data['message_info'] = []
+    BF.resetUser_id()
+    BF.resetChannel_id()
+    BF.resetMessage_id()
+    authRegisterDict1 = BF.user_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+    authRegisterDict2 = BF.user_register('bot2@gmail.com', '123456', 'real', 'bot2')
+    token2 = authRegisterDict2['token']
+
+    channelsCreateDict = BF.channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+    BF.channel_join(token2, channelID)
+
+    messageDict = BF.message_send(token1, channelID, "Hello World")
+    
+    with pytest.raises(BF.AccessError): 
+        BF.message_edit(token2, messageDict['message_id'], 'changed message')
+
+def test_messges_edit_not_owner(): 
+    BF.data['user_info'] = []
+    BF.data['channel_info'] = []
+    BF.data['message_info'] = []
+    BF.resetUser_id()
+    BF.resetChannel_id()
+    BF.resetMessage_id()
+    authRegisterDict1 = BF.user_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+    authRegisterDict2 = BF.user_register('bot2@gmail.com', '123456', 'real', 'bot2')
+    token2 = authRegisterDict2['token']
+
+    channelsCreateDict = BF.channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+    BF.channel_join(token2, channelID)
+
+    messageDict = BF.message_send(token2, channelID, "Hello World")
+    
+    with pytest.raises(BF.AccessError): 
+        BF.message_edit(token2, messageDict['message_id'], 'changed message')
+     
+def test_messages_edit_not_slack_admin_or_owner(): 
+    BF.data['user_info'] = []
+    BF.data['channel_info'] = []
+    BF.data['message_info'] = []
+    BF.resetUser_id()
+    BF.resetChannel_id()
+    BF.resetMessage_id()
+    authRegisterDict1 = BF.user_register('bot@gmail.com', '123456', 'real', 'bot')
+    token1 = authRegisterDict1['token']
+    authRegisterDict2 = BF.user_register('bot2@gmail.com', '123456', 'real', 'bot2')
+    token2 = authRegisterDict2['token']
+
+    channelsCreateDict = BF.channels_create(token1, 'Channel 1', True)
+    channelID = channelsCreateDict['channel_id']
+    BF.channel_join(token2, channelID)
+
+    messageDict = BF.message_send(token2, channelID, "Hello World")
+    
+    with pytest.raises(BF.AccessError): 
+        BF.message_edit(token2, messageDict['message_id'], 'changed message')
+
 def test_message_react_invalid_message():
     BF.data['user_info'] = []
     BF.data['channel_info'] = []
@@ -394,7 +457,7 @@ def test_message_pin_not_member():
 
     with pytest.raises(BF.AccessError):
         BF.message_pin(token2, messageDict['message_id'])
-'''
+
 def test_message_unpin_invalid_message():
     BF.data['user_info'] = []
     BF.data['channel_info'] = []
@@ -405,8 +468,11 @@ def test_message_unpin_invalid_message():
     authRegisterDict1 = BF.user_register('bot@gmail.com', '123456', 'real', 'bot')
     token1 = authRegisterDict1['token']
 
+    random_message_id = 23
+
     with pytest.raises(BF.ValueError):
         BF.message_unpin(token1, random_message_id)
+
 def test_message_unpin_not_admin():
     BF.data['user_info'] = []
     BF.data['channel_info'] = []
@@ -456,6 +522,7 @@ def test_message_unpin_not_member():
     BF.resetUser_id()
     BF.resetChannel_id()
     BF.resetMessage_id()
+
     authRegisterDict1 = BF.user_register('bot@gmail.com', '123456', 'real', 'bot')
     token1 = authRegisterDict1['token']
     authRegisterDict2 = BF.user_register('bot2@gmail.com', '123456', 'real', 'bot2')
@@ -467,6 +534,5 @@ def test_message_unpin_not_member():
     messageDict = BF.message_send(token1, channelID, "Hello World")
 
     BF.message_pin(token1, messageDict['message_id'])
-    with pytest.raises(AccessError, match=r"*"):
+    with pytest.raises(BF.AccessError):
         BF.message_unpin(token2, messageDict['message_id'])
-'''
