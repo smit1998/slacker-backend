@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from marcus_backend import * 
+=======
+from user_profile import * 
+>>>>>>> smit
 from json import dumps
 import sys
 from flask import Flask, request, jsonify
@@ -21,6 +25,7 @@ APP.register_error_handler(Exception, defaultHandler)
 CORS(APP)
 
 
+<<<<<<< HEAD
 APP.config.update(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=465,
@@ -30,6 +35,8 @@ APP.config.update(
 )
 
 
+=======
+>>>>>>> smit
 class ValueError(HTTPException):
     code = 400
     message = 'No message specified'
@@ -90,7 +97,10 @@ def channel_details_server():
 def user_profile_server():
     token = request.args.get('token')
     u_id = request.args.get('u_id')
+<<<<<<< HEAD
     print(request.args)
+=======
+>>>>>>> smit
     result =  user_profile(token, u_id)
     return dumps(result)
  
@@ -116,6 +126,7 @@ def message_sendlater_server():
     channel_id = request.form.get('channel_id')
     message = request.form.get('message')
     time_sent = request.form.get('time_sent')
+<<<<<<< HEAD
     result = sendlater_message(token, channel_id, message, time_sent)
     return dumps(result)
 
@@ -123,6 +134,15 @@ def message_sendlater_server():
 def passwordreset_request_server():
     email = request.form.get('email')
     passwordreset_request(email, APP)
+=======
+    result = message_sendlater(token, channel_id, message, time_sent)
+    return dumps(result)
+
+@APP.route('/auth/passwordreset/request', methods=['POST'])
+def passwordreset_request():
+    email = request.form.get('email')
+    auth_passwordreset_request(email)
+>>>>>>> smit
     return dumps({})
 
 @APP.route('/auth/passwordreset/reset', methods=['POST'])
@@ -133,11 +153,18 @@ def passwordreset_reset():
     return dumps({})
 
 @APP.route('/channel/leave', methods=['POST'])
+<<<<<<< HEAD
 def leave_channel_server():
     token = request.form.get('token')
     channel_id = request.form.get('channel_id')
     result = channel_leave(token, channel_id)
     return dumps(result)
+=======
+def leave_channel():
+    token = request.form.get('token')
+    channel_id = request.form.get('channel_id')
+    return dumps(channel_leave(token, channel_id))
+>>>>>>> smit
     
 @APP.route('/channel/join', methods=['POST'])
 def join_channel():
@@ -151,7 +178,11 @@ def addowner_channel_server():
     token = request.form.get('token')
     channel_id = request.form.get('channel_id')
     user_id = request.form.get('u_id')
+<<<<<<< HEAD
     addowners_channel(token, channel_id, user_id)
+=======
+    addowners(token, channel_id, user_id)
+>>>>>>> smit
     return dumps({})
 
 @APP.route('/channel/removeowner', methods=['POST'])
@@ -159,7 +190,11 @@ def removeowner_channel_server():
     token = request.form.get('token')
     channel_id = request.form.get('channel_id')
     user_id = request.form.get('u_id')
+<<<<<<< HEAD
     removeowners_channel(token, channel_id, user_id)
+=======
+    removeowners(token, channel_id, user_id)
+>>>>>>> smit
     return dumps({})
 
   
@@ -173,8 +208,13 @@ def create_server():
 
 @APP.route('/message/remove', methods=['DELETE'])
 def removeMessage():
+<<<<<<< HEAD
     token = request.form.get('token')
     message_id = request.form.get('message_id')
+=======
+    token = request.args.get('token')
+    message_id = request.args.get('message_id')
+>>>>>>> smit
     message_remove(token, message_id)
     return dumps({})
 
@@ -191,16 +231,26 @@ def react():
     token = request.form.get('token')
     message_id = request.form.get('message_id')
     react_id = request.form.get('react_id')
+<<<<<<< HEAD
     result = message_react(token, message_id, react_id)
     return dumps(result)
+=======
+    message_react(token, message_id, react_id)
+    return dumps({})
+>>>>>>> smit
 
 @APP.route('/message/unreact', methods=['POST'])
 def unreact():
     token = request.form.get('token')
     message_id = request.form.get('message_id')
     react_id = request.form.get('react_id')
+<<<<<<< HEAD
     result = message_unreact(token, message_id, react_id)
     return dumps(result)
+=======
+    message_unreact(token, message_id, react_id)
+    return dumps({})
+>>>>>>> smit
 
 @APP.route('/message/pinn', methods=['POST'])
 def pin():
@@ -244,6 +294,7 @@ def list_channels_server():
     result = channels_list(token)
     return dumps(result)
 
+<<<<<<< HEAD
 @APP.route('/channels/listall', methods=['GET'])
 def listall_channels_server():
     token = request.args.get('token')
@@ -270,3 +321,39 @@ def admin_userpermission_change_server():
 
 if __name__ == '__main__':
     APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000), debug=True)
+=======
+@APP.route('/search', methods = ['GET'])
+def search():
+    token = request.form.get('token')
+    q_str = request.form.get('query_str')
+
+    search_results = search(token, q_str)
+
+    return dumps({})
+
+@APP.route('/admin/userpermission/change', methods = ['POST'])
+def admin_userpermission_change():
+    
+    token = request.form.get('token')
+    u_id = request.form.get('u_id')
+    permission_id = request.form.get('permission')
+
+    permission_results = admin_userpermission_change(token, u_id, permission_id)
+
+    return dumps(permission_results)
+@APP.route('/user/profiles/uploadphoto', methods = ['POST'])
+def user_profiles_uploadphoto():
+
+    token = request.form.get('token')
+    img_url = request.form.get('img_url')
+    x_start = request.form.get('x_start')
+    x_end = request.form.get('x_end')
+    y_start = request.form.get('y_start')
+    y_end = request.form.get('y_end')
+
+    results = user_profiles_uploadphoto(token, x_start, y_start, x_end, y_end)
+
+    return dumps(results)
+if __name__ == '__main__':
+    APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
+>>>>>>> smit
